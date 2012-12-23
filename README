@@ -1,0 +1,5 @@
+PHP Http class use for sending POST/ GET/ PUT request
+
+Use:
+- cURL
+- fsockopen
