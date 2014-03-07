@@ -14,7 +14,7 @@
 #### Version 2.5: Mar 07, 2014
 * Change class name to \ChipVN\Http\Request
 * Most clean and clear
-* Use composer
+* Supports composer
 
 #### Version 2.4: Jul 25, 2013
 * Require PHP 5.3 or newer
