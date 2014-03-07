@@ -1,7 +1,7 @@
 # PHP-Http-Class
- Http class used to sending request and get response like browser.
- Use 2 functions: cURL, fsockopen.
- Supports POST (fields, raw data), file uploading, GET, PUT, etc..
+- Http class used to sending request and get response like browser.
+- Use 2 functions: cURL, fsockopen.
+- Supports POST (fields, raw data), file uploading, GET, PUT, etc..
 
 **Note**: _fsockopen_ is faster also it is default.
 
