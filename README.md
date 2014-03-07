@@ -5,16 +5,15 @@ Supports POST (fields, raw data), file uploading, GET, PUT, etc..
 
 **Note**: _fsockopen_ is faster also it is default.
 
-* @author     Phan Thanh Cong <ptcong90@gmail.com>
-* @copyright  2010-2014 Phan Thanh Cong.
-* @license    http://www.opensource.org/licenses/mit-license.php  MIT License
-* @license    MIT
-* @version    2.6
-* @relase     Mar 7, 2014 (mostly clean, clear)
+* Author     Phan Thanh Cong <ptcong90@gmail.com>
+* Copyright  2010-2014 Phan Thanh Cong.
+* License    http://www.opensource.org/licenses/mit-license.php  MIT License
+* Version    2.6
 
 ## Change logs
 #### Version 2.5: Mar 07, 2014
 * Most clean and clear
+* Use composer
 
 #### Version 2.4: Jul 25, 2013
 * Require PHP 5.3 or newer
