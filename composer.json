@@ -3,6 +3,13 @@
 	"description": "Http class used to sending request and get response like browser.",
 	"keywords": ["php", "http"],
 	"license": "MIT",
+    "authors": [
+        {
+            "name": "Phan Thanh Cong",
+            "email": "ptcong90@gmail.com",
+            "homepage": "http://ptcong.com"
+        }
+    ],
     "require": {
         "php": ">=5.3.0"
     },
