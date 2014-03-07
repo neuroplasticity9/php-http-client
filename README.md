@@ -57,6 +57,7 @@
 * File uploading
 
 ## Usage
+Add require `"ptcong/php-http-class": "dev-master"` to composer.json and run `composer update` if you use composer
 
 ### Read web content:
 	$http = new \ChipVN\Http();
