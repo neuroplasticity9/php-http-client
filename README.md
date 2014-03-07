@@ -12,6 +12,7 @@
 
 ## Change logs
 #### Version 2.5: Mar 07, 2014
+* Change class name to \ChipVN\Http\Request
 * Most clean and clear
 * Use composer
 
@@ -61,14 +62,14 @@
 Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `composer update` if you use composer
 
 ### Read web content:
-	$http = new \ChipVN\Http();
+	$http = new \ChipVN\Http\Request;
 	$http->setTarget("http://www.yourwebsite.com/");
 	$http->execute();
 	print_r($http->getResponseHeaders());
 	echo $http->getResponseText();
 	
 ### Submit form:
-	$http = new \ChipVN\Http();
+	$http = new \ChipVN\Http\Request;
 	$http->setTarget("http://www.yourwebsite.com/");
 	$http->setParam(array("fieldname"=> $value)); 
 	$http->setMethod('POST');
@@ -76,7 +77,7 @@ Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `
 	echo $http->getResponseText();
 	
 ### Using Proxy: only useCurl
-	$http = new \ChipVN\Http();
+	$http = new \ChipVN\Http\Request;
 	$http->useCurl(true);
 	$http->setTarget("http://www.yourwebsite.com/");
 	$http->setProxy('proxy_ip:proxy_port');
@@ -85,7 +86,7 @@ Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `
 
 ### Upload file:
 	$filePath = getcwd().'/abc.jpg';
-	$http = new \ChipVN\Http();
+	$http = new \ChipVN\Http\Request;
 	$http->setTarget("http://www.yourwebsite.com/");
 	$http->setSubmitMultipart();
 	$http->setParam(array('fileupload'=>"@$filePath"));

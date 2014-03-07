@@ -13,7 +13,7 @@
 
 namespace ChipVN;
 
-class Http
+class Request
 {
     /**
      * HTTP Version.
@@ -215,7 +215,7 @@ class Http
     }
     /**
      * Reset request
-     * @return \ChipVN\Http
+     * @return \ChipVN\Http\Request
      */
     public function reset()
     {
@@ -257,8 +257,8 @@ class Http
     /**
      * Set http version.
      *
-     * @param  string $version
-     * @return \ChipVN\Http
+     * @param  string               $version
+     * @return \ChipVN\Http\Request
      */
     public function setHttpVersion($version)
     {
@@ -272,8 +272,8 @@ class Http
     /**
      * Set URL target.
      *
-     * @param  string $target
-     * @return \ChipVN\Http
+     * @param  string               $target
+     * @return \ChipVN\Http\Request
      */
     public function setTarget($target)
     {
@@ -285,9 +285,9 @@ class Http
     /**
      * Set parameters with name, value or array of name-value pairs.
      *
-     * @param  string|array $name
-     * @param  mixed        $value
-     * @return \ChipVN\Http
+     * @param  string|array         $name
+     * @param  mixed                $value
+     * @return \ChipVN\Http\Request
      */
     public function setParam($name, $value = null)
     {
@@ -314,8 +314,8 @@ class Http
     /**
      * Set request URL referer.
      *
-     * @param  string $referer
-     * @return \ChipVN\Http
+     * @param  string               $referer
+     * @return \ChipVN\Http\Request
      */
     public function setReferer($referer)
     {
@@ -327,8 +327,8 @@ class Http
     /**
      * Set request user agent.
      *
-     * @param  string $userAgent
-     * @return \ChipVN\Http
+     * @param  string               $userAgent
+     * @return \ChipVN\Http\Request
      */
     public function setUserAgent($userAgent)
     {
@@ -339,8 +339,8 @@ class Http
     /**
      * Set number of seconds to time out.
      *
-     * @param  integer $seconds
-     * @return \ChipVN\Http
+     * @param  integer              $seconds
+     * @return \ChipVN\Http\Request
      */
     public function setTimeout($seconds)
     {
@@ -354,8 +354,8 @@ class Http
     /**
      * Set request raw post data.
      *
-     * @param  string $rawData
-     * @return \ChipVN\Http
+     * @param  string               $rawData
+     * @return \ChipVN\Http\Request
      */
     public function setRawPost($rawData)
     {
@@ -367,8 +367,8 @@ class Http
     /**
      * Set request method.
      *
-     * @param  string $method
-     * @return \ChipVN\Http
+     * @param  string               $method
+     * @return \ChipVN\Http\Request
      */
     public function setMethod($method)
     {
@@ -380,9 +380,9 @@ class Http
     /**
      * Set request headers with name, value or array of name-value pairs.
      *
-     * @param  string|array $name
-     * @param  mixed        $value
-     * @return \ChipVN\Http
+     * @param  string|array         $name
+     * @param  mixed                $value
+     * @return \ChipVN\Http\Request
      */
     public function setHeader($name, $value = null)
     {
@@ -410,8 +410,8 @@ class Http
      * Determine if the request will use cURL or not.
      * Default is use fsockopen.
      *
-     * @param  boolean $useCurl
-     * @return \ChipVN\Http
+     * @param  boolean              $useCurl
+     * @return \ChipVN\Http\Request
      */
     public function useCurl($useCurl)
     {
@@ -423,8 +423,8 @@ class Http
     /**
      * Set submit multipart.
      *
-     * @param  string $type
-     * @return \ChipVN\Http
+     * @param  string               $type
+     * @return \ChipVN\Http\Request
      */
     public function setSubmitMultipart($type = 'form-data')
     {
@@ -438,8 +438,8 @@ class Http
     /**
      * Set submit normal.
      *
-     * @param  string $method
-     * @return \ChipVN\Http
+     * @param  string               $method
+     * @return \ChipVN\Http\Request
      */
     public function setSubmitNormal($method = 'POST')
     {
@@ -453,8 +453,8 @@ class Http
     /**
      * Set request content type.
      *
-     * @param  string $mimeType
-     * @return \ChipVN\Http
+     * @param  string               $mimeType
+     * @return \ChipVN\Http\Request
      */
     public function setMimeContentType($mimeType)
     {
@@ -466,9 +466,9 @@ class Http
     /**
      * Set request cookies.
      *
-     * @param  string|array $value
-     * @param  boolean      $addition
-     * @return \ChipVN\Http
+     * @param  string|array         $value
+     * @param  boolean              $addition
+     * @return \ChipVN\Http\Request
      */
     public function setCookie($value, $addition = true)
     {
@@ -487,10 +487,10 @@ class Http
     /**
      * Set request with proxy.
      *
-     * @param  string $proxyIp  Format: ipaddress:port
-     * @param  string $username
-     * @param  string $password
-     * @return \ChipVN\Http
+     * @param  string               $proxyIp  Format: ipaddress:port
+     * @param  string               $username
+     * @param  string               $password
+     * @return \ChipVN\Http\Request
      */
     public function setProxy($proxyIp, $username = '', $password = '')
     {
@@ -504,9 +504,9 @@ class Http
     /**
      * Set request authentication.
      *
-     * @param  string $username
-     * @param  string $password
-     * @return \ChipVN\Http
+     * @param  string               $username
+     * @param  string               $password
+     * @return \ChipVN\Http\Request
      */
     public function setAuth($username, $password = '')
     {
@@ -519,11 +519,11 @@ class Http
     /**
      * Execute sending request and trigger errors messages if have.
      *
-     * @param  string|null       $target
-     * @param  string|null       $method
-     * @param  string|array|null $parameters
-     * @param  string|null       $referer
-     * @return \ChipVN\Http|boolean      False if request is failed.
+     * @param  string|null                  $target
+     * @param  string|null                  $method
+     * @param  string|array|null            $parameters
+     * @param  string|null                  $referer
+     * @return \ChipVN\Http\Request|boolean False if request is failed.
      */
     public function execute($target = null, $method = null, $parameters = null, $referer = null)
     {
@@ -866,6 +866,7 @@ class Http
     /**
      * Read binary data of file.
      *
+     * @param  string $filePath
      * @return string
      */
     protected function readBinary($filePath)
@@ -885,8 +886,8 @@ class Http
     /**
      * Get mime type of file.
      *
-     * @param   string  file path
-     * @return string|boolean false if mime type not found
+     * @param  string $filePath
+     * @return string
      */
     protected function getMimeType($filePath)
     {
