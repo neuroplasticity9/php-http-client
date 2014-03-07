@@ -1,16 +1,21 @@
 # PHP-Http-Class
-This project help for sending GET/POST/PUT request easier, being used to crawler.
-This use fsockopen, curl to execute request.
-**Note**: _fsockopen_ is faster also default of the class is use _fsockopen_
+Http class used to sending request and get response like browser.
+Use 2 functions: cURL, fsockopen.
+Supports POST (fields, raw data), file uploading, GET, PUT, etc..
+
+**Note**: _fsockopen_ is faster also it is default.
 
 * Author: Phan Thanh Cong 
 * Contact: ptcong90@gmail.com
-* Copyright: (c) 2011 chiplove.9xpro
+* Copyright: (c) 2011-2014 chiplove.9xpro
 * Version: 2.4
 
 ## Change logs
+#### Version 2.5: Mar 07, 2014
+* Most clean and clear
+
 #### Version 2.4: Jul 25, 2013
-* Use namespace
+* Require PHP 5.3 or newer
 * Change two static class methods (readBinary, mimeTye) to protected instance method
 
 #### Version 2.3.4: Feb 20, 2013
@@ -20,16 +25,16 @@ This use fsockopen, curl to execute request.
 * Re-struct, something edited
 
 #### Version 2.3.2: June 12, 2012
-* Add some functions, something edited
+* Add some methods
 
 #### Version 2.3.1: Mar 30, 2012
-* Fixed some know bugs (php 5.3)
+* Fixed some know bugs to work well with PHP 5.3 (E_NOTICE is default)
 
 #### Version 2.3: Feb 2, 2012
 * Update for picasa API
 
 #### Version 2.2: Jan 1, 2012
-* Add RawPost var to post request (upload image to picasa)
+* Support raw data for posting request (upload image to picasa)
 
 #### Version 2.1: Dec 23, 2011
 * Fixed some bugs
@@ -46,11 +51,9 @@ This use fsockopen, curl to execute request.
 * Fixed some bugs
 
 #### Version 1.0:
-* Cookie
-* Referer
+* Send normal request
 * Proxy (only useCurl)
-* SerVersion authentication
-* Upload file
+* File uploading
 
 ## Usage
 
@@ -71,7 +74,7 @@ This use fsockopen, curl to execute request.
 	
 ### Using Proxy: only useCurl
 	$http = new \ChipVN\Http();
-        $http->useCurl(true);
+	$http->useCurl(true);
 	$http->setTarget("http://www.yourwebsite.com/");
 	$http->setProxy('proxy_ip:proxy_port');
 	$http->execute();

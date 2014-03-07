@@ -1,0 +1,11 @@
+{
+	"name": "ptcong/php-http",
+	"description": "Http class used to sending request and get response like browser. Supports: POST (fields, raw data), file uploading, GET, PUT, etc..",
+	"keywords": ["php", "http"],
+	"license": "MIT",
+	"autoload": {
+		"files": [
+            "Http.php"
+        ]
+	}
+}

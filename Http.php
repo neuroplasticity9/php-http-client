@@ -1,537 +1,475 @@
 <?php
-
 /**
- * Http class use curl, fsockopen
- * This class is fake a browser, you can using it for read web content 
- * or upload file to server. It using two functions: curl and fsockopen
+ * Http class used to sending request and get response like browser.
+ * Use 2 functions: cURL, fsockopen.
+ * Supports POST (fields, raw data), file uploading, GET, PUT, etc..
  *
- * @package		ChipVN
- * @author		Phan Thanh Cong <ptcong90 at gmail dot com>
- * @copright	chiplove.9xpro aka ptcong90
- * @version	 	2.5
- * @since       Jul 25, 2013
- */
-/**
-  ## Change logs
- #### Version 2.5: Jan 03, 2014
- * Add setHttpVersion
-   
-  #### Version 2.4: Jul 25, 2013
- * Use namespace
- * Change two static class methods (readBinary, mimeTye) to protected instance method
-
-  #### Version 2.3.4: Feb 20, 2013
- * Parser header fixed (wrong typing)
-
-  #### Version 2.3.3: Nov 5, 2012
- * Re-struct, something edited
-
-  #### Version 2.3.2: June 12, 2012
- * Add some functions, something edited
-
-  #### Version 2.3.1: Mar 30, 2012
- * Fixed some know bugs (php 5.3)
-
-  #### Version 2.3: Feb 2, 2012
- * Update for picasa API
-
-  #### Version 2.2: Jan 1, 2012
- * Add RawPost var to post request (upload image to picasa)
-
-  #### Version 2.1: Dec 23, 2011
- * Fixed some bugs
-
-  #### Version 2.0: Jun 26, 2011
- * Rewrite class to easy use
- * Fixed some bugs
-
-  #### Version 1.2: April 19, 2011
- * Mime-type bug on upload file fixed 
-
-  #### Version 1.1:
- * Upload multi file
- * Fixed some bugs
-
-  #### Version 1.0:
- * Cookie
- * Referer
- * Proxy (only useCurl)
- * SerVersion authentication
- * Upload file
-
-  ## Usage
-
-  ### Read web content:
-  $http = new \ChipVN\Http();
-  $http->setTarget("http://www.yourwebsite.com/");
-  $http->execute();
-  print_r($http->getResponseHeaders());
-  echo $http->getResponseText();
-
-  ### Submit form:
-  $http = new \ChipVN\Http();
-  $http->setTarget("http://www.yourwebsite.com/");
-  $http->setParam(array("fieldname"=> $value));
-  $http->setMethod('POST');
-  $http->execute();
-  echo $http->getResponseText();
-
-  ### Using Proxy: only useCurl
-  $http = new \ChipVN\Http();
-  $http->useCurl(true);
-  $http->setTarget("http://www.yourwebsite.com/");
-  $http->setProxy('proxy_ip:proxy_port');
-  $http->execute();
-  echo $http->getResponseText();
-
-  ### Upload file:
-  $filePath = getcwd().'/abc.jpg';
-  $http = new \ChipVN\Http();
-  $http->setTarget("http://www.yourwebsite.com/");
-  $http->setSubmitMultipart();
-  $http->setParam(array('fileupload'=>"@$filePath"));
-  $http->execute();
-  print_r($http->getResponseHeaders());
-  echo $http->getResponseText();
+ * @author     Phan Thanh Cong <ptcong90@gmail.com>
+ * @copyright  2010-2014 Phan Thanh Cong.
+ * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
+ * @license    MIT
+ * @version    2.6
+ * @relase     Mar 7, 2014 (mostly clean, clear)
  */
 
 namespace ChipVN;
 
 class Http
 {
-	/**
-	 * HTTP Version
-	 *
-	 * @var string
-	*/
-	public $httpVersion;
-	
     /**
-     * Url target
+     * HTTP Version.
+     *
+     * @var string
+     */
+    public $httpVersion;
+
+    /**
+     * URL target.
      *
      * @var string
      */
     public $target;
 
     /**
-     * Schema of url target 
+     * URL schema.
      *
-     * @var string 
+     * @var string
      */
     public $schema;
 
     /**
-     * Host of url target
+     * URL host.
      *
      * @var string
      */
     public $host;
 
     /**
-     * Port of url target
+     * URL port.
      *
      * @var integer
      */
     public $port;
 
     /**
-     * Path of target url
+     * URL path.
      *
      * @var string
      */
     public $path;
 
     /**
-     * Request method (POST/GET/PUT)
+     * Request method.
      *
      * @var string
      */
     public $method;
 
     /**
-     * Request cookie
+     * Request cookies.
      *
      * @var string
      */
-    public $cookie;
+    public $cookies;
 
     /**
-     * Request headers
+     * Request headers.
      *
      * @var array
      */
     public $headers;
 
     /**
-     * Request paramters
+     * Request parameters.
      *
      * @var array
      */
-    public $params;
+    public $parameters;
 
     /**
-     * Raw post data
+     * Raw post data.
      *
      * @var mixed
      */
-    public $rawPost;
+    public $rawData;
 
     /**
-     * Request with browser ?
+     * Request user agent.
      *
      * @var string
      */
     public $userAgent;
 
     /**
-     * Number of seconds to timeout
+     * Number of seconds to timeout.
      *
      * @var integer
      */
     public $timeout;
 
     /**
-     * Use curl to send request. If no, fsockopen will be used to do it
+     * Determine the request will use cURL or not.
      *
      * @var boolean
      */
     public $useCurl;
 
     /**
-     * Authentication user
+     * Authentication username.
      *
-     * @var string 
+     * @var string
      */
     public $authUsername;
 
     /**
-     * Authentication password
+     * Authentication password.
      *
-     * @var string 
+     * @var string
      */
     public $authPassword;
 
     /**
-     * Proxy IP. Can use when you used curl ( $this->useCurl = true) 
+     * Proxy IP (only cURL).
      *
      * @var string
      */
     public $proxyIp;
 
     /**
-     * Proxy user
+     * Proxy username.
      *
      * @var string
      */
     public $proxyUsername;
 
     /**
-     * Proxy password
+     * Proxy password.
      *
      * @var string
      */
     public $proxyPassword;
 
     /**
-     * Request is multipart ?
-     * 
+     * Determine the request is multipart or not.
+     *
      * @var boolean
      */
     public $isMultipart;
 
     /**
-     * Enctype (application/x-www-form-urlencoded)
+     * Enctype (application/x-www-form-urlencoded).
      *
-     * @var string 
+     * @var string
      */
     public $mimeContentType;
 
     /**
-     * Boundary name (used when upload file)
+     * Boundary name (use when uploading).
      *
-     * @var string 
+     * @var string
      */
     public $boundary;
 
     /**
-     * Errors while execute
+     * Errors while execute.
      *
-     * @var	array
+     * @var array
      */
     public $errors;
 
     /**
-     * Response status code
+     * Response status code.
      *
      * @var integer
      */
-    protected $_responseStatus;
+    protected $responseStatus;
 
     /**
-
-
-
-     * Cookies retrieved from response
+     * Response cookies.
      *
      * @var string
      */
-    protected $_responseCookie;
+    protected $responseCookies;
 
     /**
-     * Header response
+     * Response headers.
      *
      * @var array
      */
-    protected $_responseHeaders;
+    protected $responseHeaders;
 
     /**
-     * Html results fetched from response
+     * Response text.
      *
      * @var string
      */
-    protected $_responseText;
+    protected $responseText;
 
-    public function __construct()
+    /**
+     * Create a Http instance.
+     *
+     * @return void
+     */
+    public function _construct()
     {
         $this->reset();
     }
-
     /**
      * Reset request
      * @return \ChipVN\Http
      */
     public function reset()
     {
-		$this->httpVersion = '1.1';
-        $this->target = '';
-        $this->schema = 'http';
-        $this->host = '';
-        $this->port = 0;
-        $this->path = '';
-        $this->method = 'GET';
-        $this->params = array();
-        $this->rawPost = '';
-        $this->cookie = '';
-        $this->headers = array();
+        $this->httpVersion      = '1.1';
+        $this->target           = '';
+        $this->schema           = 'http';
+        $this->host             = '';
+        $this->port             = 0;
+        $this->path             = '';
+        $this->method           = 'GET';
+        $this->parameters       = array();
+        $this->rawData          = '';
+        $this->cookies          = '';
+        $this->headers          = array();
 
-        $this->useCurl = false;
-        $this->timeout = 10;
-        $this->userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
-        $this->errors = array();
+        $this->useCurl          = false;
+        $this->timeout          = 10;
+        $this->userAgent        = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
+        $this->errors           = array();
 
-        $this->mimeContentType = 'application/x-www-form-urlencoded';
-        $this->boundary = 'chiplove.9xpro';
+        $this->mimeContentType  = 'application/x-www-form-urlencoded';
+        $this->boundary         = 'chiplove.9xpro';
 
-        $this->proxyIp = '';
-        $this->proxyUsername = '';
-        $this->proxyPassword = '';
+        $this->proxyIp          = '';
+        $this->proxyUsername    = '';
+        $this->proxyPassword    = '';
 
-        $this->authUsername = '';
-        $this->authPassword = '';
+        $this->authUsername     = '';
+        $this->authPassword     = '';
 
-        $this->_responseStatus = 0;
-        $this->_responseHeaders = array();
-        $this->_responseCookie = '';
-        $this->_responseText = '';
+        $this->responseStatus   = 0;
+        $this->responseHeaders  = array();
+        $this->responseCookies  = '';
+        $this->responseText     = '';
 
         return $this;
     }
 
-	/**
-	 * Set http version
-	 * 
-	 * @param string
-	 * @return \ChipVN\Http
-	*/
-	public function setHttpVersion($ver)
-	{
-		$this->httpVersion = $ver;
-		return $this;
-	}
-	
     /**
-     * Set url target
+     * Set http version.
      *
-     * @param string
-     * @return \ChipVN\Http
+     * @param  string $version
+     * @return Http
+     */
+    public function setHttpVersion($version)
+    {
+        if (in_array($version, array('1.0', '1.1'))) {
+           $this->httpVersion = $version;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set URL target.
+     *
+     * @param  string $target
+     * @return Http
      */
     public function setTarget($target)
     {
         $this->target = trim($target);
+
         return $this;
     }
 
     /**
-     * Set request parameters from ($name, $value) or from array name-value pairs
+     * Set parameters with name, value or array of name-value pairs.
      *
-     * @param	string|array	
-     * @param	mixed
-     * @return \ChipVN\Http
+     * @param  string|array $name
+     * @param  mixed        $value
+     * @return Http
      */
-    public function setParam($name, $value = NULL)
+    public function setParam($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->params[$name] = $value;
-        }
-        else {
+            $this->parameters[$name] = $value;
+        } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
-                    $this->params[$key] = $value;
+                    $this->parameters[$key] = $value;
                 }
-            }
-            else if (is_string($name)) {
-                $str = preg_replace_callback('#&[a-z]+;#', create_function('$match', '
-					return rawurlencode($match[0]);
-				'), $name);
-                parse_str(str_replace('+', '%2B', $str), $array);
+            } elseif (is_string($name)) {
+                $name = preg_replace_callback(
+                    '#&[a-z]+;#',
+                    create_function('$match', 'return rawurlencode($match[0]);'),
+                    $name);
+                parse_str(str_replace('+', '%2B', $name), $array);
                 $this->setParam($array);
             }
         }
+
         return $this;
     }
 
     /**
-     * Set referer
-     * @param	string
-     * @return	\ChipVN\Http
+     * Set request URL referer.
+     *
+     * @param  string $referer
+     * @return Http
      */
     public function setReferer($referer)
     {
         $this->headers['Referer'] = $referer;
+
         return $this;
     }
 
     /**
-     * Set user agent 
-     * Mozilla/5.0 (Windows NT 6.1; WOW64; rv:2.0) Gecko/20100101 Firefox/4.0
+     * Set request user agent.
      *
-     * @param string
-     * @return \ChipVN\Http
+     * @param  string $userAgent
+     * @return Http
      */
     public function setUserAgent($userAgent)
     {
         $this->userAgent = $userAgent;
+
         return $this;
     }
-
     /**
-     * Set number of seconds to time out
+     * Set number of seconds to time out.
      *
-     * @param integer seconds to time out
-     * @return \ChipVN\Http
+     * @param  integer $seconds
+     * @return Http
      */
     public function setTimeout($seconds)
     {
         if ($seconds > 0) {
             $this->timeout = $seconds;
         }
+
         return $this;
     }
 
     /**
-     * @param	string
-     * @return	\ChipVN\Http
-     */
-    public function setRawPost($rawPost)
-    {
-        $this->rawPost = $rawPost;
-        return $this;
-    }
-
-    /**
-     * Request method
+     * Set request raw post data.
      *
-     * @param	string
-     * @return	\ChipVN\Http
+     * @param  string $rawData
+     * @return Http
+     */
+    public function setRawPost($rawData)
+    {
+        $this->rawData = $rawData;
+
+        return $this;
+    }
+
+    /**
+     * Set request method.
+     *
+     * @param  string $method
+     * @return Http
      */
     public function setMethod($method)
     {
         $this->method = strtoupper(trim($method));
+
         return $this;
     }
 
     /**
-     * Set request headers from ($name, $value) or from array name-value pairs
-     * 
-     * @param	string|array
-     * @param	mixed
-     * @return 	\ChipVN\Http
+     * Set request headers with name, value or array of name-value pairs.
+     *
+     * @param  string|array $name
+     * @param  mixed        $value
+     * @return Http
      */
-    public function setHeader($name, $value = NULL)
+    public function setHeader($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->headers[trim($name)] = trim($value);
-        }
-        else {
+            $this->headers[trim($name) ] = trim($value);
+        } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
                     if (!is_int($key)) {
                         $this->setHeader($key, $value);
-                    }
-                    else {
+                    } else {
                         $this->setHeader($value);
                     }
                 }
-            }
-            else if (is_string($name)) {
+            } elseif (is_string($name)) {
                 list($key, $value) = explode(':', $name, 2);
                 $this->setHeader($key, $value);
             }
         }
+
         return $this;
     }
 
     /**
-     * Use cURL for sending request, otherwise use fsockopen
+     * Determine if the request will use cURL or not.
+     * Default is use fsockopen.
      *
-     * @param boolean
-     * @return 	\ChipVN\Http
+     * @param  boolean $useCurl
+     * @return Http
      */
     public function useCurl($useCurl)
     {
         $this->useCurl = (boolean) $useCurl;
+
         return $this;
     }
 
     /**
-     * @return 	\ChipVN\Http
+     * Set submit multipart.
+     *
+     * @param  string $type
+     * @return Http
      */
     public function setSubmitMultipart($type = 'form-data')
     {
         $this->setMethod('POST');
         $this->isMultipart = true;
         $this->mimeContentType = "multipart/" . $type;
+
         return $this;
     }
 
     /**
-     * @return 	\ChipVN\Http
+     * Set submit normal.
+     *
+     * @param  string $method
+     * @return Http
      */
     public function setSubmitNormal($method = 'POST')
     {
         $this->setMethod($method);
         $this->isMultipart = false;
         $this->mimeContentType = "application/x-www-form-urlencoded";
+
         return $this;
     }
 
     /**
-     * 
-     * @param string
-     * @return 	\ChipVN\Http
+     * Set request content type.
+     *
+     * @param  string $mimeType
+     * @return Http
      */
     public function setMimeContentType($mimeType)
     {
         $this->mimeContentType = $mimeType;
+
         return $this;
     }
 
     /**
-     * Set request cookie from string or array cookies
+     * Set request cookies.
      *
-     * @param	string|array
-     * @param	boolean	addition to existing cookie ?
-     * @return 	\ChipVN\Http
+     * @param  string|array $value
+     * @param  boolean      $addition
+     * @return Http
      */
     public function setCookie($value, $addition = true)
     {
@@ -539,20 +477,21 @@ class Http
             $value = implode(';', $value);
         }
         if ($addition) {
-            $this->cookie .= $value . ';';
+            $this->cookies .= $value . ';';
+        } else {
+            $this->cookies = $value;
         }
-        else {
-            $this->cookie = $value;
-        }
+
         return $this;
     }
 
     /**
-     * Set proxy
-	 * @param 	string proxy:port
-	 * @param	string username
-	 * @param	string password
-     * @return 	\ChipVN\Http
+     * Set request with proxy.
+     *
+     * @param  string $proxyIp  Format: ipaddress:port
+     * @param  string $username
+     * @param  string $password
+     * @return Http
      */
     public function setProxy($proxyIp, $username = '', $password = '')
     {
@@ -564,8 +503,11 @@ class Http
     }
 
     /**
-     * Set auth
-     * @return 	\ChipVN\Http
+     * Set request authentication.
+     *
+     * @param  string $username
+     * @param  string $password
+     * @return Http
      */
     public function setAuth($username, $password = '')
     {
@@ -576,11 +518,15 @@ class Http
     }
 
     /**
-     * Execute request 
+     * Execute sending request and trigger errors messages if have.
      *
-     * @return	string|boolean - Response text or FALSE if request failed
+     * @param  string|null       $target
+     * @param  string|null       $method
+     * @param  string|array|null $parameters
+     * @param  string|null       $referer
+     * @return Http|boolean      False if request is failed.
      */
-    public function execute($target = NULL, $method = NULL, $params = NULL, $referer = NULL)
+    public function execute($target = null, $method = null, $parameters = null, $referer = null)
     {
         if ($target) {
             $this->setTarget($target);
@@ -591,17 +537,19 @@ class Http
         if ($referer) {
             $this->setReferer($referer);
         }
-        if ($params) {
-            $this->setParam($params);
+        if ($parameters) {
+            $this->setParam($parameters);
         }
 
         if (empty($this->target)) {
-            $this->errors[] = 'ERROR: Target url must be no empty';
+            $this->errors[] = 'ERROR: Target url must be no empty.';
+
             return false;
         }
 
-        if ($this->params && $this->method == 'GET') {
-            $this->target .= ($this->method == 'GET' ? (strpos($this->target, '?') ? '&' : '?') . http_build_query($this->params) : '');
+        if ($this->parameters && $this->method == 'GET') {
+            $this->target .= ($this->method == 'GET' ? (strpos($this->target, '?') ? '&' : '?')
+                . http_build_query($this->parameters) : '');
         }
 
         $urlParsed = parse_url($this->target);
@@ -609,59 +557,47 @@ class Http
         if ($urlParsed['scheme'] == 'https') {
             $this->host = 'ssl://' . $urlParsed['host'];
             $this->port = ($this->port != 0) ? $this->port : 443;
-        }
-        else {
+        } else {
             $this->host = $urlParsed['host'];
             $this->port = ($this->port != 0) ? $this->port : 80;
         }
-        $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/') . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
+        $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
+                    . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
         $this->schema = $urlParsed['scheme'];
-
-
-        //use curl to send request
+        // use cURL to send request
         if ($this->useCurl) {
             if ($this->isMultipart) {
-                foreach ((array) $this->params as $key => $value) {
+                foreach ((array) $this->parameters as $key => $value) {
                     if (substr($value, 0, 1) == '@') {
-                        $this->params[$key] = $value . ';type=' . $this->_getMimeType(substr($value, 1));
+                        $this->parameters[$key] = $value . ';type=' . $this->getMimeType(substr($value, 1));
                     }
                 }
             }
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $this->target);
-			
-			$httpVersion = CURL_HTTP_VERSION_1_0;
-			// for future
-			if(version_compare($this->httpVersion, '2', '=') AND defined('CURL_HTTP_VERSION_2_0')) { 
-				$httpVersion = CURL_HTTP_VERSION_2_0;
-			} elseif(version_compare($this->httpVersion, '2.1', '=') AND defined('CURL_HTTP_VERSION_2_1')) {
-				$httpVersion = CURL_HTTP_VERSION_2_1;
-			}
-			if(version_compare($this->httpVersion, '1', '>') AND $httpVersion = CURL_HTTP_VERSION_1_0) {
-				$httpVersion = CURL_HTTP_VERSION_1_1;
-			}
-			curl_setopt($ch, CURLOPT_HTTP_VERSION, $httpVersion);
-			
+
+            $httpVersion = CURL_HTTP_VERSION_1_0;
+            if ($this->httpVersion = '1.1') {
+                $httpVersion = CURL_HTTP_VERSION_1_1;
+            }
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, $httpVersion);
+
             if ($this->isMultipart) {
                 $this->headers[] = 'Content-Type: ' . $this->mimeContentType;
             }
             if ($this->method == 'POST') {
                 curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->params);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->parameters);
             }
-            if ($this->cookie) {
-                curl_setopt($ch, CURLOPT_COOKIE, $this->cookie);
+            if ($this->cookies) {
+                curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
             }
-            /* if( ! empty($this->referer['Referer'])) {
-              curl_setopt($ch, CURLOPT_REFERER, 			$this->referer['Referer']);
-              }
-             */
             if ($this->headers) {
-                $_headers = array();
+                $headers = array();
                 foreach ($this->headers as $name => $value) {
-                    $_headers[] = $name . ': ' . $value;
+                    $headers[] = $name . ': ' . $value;
                 }
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $_headers);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             }
             if ($this->timeout) {
                 curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
@@ -675,7 +611,6 @@ class Http
                 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
 
                 if ($this->proxyUsername) {
-
                     curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUsername . ':' . $this->proxyPassword);
                 }
             }
@@ -687,30 +622,32 @@ class Http
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
+            // send request
             $response = curl_exec($ch);
 
             if ($response === false) {
-                $this->errors[] = 'ERROR: ' . curl_errno($ch) . ' - ' . curl_error($ch);
+                $this->errors[] = sptinrf('ERROR: % - %s.', curl_errno($ch), curl_error($ch));
+
                 return false;
             }
             $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $responseHeader = substr($response, 0, $headerSize);
             $responseBody = substr($response, $headerSize);
 
-            $this->_parseResponseHeaders($responseHeader);
-            $this->_responseText = $responseBody;
+            $this->parseResponseHeaders($responseHeader);
+            $this->responseText = $responseBody;
             curl_close($ch);
         }
-        //use fsockopen to send request
+        // use fsockopen to send request
         else {
             $postData = '';
-            if ($this->rawPost) {
+            if ($this->rawData) {
                 $postData .= $this->isMultipart ? "--" . $this->boundary . "\r\n" : "";
-                $postData .= $this->rawPost . "\r\n";
+                $postData .= $this->rawData . "\r\n";
             }
-            //for upload file
+            // upload file
             if ($this->isMultipart) {
-                foreach ($this->params as $key => $value) {
+                foreach ($this->parameters as $key => $value) {
                     if (substr($value, 0, 1) == '@') {
                         $upload_file_path = substr($value, 1);
                         $upload_field_name = $key;
@@ -718,12 +655,11 @@ class Http
                         if (file_exists($upload_file_path)) {
                             $postData .= "--" . $this->boundary . "\r\n";
                             $postData .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
-                            $postData .= "Content-Type: " . $this->_getMimeType($upload_file_path) . "\r\n";
+                            $postData .= "Content-Type: " . $this->getMimeType($upload_file_path) . "\r\n";
                             $postData .= "Content-Transfer-Encoding: binary\r\n\r\n";
-                            $postData .= $this->_readBinary($upload_file_path) . "\r\n";
+                            $postData .= $this->readBinary($upload_file_path) . "\r\n";
                         }
-                    }
-                    else {
+                    } else {
                         $postData .= "--" . $this->boundary . "\r\n";
                         $postData .= "Content-Disposition: form-data; name=\"" . $key . "\"\r\n";
                         $postData .= "\r\n";
@@ -732,24 +668,19 @@ class Http
                 }
                 $postData .= "--" . $this->boundary . "--\r\n";
             }
-            //submit normal
+            // submit normal
             else {
-                foreach ($this->params as $key => $param) {
+                foreach ($this->parameters as $key => $param) {
                     $postData .= urlencode($key) . '=' . rawurlencode($param) . '&';
                 }
+                $postData = substr($postData, 0, -1);
             }
-            //open connection
-			if($this->proxyIp) {
-				$proxy = explode(':', $this->proxyIp);
-				if(empty($proxy[1])) $proxy[1] = 80;
-				$filePointer = @fsockopen($proxy[0], $proxy[1], $errno, $errstr, $this->timeout);
-				
-			} else {
-            	$filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
-				
-			}
+            // open connection
+            $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
+
             if (!$filePointer) {
-                $this->errors[] = 'ERROR: ' . $errno . ' - ' . $errstr;
+                $this->errors[] = sprintf('ERROR: %s - %s.', $errno, $errstr);
+
                 return false;
             }
             $requestHeader = $this->method . " " . $this->path . " HTTP/" . $this->httpVersion . "\r\n";
@@ -761,13 +692,17 @@ class Http
                 }
             }
             if ($this->mimeContentType) {
-                $requestHeader .= "Content-Type: " . $this->mimeContentType . ($this->isMultipart ? "; boundary=" . $this->boundary : "") . "\r\n";
+                $requestHeader .= "Content-Type: " . $this->mimeContentType
+                    . ($this->isMultipart ? "; boundary=" . $this->boundary : "")
+                    . "\r\n";
             }
             if ($this->authUsername) {
-                $requestHeader .= "Authorization: Basic " . base64_encode($this->authUsername . ":" . $this->authPassword) . "\r\n";
+                $requestHeader .= "Authorization: Basic "
+                    . base64_encode($this->authUsername . ":" . $this->authPassword)
+                    . "\r\n";
             }
-            if ($this->cookie) {
-                $requestHeader .= "Cookie: " . $this->cookie . "\r\n";
+            if ($this->cookies) {
+                $requestHeader .= "Cookie: " . $this->cookies . "\r\n";
             }
             if ($postData && $this->method == 'POST') {
                 $requestHeader .= "Content-length: " . strlen($postData) . "\r\n";
@@ -779,38 +714,38 @@ class Http
                 $requestHeader .= $postData;
             }
             $requestHeader .= "\r\n\r\n";
-			
+
+            // send request
             fwrite($filePointer, $requestHeader);
 
             $responseHeader = '';
             $responseBody = '';
             do {
                 $responseHeader .= fgets($filePointer, 128);
-            }
-            while (strpos($responseHeader, "\r\n\r\n") === false);
+            } while (strpos($responseHeader, "\r\n\r\n") === false);
 
-            $this->_parseResponseHeaders($responseHeader);
+            $this->parseResponseHeaders($responseHeader);
 
             while (!feof($filePointer)) {
                 $responseBody .= fgets($filePointer, 128);
             }
-			if (isset($this->_responseHeaders['transfer-encoding']) AND $this->_responseHeaders['transfer-encoding'] == 'chunked') {
+            if (isset($this->responseHeaders['transfer-encoding']) && $this->responseHeaders['transfer-encoding'] == 'chunked') {
                 $data = $responseBody;
-				$pos = 0;
+                $pos = 0;
                 $len = strlen($data);
                 $outData = '';
 
                 while ($pos < $len) {
                     $rawnum = substr($data, $pos, strpos(substr($data, $pos), "\r\n") + 2);
                     $num = hexdec(trim($rawnum));
-					$pos += strlen($rawnum);
+                    $pos+= strlen($rawnum);
                     $chunk = substr($data, $pos, $num);
                     $outData .= $chunk;
-                    $pos += strlen($chunk);
+                    $pos+= strlen($chunk);
                 }
                 $responseBody = $outData;
             }
-            $this->_responseText = ($responseBody); //ltrim
+            $this->responseText = $responseBody;
             fclose($filePointer);
         }
 
@@ -818,44 +753,41 @@ class Http
     }
 
     /**
-     * Parser response headers
+     * Parse response headers.
      *
-     * @param	string
-     * @return 	void
+     * @param  string $headers
+     * @return void
      */
-    protected function _parseResponseHeaders($headers)
+    protected function parseResponseHeaders($headers)
     {
-        $this->_responseHeaders = array();
+        $this->responseHeaders = array();
         $lines = explode("\n", $headers);
         foreach ($lines as $line) {
             if ($line = trim($line)) {
                 // parse headers to array
-                if (empty($this->_responseHeaders)) {
+                if (empty($this->responseHeaders)) {
                     preg_match('#HTTP/.*?\s+(\d+)#', $line, $match);
-                    $this->_responseStatus = intval($match[1]);
-                    $this->_responseHeaders['status'] = $line;
-                }
-                else if (strpos($line, ':')) {
+                    $this->responseStatus = intval($match[1]);
+                    $this->responseHeaders['status'] = $line;
+                } elseif (strpos($line, ':')) {
                     list($key, $value) = explode(':', $line, 2);
                     $value = ltrim($value);
                     $key = strtolower($key);
-                    //parse cookie
+                    // parse cookie
                     if ($key == 'set-cookie') {
-                        $this->_responseCookie .= $value . ';';
+                        $this->responseCookies .= $value . ';';
                     }
-                    if (array_key_exists($key, $this->_responseHeaders)) {
-                        if (!is_array($this->_responseHeaders[$key])) {
-                            $temp = $this->_responseHeaders[$key];
-                            unset($this->_responseHeaders[$key]);
-                            $this->_responseHeaders[$key][] = $temp;
-                            $this->_responseHeaders[$key][] = $value;
+                    if (array_key_exists($key, $this->responseHeaders)) {
+                        if (!is_array($this->responseHeaders[$key])) {
+                            $temp = $this->responseHeaders[$key];
+                            unset($this->responseHeaders[$key]);
+                            $this->responseHeaders[$key][] = $temp;
+                            $this->responseHeaders[$key][] = $value;
+                        } else {
+                            $this->responseHeaders[$key][] = $value;
                         }
-                        else {
-                            $this->_responseHeaders[$key][] = $value;
-                        }
-                    }
-                    else {
-                        $this->_responseHeaders[$key] = $value;
+                    } else {
+                        $this->responseHeaders[$key] = $value;
                     }
                 }
             }
@@ -863,63 +795,81 @@ class Http
     }
 
     /**
-     * Get response status code
+     * Get response status code.
      *
-     * @return	integer
+     * @return integer
      */
     public function getResponseStatus()
     {
-        return $this->_responseStatus;
+        return $this->responseStatus;
     }
 
     /**
-     * Get response cookie 
+     * Get response cookies.
      *
-     * @return	string
+     * @return string
      */
-    public function getResponseCookie()
+    public function getResponseCookies()
     {
-        return $this->_responseCookie;
+        return $this->responseCookies;
     }
 
     /**
-     * Get response headers
+     * Get response headers.
      *
-     * @param	string|null		NULL to get all headers
-     * @return	mixed|boolean	FALSE if get header by name and it is not exist
+     * @param  string|null   $name Null to get all headers
+     * @return mixed|boolean False if get header by name and it is not exist
      */
-    public function getResponseHeaders($name = NULL)
+    public function getResponseHeaders($name = null)
     {
-        if ($name !== NULL) {
-            if (array_key_exists($name, $this->_responseHeaders)) {
-                return $this->_responseHeaders[$name];
+        if ($name !== null) {
+            if (array_key_exists($name, $this->responseHeaders)) {
+                return $this->responseHeaders[$name];
             }
+
             return false;
         }
-        return $this->_responseHeaders;
+
+        return $this->responseHeaders;
     }
 
     /**
-     * Get response body text
-     * 
-     * @return	string
+     * Get response text.
+     *
+     * @return string
      */
     public function getResponseText()
     {
-        return $this->_responseText;
+        return $this->responseText;
     }
 
-    public function __toString()
+    /**
+     * Get response text.
+     *
+     * @return string
+     */
+    public function _toString()
     {
         return $this->getResponseText();
     }
 
     /**
-     * Read binary of file for uploading.
+     * Get response cookies.
      *
-     * @return	string
+     * @return string
+     * @deprecated 2.6
      */
-    protected function _readBinary($filePath)
+    public function getResponseCookie()
+    {
+        return $this->getResponseCookies();
+    }
+
+    /**
+     * Read binary data of file.
+     *
+     * @return string
+     */
+    protected function readBinary($filePath)
     {
         $binarydata = '';
         if (file_exists($filePath)) {
@@ -929,16 +879,17 @@ class Http
             }
             fclose($handle);
         }
+
         return $binarydata;
     }
 
     /**
-     * Get mime type of file 
+     * Get mime type of file.
      *
-     * @param	string	file path
-     * @return	string|boolean FALSE if mime type not found
+     * @param   string  file path
+     * @return string|boolean false if mime type not found
      */
-    protected function _getMimeType($filePath)
+    protected function getMimeType($filePath)
     {
         $filename = realpath($filePath);
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -946,20 +897,17 @@ class Http
         if (preg_match('/^(?:jpe?g|png|[gt]if|bmp|swf)$/', $extension)) {
             $file = getimagesize($filename);
 
-            if (isset($file['mime'])) {
-                return $file['mime'];
-            }
+            if (isset($file['mime'])) return $file['mime'];
         }
-        if (class_exists('finfo', FALSE)) {
+        if (class_exists('finfo', false)) {
             if ($info = new finfo(defined('FILEINFO_MIME_TYPE') ? FILEINFO_MIME_TYPE : FILEINFO_MIME)) {
                 return $info->file($filename);
             }
         }
-        if (ini_get('mime_magic.magicfile') AND function_exists('mime_content_type')) {
+        if (ini_get('mime_magic.magicfile') && function_exists('mime_content_type')) {
             return mime_content_type($filename);
         }
 
         return false;
     }
-
 }
