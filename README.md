@@ -5,10 +5,12 @@ Supports POST (fields, raw data), file uploading, GET, PUT, etc..
 
 **Note**: _fsockopen_ is faster also it is default.
 
-* Author: Phan Thanh Cong 
-* Contact: ptcong90@gmail.com
-* Copyright: (c) 2011-2014 chiplove.9xpro
-* Version: 2.4
+* @author     Phan Thanh Cong <ptcong90@gmail.com>
+* @copyright  2010-2014 Phan Thanh Cong.
+* @license    http://www.opensource.org/licenses/mit-license.php  MIT License
+* @license    MIT
+* @version    2.6
+* @relase     Mar 7, 2014 (mostly clean, clear)
 
 ## Change logs
 #### Version 2.5: Mar 07, 2014
