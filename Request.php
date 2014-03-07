@@ -678,7 +678,11 @@ class Request
             $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
 
             if (!$filePointer) {
-                $this->errors[] = sprintf('ERROR: %s - %s.', $errno, $errstr);
+                if ($errstr) {
+                    $this->errors[] = sprintf('ERROR: %s - %s.', $errno, $errstr);
+                } else {
+                    $this->errors[] = sprintf('ERROR: Cannot connect to %s:%s', $this->url, $this->port);
+                }
 
                 return false;
             }
