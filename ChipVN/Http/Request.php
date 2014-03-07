@@ -11,7 +11,7 @@
  * @relase     Mar 7, 2014 (mostly clean, clear)
  */
 
-namespace ChipVN;
+namespace ChipVN\Http;
 
 class Request
 {
