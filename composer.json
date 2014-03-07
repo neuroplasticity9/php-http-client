@@ -1,5 +1,5 @@
 {
-	"name": "ptcong/php-http",
+	"name": "ptcong/php-http-class",
 	"description": "Http class used to sending request and get response like browser.",
 	"keywords": ["php", "http"],
 	"license": "MIT",
