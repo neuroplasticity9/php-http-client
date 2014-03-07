@@ -566,7 +566,7 @@ class Request
         // use cURL to send request
         if ($this->useCurl) {
             if ($this->isMultipart) {
-                foreach ((array) $this->parameters as $key => $value) {
+                foreach ($this->parameters as $key => $value) {
                     if (substr($value, 0, 1) == '@') {
                         $this->parameters[$key] = $value . ';type=' . $this->getMimeType(substr($value, 1));
                     }
