@@ -59,7 +59,7 @@
 
 ## Usage
 
-Add require `"ptcong/php-http-class": "2.5.*"` to _composer.json_ and run `composer update` if you use composer
+Add require `"ptcong/php-http-class": "2.5.*@dev"` to _composer.json_ and run `composer update` if you use composer
 
 ### Read web content:
 	$http = new \ChipVN\Http\Request;
