@@ -5,10 +5,10 @@
 
 **Note**: _fsockopen_ is faster also it is default.
 
-* Author     Phan Thanh Cong <ptcong90@gmail.com>
-* Copyright  2010-2014 Phan Thanh Cong.
-* License    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version    2.5 stateble
+* Author:     Phan Thanh Cong <ptcong90@gmail.com>
+* Copyright:  2011-2014 Phan Thanh Cong.
+* License:    http://www.opensource.org/licenses/mit-license.php  MIT License
+* Version:    2.5 stateble
 
 ## Change logs
 #### Version 2.5: Mar 07, 2014
