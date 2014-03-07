@@ -1,7 +1,7 @@
 {
 	"name": "ptcong/php-http-class",
 	"description": "Http class used to sending request and get response like a browser.",
-	"keywords": ["php", "http"],
+	"keywords": ["php", "http", "request", "curl", "fsockopen"],
 	"license": "MIT",
     "authors": [
         {
