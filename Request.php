@@ -209,7 +209,7 @@ class Request
      *
      * @return void
      */
-    public function _construct()
+    public function __construct()
     {
         $this->reset();
     }
