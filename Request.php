@@ -7,8 +7,8 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5
- * @relase     Mar 7, 2014 (mostly clean, clear)
+ * @version    2.5.1
+ * @relase     Mar 28, 2014 (mostly clean, clear)
  */
 
 namespace ChipVN\Http;
@@ -250,6 +250,7 @@ class Request
         $this->responseHeaders  = array();
         $this->responseCookies  = '';
         $this->responseText     = '';
+
 
         return $this;
     }
@@ -681,7 +682,7 @@ class Request
                 if ($errstr) {
                     $this->errors[] = sprintf('ERROR: %s - %s.', $errno, $errstr);
                 } else {
-                    $this->errors[] = sprintf('ERROR: Cannot connect to %s:%s', $this->url, $this->port);
+                    $this->errors[] = sprintf('ERROR: Cannot connect to %s:%s', $this->target, $this->port);
                 }
 
                 return false;
