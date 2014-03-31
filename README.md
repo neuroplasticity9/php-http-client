@@ -11,6 +11,11 @@
 * Version:    2.5 stateble
 
 ## Change logs
+#### Version 2.5.2: Apr 1, 2014
+* Add new method getResponseArrayCookies() 
+* Fixed a bug
+* Change all properties to protected (need use set* methods to change the properties)
+
 #### Version 2.5: Mar 07, 2014
 * Change class name to \ChipVN\Http\Request
 * Most clean and clear
