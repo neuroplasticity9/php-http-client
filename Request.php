@@ -442,7 +442,7 @@ class Request
     public function setSubmitMultipart($type = 'form-data')
     {
         $this->setMethod('POST');
-        $this->isMultipart = true;
+        $this->isMultipart     = true;
         $this->mimeContentType = "multipart/" . $type;
 
         return $this;
@@ -457,7 +457,7 @@ class Request
     public function setSubmitNormal($method = 'POST')
     {
         $this->setMethod($method);
-        $this->isMultipart = false;
+        $this->isMultipart     = false;
         $this->mimeContentType = "application/x-www-form-urlencoded";
 
         return $this;
@@ -806,7 +806,7 @@ class Request
                     if ($key == 'set-cookie') {
                         $this->responseCookies .= $value . ';';
                         if (preg_match_all('#([^=;\s]+)(?:=([^;]+))?;?\s*?#', $value, $matches)) {
-                            $name = $matches[1][0];
+                            $name  = $matches[1][0];
                             $value = $matches[2][0];
                             array_shift($matches[1]);
                             array_shift($matches[2]);
