@@ -28,7 +28,7 @@
 * Change two static class methods (readBinary, mimeTye) to protected instance method
 
 #### Version 2.3.4: Feb 20, 2013
-* Parser header fixed (wrong typing)
+* Fixed parse headers (typo)
 
 #### Version 2.3.3: Nov 5, 2012
 * Re-struct, something edited
@@ -37,13 +37,13 @@
 * Add some methods
 
 #### Version 2.3.1: Mar 30, 2012
-* Fixed some know bugs to work well with PHP 5.3 (E_NOTICE is default)
+* Fixed some bugs to work well with PHP 5.3 (E_NOTICE default is enabled)
 
 #### Version 2.3: Feb 2, 2012
 * Update for picasa API
 
 #### Version 2.2: Jan 1, 2012
-* Support raw data for posting request (upload image to picasa)
+* Support raw data for posting (upload image to picasa)
 
 #### Version 2.1: Dec 23, 2011
 * Fixed some bugs
@@ -56,13 +56,13 @@
 * Mime-type bug on upload file fixed 
 
 #### Version 1.1:
-* Upload multi file
+* Supports upload multiple files
 * Fixed some bugs
 
 #### Version 1.0:
-* Send normal request
+* Supports send a basic request
 * Proxy (only useCurl)
-* File uploading
+* Supports file uploading
 
 ## Usage
 
