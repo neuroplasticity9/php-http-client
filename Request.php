@@ -1,6 +1,6 @@
 <?php
 /**
- * Http class used to sending request and get response like a browser.
+ * ChipVN\Http\Request class used to sending request and get response like a browser.
  * Use 2 functions: cURL, fsockopen
  * so you can use this class like "curl" WITHOUT CURL extension installed
  * Supports POST (fields, raw data), file uploading, GET, PUT, etc..
