@@ -8,10 +8,10 @@
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
 * License:    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version:    2.5 stateble
+* Version:    2.5.3
 
 ## Change logs
-#### Version 2.5.2: Apr 1, 2014
+#### Version 2.5.3: Apr 1, 2014
 * Add new method setFollowRedirect() to follow redirect
 * Add new method getResponseArrayCookies() to get all cookies by array [name => [info], name2 => [info]]
 * Fixed a bug
