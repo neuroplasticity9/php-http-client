@@ -185,7 +185,7 @@ Create an \ChipVN\Http\Request instnace
 		'name2=value2',
 	));
 
-**Use Proxy**
+**Use Proxy** The method only avaliable if you use cURL for sending request 
 
 	$request->setProxy('127.0.0.1:80');
 
