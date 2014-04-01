@@ -814,15 +814,16 @@ class Request
 
             $this->parseResponseHeaders($responseHeader);
 
+            // get body
+            while (!feof($filePointer)) {
+                $responseBody .= fgets($filePointer, 128);
+            }
+            fclose($filePointer);
+            
             // Cookies will not be recognized if have redirection
             // so we don't need to add anything to request cookies
             if (null !== $responseStatus = $this->followRedirect()) {
                 return $responseStatus;
-            }
-            
-            // get body
-            while (!feof($filePointer)) {
-                $responseBody .= fgets($filePointer, 128);
             }
 
             // remove chunked
@@ -843,7 +844,6 @@ class Request
                 $responseBody = $outData;
             }
             $this->responseText = $responseBody;
-            fclose($filePointer);
         }
 
         return true;
