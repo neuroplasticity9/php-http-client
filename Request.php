@@ -68,7 +68,7 @@ class Request
     /**
      * Request cookies.
      *
-     * @var string
+     * @var array
      */
     protected $cookies;
 
@@ -249,11 +249,24 @@ class Request
     }
 
     /**
-     * Reset request.
+     * Reset request and response data.
      *
      * @return \ChipVN\Http\Request
      */
     public function reset()
+    {
+        $this->resetRequest();
+        $this->resetResponse();
+
+        return $this;
+    }
+
+    /**
+     * Reset request data.
+     *
+     * @return \ChipVN\Http\Request
+     */
+    public function resetRequest()
     {
         $this->httpVersion          = '1.1';
         $this->target               = '';
@@ -264,7 +277,7 @@ class Request
         $this->method               = 'GET';
         $this->parameters           = array();
         $this->rawData              = '';
-        $this->cookies              = '';
+        $this->cookies              = array();
         $this->headers              = array();
         $this->timeout              = 10;
         $this->followRedirect       = false;
@@ -285,7 +298,16 @@ class Request
         $this->authUsername         = '';
         $this->authPassword         = '';
 
-        // response
+        return $this;
+    }
+
+    /**
+     * Reset response data.
+     *
+     * @return \ChipVN\Http\Request
+     */
+    public function resetResponse()
+    {
         $this->responseStatus       = 0;
         $this->responseHeaders      = array();
         $this->responseCookies      = '';
@@ -526,18 +548,21 @@ class Request
      * Set request cookies.
      *
      * @param  string|array         $value
-     * @param  boolean              $addition
+     * @param  boolean              $append
      * @return \ChipVN\Http\Request
      */
-    public function setCookie($value, $addition = true)
+    public function setCookie($value, $append = true)
     {
         if (is_array($value)) {
-            $value = implode(';', $value);
-        }
-        if ($addition) {
-            $this->cookies .= $value . ';';
-        } else {
-            $this->cookies = $value;
+            foreach ($value as $val) {
+                $this->setCookie($val, $append);
+            }
+        } elseif ($cookie = $this->parseCookie($value)) {
+            if ($append) {
+                $this->cookies[$cookie['name']] = $cookie;
+            } else {
+                $this->cookies = array($cookie['name'] => $cookie);
+            }
         }
 
         return $this;
@@ -589,6 +614,56 @@ class Request
     }
 
     /**
+     * Parses a URL and returns an associative array.
+     *
+     * @param  string      $value
+     * @return array|false False if can't parse the value
+     */
+    public function parseCookie($value)
+    {
+        if (is_string($value) && preg_match_all('#([^=;\s]+)(?:=([^;]+))?;?\s*?#', $value, $matches)) {
+            $name  = $matches[1][0];
+            $value = $matches[2][0];
+            array_shift($matches[1]);
+            array_shift($matches[2]);
+
+            return array_combine($matches[1], $matches[2]) +
+            // defaults
+            array(
+                'name'     => $name,
+                'value'    => $value,
+                'expires'  => null,
+                'path'     => null,
+                'expires'  => null,
+                'domain'   => null,
+                'secure'   => null,
+                'httponly' => null,
+            );
+        }
+
+        return false;
+    }
+
+    /**
+     * Create cookie from array.
+     *
+     * @param  array  $cookie
+     * @return string
+     */
+    public function createCookie(array $cookie)
+    {
+        $result = $cookie['name'] . '=' . $cookie['value'] . ';';
+        unset($cookie['name'], $cookie['value']);
+        foreach ($cookie as $key => $value) {
+            if ($value !== null) {
+                $result .= ' ' . $key . '=' . $value . ';';
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Execute sending request and trigger errors messages if have.
      *
      * @param  string|null       $target
@@ -635,6 +710,12 @@ class Request
         $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
                     . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
         $this->schema = $urlParsed['scheme'];
+
+        $cookies = '';
+        foreach ($this->cookies as $name => $cookie) {
+            $cookies .= $this->createCookie($cookie);
+        }
+
         // use cURL to send request
         if ($this->useCurl) {
             if ($this->isMultipart) {
@@ -660,8 +741,8 @@ class Request
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $this->parameters);
             }
-            if ($this->cookies) {
-                curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
+            if ($cookies) {
+                curl_setopt($ch, CURLOPT_COOKIE, $cookies);
             }
             if ($this->headers) {
                 $headers = array();
@@ -686,7 +767,7 @@ class Request
                 }
             }
             // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
-            // because of if redirect count greater than $maxRedirect 
+            // because of if redirect count greater than $maxRedirect
             // CURL will trigger an error, so we can't get any responses
             // if ($this->followRedirect) {
             //     curl_setopt($ch, CURLOPT_MAXREDIRS, $this->maxRedirect);
@@ -709,15 +790,13 @@ class Request
                 return false;
             }
             $headerSize     = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $responseHeader = substr($response, 0, $headerSize);
+            $responseHeader = substr($response, 0, $headerSize) ?: ''; // always be a string
             $responseBody   = substr($response, $headerSize);
 
             $this->parseResponseHeaders($responseHeader);
-            $this->responseText = $responseBody;
+            $this->responseText = $responseBody ?: ''; // always be a string
             curl_close($ch);
 
-            // Cookies will not be recognized if have redirection
-            // so we don't need to add anything to request cookies
             if (null !== $responseStatus = $this->followRedirect()) {
                 return $responseStatus;
             }
@@ -790,7 +869,7 @@ class Request
                     . "\r\n";
             }
             if ($this->cookies) {
-                $requestHeader .= "Cookie: " . $this->cookies . "\r\n";
+                $requestHeader .= "Cookie: " . $cookies . "\r\n";
             }
             if ($postData && $this->method == 'POST') {
                 $requestHeader .= "Content-length: " . strlen($postData) . "\r\n";
@@ -819,15 +898,15 @@ class Request
                 $responseBody .= fgets($filePointer, 128);
             }
             fclose($filePointer);
-            
-            // Cookies will not be recognized if have redirection
-            // so we don't need to add anything to request cookies
+
             if (null !== $responseStatus = $this->followRedirect()) {
                 return $responseStatus;
             }
 
             // remove chunked
-            if (isset($this->responseHeaders['transfer-encoding']) && $this->responseHeaders['transfer-encoding'] == 'chunked') {
+            if (isset($this->responseHeaders['transfer-encoding'])
+                && $this->responseHeaders['transfer-encoding'] == 'chunked'
+            ) {
                 $data    = $responseBody;
                 $pos     = 0;
                 $len     = strlen($data);
@@ -849,6 +928,11 @@ class Request
         return true;
     }
 
+    /**
+     * Execute follow redirect.
+     *
+     * @return null|boolean {@link execute()}
+     */
     protected function followRedirect()
     {
         if (
@@ -859,8 +943,13 @@ class Request
             $location = $this->getAbsoluteUrl($location, $this->target);
 
             $this->redirectedCount++;
+
+            $this->setCookie($this->getResponseCookies());
+            $this->resetResponse();
+
             return $this->execute($location);
         }
+
         return null;
     }
 
@@ -888,23 +977,9 @@ class Request
                     // parse cookie
                     if ($key == 'set-cookie') {
                         $this->responseCookies .= $value . ';';
-                        if (preg_match_all('#([^=;\s]+)(?:=([^;]+))?;?\s*?#', $value, $matches)) {
-                            $name  = $matches[1][0];
-                            $value = $matches[2][0];
-                            array_shift($matches[1]);
-                            array_shift($matches[2]);
-                            $this->responseArrayCookies[$name] = array_combine($matches[1], $matches[2]) +
-                            // defaults
-                            array(
-                                'name'     => $name,
-                                'value'    => $value,
-                                'expires'  => null,
-                                'path'     => null,
-                                'expires'  => null,
-                                'domain'   => null,
-                                'secure'   => null,
-                                'httponly' => null,
-                            );
+
+                        if ($cookie = $this->parseCookie($value)) {
+                            $this->responseArrayCookies[$cookie['name']] = $cookie;
                         }
                     }
                     if (array_key_exists($key, $this->responseHeaders)) {
@@ -923,6 +998,8 @@ class Request
             }
         }
     }
+
+    
 
     /**
      * Get response status code.
@@ -1018,9 +1095,9 @@ class Request
     /**
      * Get absolute url.
      *
-     * @param  string $relative 
-     * @param  string $base     
-     * @return string           
+     * @param  string $relative
+     * @param  string $base
+     * @return string
      */
     protected function getAbsoluteUrl($relative, $base)
     {
