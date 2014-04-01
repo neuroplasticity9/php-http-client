@@ -219,7 +219,7 @@ Create an \ChipVN\Http\Request instnace
 
 **createCookie()**: This method used to create cookie from array with keys like above (parseCookie) to string
 
-** Send request **
+**Send request**
 
 	$boolean = $request->execute();
 
@@ -228,7 +228,7 @@ Create an \ChipVN\Http\Request instnace
 
 #### Get Response
 
-** Get response headers **
+**Get response headers**
 
 	print_r($request->getResponseHeaders());
 
@@ -238,7 +238,7 @@ Create an \ChipVN\Http\Request instnace
 	// or "set-cookie" return an array if have.
 	print_r($request->getResponseHeaders('set-cookie'));
 
-** Get response cookies **
+**Get response cookies**
 	
 	// by string
 	echo $request->getResponseCookies();
@@ -248,11 +248,11 @@ Create an \ChipVN\Http\Request instnace
 
 	print_r($request->getResponseArrayCookies('cookie-name'));
 
-** Get response body text **
+**Get response body text**
 
 	echo $request->getResponseText();
 
-** Reset request ** Just call 
+**Reset request** Just call 
 
 	$request->reset();
 
