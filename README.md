@@ -12,7 +12,8 @@
 
 ## Change logs
 #### Version 2.5.2: Apr 1, 2014
-* Add new method getResponseArrayCookies() 
+* Add new method setFollowRedirect() to follow redirect
+* Add new method getResponseArrayCookies() to get all cookies by array [name => [info], name2 => [info]]
 * Fixed a bug
 * Change all properties to protected (need use set* methods to change the properties)
 
@@ -20,6 +21,7 @@
 * Change class name to \ChipVN\Http\Request
 * Most clean and clear
 * Supports composer
+* Add new method setHttpVersion() to change HTTP protocol version
 
 #### Version 2.4: Jul 25, 2013
 * Require PHP 5.3 or newer

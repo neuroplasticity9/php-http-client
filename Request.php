@@ -7,7 +7,7 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5.2
+ * @version    2.5.3
  * @relase     Apr 1, 2014
  */
 
@@ -105,6 +105,30 @@ class Request
      * @var integer
      */
     protected $timeout;
+
+    /**
+     * Determine follow response location (if have) or not.
+     *
+     * @since 2.5.2
+     * @var boolean
+     */
+    protected $followRedirect;
+
+    /**
+     * The maximum amount of HTTP redirections to follow.
+     *
+     * @since 2.5.2
+     * @var integer
+     */
+    protected $maxRedirect;
+
+    /**
+     * Redirected count (for use fsockopen).
+     *
+     * @since 2.5.2
+     * @var integer
+     */
+    protected $redirectedCount;
 
     /**
      * Determine the request will use cURL or not.
@@ -241,10 +265,13 @@ class Request
         $this->rawData              = '';
         $this->cookies              = '';
         $this->headers              = array();
-
-        $this->useCurl              = false;
         $this->timeout              = 10;
+        $this->followRedirect       = false;
+        $this->maxRedirect          = 3;
+        $this->redirectedCount      = 0;
         $this->userAgent            = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1';
+        $this->useCurl              = false;
+
         $this->errors               = array();
 
         $this->mimeContentType      = 'application/x-www-form-urlencoded';
@@ -270,6 +297,7 @@ class Request
     /**
      * Set http version.
      *
+     * @since  2.5
      * @param  string               $version
      * @return \ChipVN\Http\Request
      */
@@ -277,6 +305,23 @@ class Request
     {
         if (in_array($version, array('1.0', '1.1'))) {
            $this->httpVersion = $version;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set follow response location (if have).
+     *
+     * @param  boolean              $follow
+     * @param  integer|null         $maxRedirect Null to use default value
+     * @return \ChipVN\Http\Request
+     */
+    public function setFollowRedirect($follow = true, $maxRedirect = null)
+    {
+        $this->followRedirect = (boolean) $follow;
+        if ($maxRedirect !== null) {
+            $this->maxRedirect = (int) $maxRedirect ?: 1;
         }
 
         return $this;
@@ -507,7 +552,7 @@ class Request
      */
     public function setProxy($proxyIp, $username = '', $password = '')
     {
-        $this->proxyIp = trim($proxyIp);
+        $this->proxyIp       = trim($proxyIp);
         $this->proxyUsername = $username;
         $this->proxyPassword = $password;
 
@@ -639,6 +684,13 @@ class Request
                     curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUsername . ':' . $this->proxyPassword);
                 }
             }
+            // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
+            // because of if redirect count greater than $maxRedirect 
+            // CURL will trigger an error, so we can't get any responses
+            // if ($this->followRedirect) {
+            //     curl_setopt($ch, CURLOPT_MAXREDIRS, $this->maxRedirect);
+            //     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $this->followRedirect);
+            // }
             curl_setopt($ch, CURLOPT_USERAGENT, $this->userAgent);
             curl_setopt($ch, CURLOPT_HEADER, true);
             curl_setopt($ch, CURLOPT_NOBODY, false);
@@ -651,7 +703,7 @@ class Request
             $response = curl_exec($ch);
 
             if ($response === false) {
-                $this->errors[] = sptinrf('ERROR: % - %s.', curl_errno($ch), curl_error($ch));
+                $this->errors[] = sprintf('ERROR: %d - %s.', curl_errno($ch), curl_error($ch));
 
                 return false;
             }
@@ -662,6 +714,12 @@ class Request
             $this->parseResponseHeaders($responseHeader);
             $this->responseText = $responseBody;
             curl_close($ch);
+
+            // Cookies will not be recognized if have redirection
+            // so we don't need to add anything to request cookies
+            if (null !== $responseStatus = $this->followRedirect()) {
+                return $responseStatus;
+            }
         }
         // use fsockopen to send request
         else {
@@ -705,9 +763,9 @@ class Request
 
             if (!$filePointer) {
                 if ($errstr) {
-                    $this->errors[] = sprintf('ERROR: %s - %s.', $errno, $errstr);
+                    $this->errors[] = sprintf('ERROR: %d - %s.', $errno, $errstr);
                 } else {
-                    $this->errors[] = sprintf('ERROR: Cannot connect to %s:%s', $this->target, $this->port);
+                    $this->errors[] = sprintf('ERROR: Cannot connect to "%s" with port "%s"', $this->target, $this->port);
                 }
 
                 return false;
@@ -755,9 +813,18 @@ class Request
 
             $this->parseResponseHeaders($responseHeader);
 
+            // Cookies will not be recognized if have redirection
+            // so we don't need to add anything to request cookies
+            if (null !== $responseStatus = $this->followRedirect()) {
+                return $responseStatus;
+            }
+            
+            // get body
             while (!feof($filePointer)) {
                 $responseBody .= fgets($filePointer, 128);
             }
+
+            // remove chunked
             if (isset($this->responseHeaders['transfer-encoding']) && $this->responseHeaders['transfer-encoding'] == 'chunked') {
                 $data    = $responseBody;
                 $pos     = 0;
@@ -779,6 +846,21 @@ class Request
         }
 
         return true;
+    }
+
+    protected function followRedirect()
+    {
+        if (
+            $this->followRedirect
+            && ($location = $this->getResponseHeaders('location'))
+            && $this->redirectedCount < $this->maxRedirect
+        ) {
+            $location = $this->getAbsoluteUrl($location, $this->target);
+
+            $this->redirectedCount++;
+            return $this->execute($location);
+        }
+        return null;
     }
 
     /**
@@ -930,6 +1012,39 @@ class Request
     public function getResponseCookie()
     {
         return $this->getResponseCookies();
+    }
+
+    /**
+     * Get absolute url.
+     *
+     * @param  string $relative 
+     * @param  string $base     
+     * @return string           
+     */
+    protected function getAbsoluteUrl($relative, $base)
+    {
+        // remove query string
+        $base = preg_replace('#(\?|\#).*?$#', '', $base);
+
+        if (parse_url($relative, PHP_URL_SCHEME) != '') {
+            return $relative;
+        }
+        if ($relative[0] == '#' || $relative[0] == '?') {
+            return $base . $relative;
+        }
+        extract(parse_url($base));
+
+        $path = preg_replace('#/[^/]*$#', '', $path);
+
+        if ($relative[0] == '/') {
+            $path = '';
+        }
+        $absolute = "$host$path/$relative";
+
+        $patterns = array('#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#');
+        for ($count = 1; $count > 0; $absolute = preg_replace($patterns, '/', $absolute, -1, $count)) {}
+
+        return $scheme.'://'.$absolute;
     }
 
     /**
