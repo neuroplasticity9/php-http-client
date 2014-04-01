@@ -133,7 +133,7 @@ Create an \ChipVN\Http\Request instnace
 	
 	$request->setReferer('http://domain.com');
 
-**Useragent**
+**User Agent**
 
 	$request->setUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1');
 
