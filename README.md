@@ -109,7 +109,7 @@ Create an \ChipVN\Http\Request instnace
 	// or maximum redirect 5 times. Default is 3 times and return last response
 	$request->setFollowRedirect(true, 5);
 
-**Parameters/ Upload**
+**Parameters / Upload**
 	
 	$request->setParam('name', 'value');
 
@@ -176,7 +176,7 @@ Create an \ChipVN\Http\Request instnace
 
 **Use Cookie**
 
-	// $append is true
+	// By default $append is true
 	$request->setCookie('name=value', $append);
 
 	// or
