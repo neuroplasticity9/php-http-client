@@ -93,12 +93,17 @@ Create an \ChipVN\Http\Request instnace
 
 **Use cookies**
 	
-	$request->setCookie('name=value');
+	$request->addCookie('name=value');
 
 	// or (does not support 'name' => 'value')
-	$request->setCookie(array(
-		'name=value',
-		'name=value; expires=Tue, 01-Apr-2014 04:57:57 GMT'
+	$request->addCookie(array(
+		'name1=value1',
+		'name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT'
+	));
+
+	$request->addCookie(array(
+		'name1' => 'value1',
+		'name2' => 'value2'
 	));
 
 **Change HTTP Protocol version**
@@ -123,14 +128,14 @@ Create an \ChipVN\Http\Request instnace
 	$request->setParam('name=value&name2=value2&name3=value3');
 
 	$request->setParam(array(
-		'name=value',
+		'name1=value1',
 		'name2=value2'
 	));
 
 	// or
 	$request->setParam(array(
-		'name'  => 'value',
-		'name2' => 'value2'
+		'name1'  => 'value1',
+		'name2'  => 'value2'
 	));
 
 	// upload
@@ -181,14 +186,14 @@ Create an \ChipVN\Http\Request instnace
 
 	// or
 	$request->setHeader(array(
-		'name=value',
+		'name1=value1',
 		'name2=value2',
 	));
 
 	// or
 	$request->setHeader(array(
-		'name'  => 'value',
-		'name2' => 'value2'
+		'name1'  => 'value1',
+		'name2'  => 'value2'
 	));
 
 **Use Cookie**
