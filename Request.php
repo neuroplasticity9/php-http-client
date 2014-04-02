@@ -1091,6 +1091,10 @@ class Request
                         if ($cookie = $this->parseCookie($value)) {
                             $this->responseArrayCookies[$cookie['name']] = $cookie;
                         }
+                        // responseHeaders[set-cookies] always return an array.
+                        if (empty($this->responseHeaders[$key])) {
+                            $this->responseHeaders[$key] = array();
+                        }
                     }
                     if (array_key_exists($key, $this->responseHeaders)) {
                         if (!is_array($this->responseHeaders[$key])) {
