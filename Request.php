@@ -438,7 +438,6 @@ class ChipVN_Http_Request
     public function setParameters($name, $value = null)
     {
         if (func_num_args() == 2) {
-            // add
             $this->parameters[$name] = $value;
         } else {
             if (is_array($name)) {
@@ -476,7 +475,6 @@ class ChipVN_Http_Request
     public function setHeaders($name, $value = null)
     {
         if (func_num_args() == 2) {
-            // add
             $this->headers[trim($name)] = trim($value);
         } else {
             if (is_array($name)) {
@@ -532,7 +530,6 @@ class ChipVN_Http_Request
                     }
                 }
             } else {
-                // add
                 if ($cookie = $this->parseCookie($value)) {
                     $this->cookies[$cookie['name']] = $cookie;
                 }
