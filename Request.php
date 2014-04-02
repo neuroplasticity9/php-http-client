@@ -831,7 +831,7 @@ class Request
             if ($this->isMultipart) {
                 foreach ($this->parameters as $key => $value) {
                     if (substr($value, 0, 1) == '@') {
-                        $this->parameters[$key] = $value . ';type=' . $this->getMimeType(substr($value, 1));
+                        $this->parameters[$key] = $value . ';type=' . $this->getFileType(substr($value, 1));
                     }
                 }
             }
@@ -1092,7 +1092,7 @@ class Request
                             $this->responseArrayCookies[$cookie['name']] = $cookie;
                         }
                         // responseHeaders[set-cookies] always return an array.
-                        if ( ! isset($this->responseHeaders[$key])) {
+                        if (!isset($this->responseHeaders[$key])) {
                             $this->responseHeaders[$key] = array();
                         }
                     }
@@ -1116,7 +1116,7 @@ class Request
     /**
      * Get redirected count.
      *
-     * @return integer 
+     * @return integer
      */
     public function getRedirectedCount()
     {
@@ -1274,7 +1274,7 @@ class Request
      * @param  string $filePath
      * @return string
      */
-    protected function getMimeType($filePath)
+    protected function getFileType($filePath)
     {
         $filename = realpath($filePath);
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
