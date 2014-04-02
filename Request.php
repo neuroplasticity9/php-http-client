@@ -849,18 +849,18 @@ class ChipVN_Http_Request
                 . http_build_query($this->parameters) : '');
         }
 
-        $urlParsed = parse_url($this->target);
-
+        $urlParsed    = parse_url($this->target);
+        $this->schema = $urlParsed['scheme'];
+        
         if ($urlParsed['scheme'] == 'https') {
             $this->host = 'ssl://' . $urlParsed['host'];
-            $this->port = ($this->port != 0) ? $this->port : 443;
+            $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 443;
         } else {
             $this->host = $urlParsed['host'];
-            $this->port = ($this->port != 0) ? $this->port : 80;
+            $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 80;
         }
         $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
                     . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
-        $this->schema = $urlParsed['scheme'];
 
         $cookies = '';
         foreach ($this->cookies as $name => $cookie) {
