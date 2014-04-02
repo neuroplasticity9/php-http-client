@@ -120,7 +120,12 @@ Create an \ChipVN\Http\Request instnace
 	$request->setParam('name', 'value');
 
 	// or
-	$request->setParam('name=value');
+	$request->setParam('name=value&name2=value2&name3=value3');
+
+	$request->setParam(array(
+		'name=value',
+		'name2=value2'
+	));
 
 	// or
 	$request->setParam(array(
@@ -169,10 +174,16 @@ Create an \ChipVN\Http\Request instnace
 
 **Use Headers**
 	
-	$request->setHeader('Origin', 'xxx');
+	$request->addHeader('Origin', 'xxx');
 
 	// or
-	$request->setHeader('User-Agent: Firefox/9.0.1');
+	$request->addHeader('User-Agent: Firefox/9.0.1');
+
+	// or
+	$request->setHeader(array(
+		'name=value',
+		'name2=value2',
+	));
 
 	// or
 	$request->setHeader(array(
@@ -182,13 +193,18 @@ Create an \ChipVN\Http\Request instnace
 
 **Use Cookie**
 
-	// By default $append is true
-	$request->setCookie('name=value', $append);
+	$request->addCookie('name=value');
 
 	// or
-	$request->setCookie(array(
+	$request->addCookie(array(
 		'name=value',
 		'name2=value2',
+	));
+
+	// or
+	$request->addCookie(array(
+		'name' => 'value',
+		'name' => 'value',
 	));
 
 **Use Proxy** The method only avaliable if you use cURL for sending request 
@@ -202,6 +218,16 @@ Create an \ChipVN\Http\Request instnace
 
 	$request->setAuth('user', 'pass');
 
+**Remove cookies/ parameters/ headers added**
+	
+	$request->removeHeader(true); // remove all headers
+	$request->removeHeader('Referer'); // remove a header
+
+	$request->removeCookie(true); // remove all cookies
+	$request->removeHeader('name'); // remove a cookie
+
+	$request->removeParam(true); // remove all parameters
+	$request->removeParam('name'); // remove a parameter
 
 #### Helpers 
 

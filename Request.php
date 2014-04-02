@@ -481,7 +481,7 @@ class Request
     {
         if (func_num_args() == 2) {
             // add
-            $this->headers[$name] = $value;
+            $this->headers[trim($name)] = trim($value);
         } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
