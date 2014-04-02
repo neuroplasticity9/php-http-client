@@ -1107,7 +1107,7 @@ class ChipVN_Http_Request
 
             $this->redirectedCount++;
 
-            $this->setCookie($this->getResponseCookies());
+            $this->setCookie($this->getResponseArrayCookies());
             $this->resetResponse();
 
             return $this->execute($location);
