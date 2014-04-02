@@ -4,7 +4,7 @@
 - Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
 - Supports POST (fields, raw data), file uploading, GET, PUT, etc..
 
-**Note**: _fsockopen_ is faster also it is default.
+**Note**: _fsockopen_ is faster also it is default. Both methods are the same, but _fsockopen_ limited use proxy feature (only).
 
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
