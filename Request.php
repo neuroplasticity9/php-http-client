@@ -948,7 +948,7 @@ class ChipVN_Http_Request
                         if (file_exists($upload_file_path)) {
                             $postData .= "--" . $this->boundary . "\r\n";
                             $postData .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
-                            $postData .= "Content-Type: " . $this->getMimeType($upload_file_path) . "\r\n";
+                            $postData .= "Content-Type: " . $this->getFileType($upload_file_path) . "\r\n";
                             $postData .= "Content-Transfer-Encoding: binary\r\n\r\n";
                             $postData .= $this->getFileData($upload_file_path) . "\r\n";
                         }
