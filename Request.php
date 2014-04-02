@@ -677,7 +677,7 @@ class ChipVN_Http_Request
      */
     public function setCookie($name, $value = null)
     {
-        $argumetns = func_get_args();
+        $arguments = func_get_args();
 
         return call_user_func_array(array($this, 'addCookies'), $arguments);
     }
