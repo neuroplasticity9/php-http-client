@@ -12,9 +12,7 @@
  * @relase     Apr 2, 2014
  */
 
-namespace ChipVN\Http;
-
-class Request
+class ChipVN_Http_Request
 {
     /**
      * HTTP Version.

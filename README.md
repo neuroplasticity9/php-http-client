@@ -13,6 +13,7 @@
 
 ## Change logs
 ##### Version 2.5.4: Apr 2, 2014
+* Changed class name from `\ChipVN\Http\Request` to `ChipVN_Http_Request` to support PHP >= 5.0
 * Add new method: `getRedirectedCount()` 
 * Add new methods: `setCookies()`, `setParameters()`, `setHeaders()`, `removeCookies()`, `removeParameters()`, `removeHeaders()`
 * Add new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`
@@ -78,9 +79,9 @@
 
 Add require `"ptcong/php-http-class": "2.5.*@dev"` to _composer.json_ and run `composer update` if you use composer
 
-Create an \ChipVN\Http\Request instnace
+Create an `ChipVN_Http_Request` instnace
 	
-	$request = new \ChipVN\Http\Request;
+	$request = new ChipVN_Http_Request;
 
 #### Send a request
 
