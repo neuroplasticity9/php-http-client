@@ -259,6 +259,31 @@ class ChipVN_Http_Request
     }
 
     /**
+     * Dynamic getters, setters.
+     *
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        if (in_array($type = substr($name, 0, 3), array('get', 'set'), true)) {
+            $property = strtolower(substr($name, 3, 1)) . substr($name, 4);
+            if ($type == 'get') {
+                if (property_exists($this, $property)) {
+                   return $this->$property;
+                }
+
+                return null;
+            } elseif (property_exists($this, $property)) {
+                $this->$property = $arguments[0];
+            }
+            if (stripos($property, 'response') === 0) {
+                throw new Exception('Response properties is not writable.');
+            }
+            return $this;
+        }
+    }
+
+    /**
      * Reset request data.
      *
      * @return \ChipVN\Http\Request
@@ -511,13 +536,13 @@ class ChipVN_Http_Request
             if (is_string($value)) {
                 $this->setCookies($name . '=' . strval($value));
             } elseif (is_array($value)) {
-                if ($this->isValidCookie($value)) {
+                if ($this->isCookieArray($value)) {
                     $this->cookies[$value['name']] = $value;
                 }
             }
         } else {
             if (is_array($name)) {
-                if ($this->isValidCookie($name)) {
+                if ($this->isCookieArray($name)) {
                     $this->cookies[$name['name']] = $name;
                 } else {
                     foreach ($name as $key => $value) {
@@ -540,12 +565,12 @@ class ChipVN_Http_Request
     }
 
     /**
-     * Determine a value is a cookie (supported by this class)
+     * Determine a value is a cookie array (supported by this class)
      *
-     * @param  mixed  $value 
-     * @return boolean     
+     * @param  mixed   $value
+     * @return boolean
      */
-    public function isValidCookie($value)
+    public function isCookieArray($value)
     {
         return !array_diff_key(
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
@@ -863,7 +888,7 @@ class ChipVN_Http_Request
 
         $urlParsed    = parse_url($this->target);
         $this->schema = $urlParsed['scheme'];
-        
+
         if ($urlParsed['scheme'] == 'https') {
             $this->host = 'ssl://' . $urlParsed['host'];
             $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 443;
@@ -957,7 +982,7 @@ class ChipVN_Http_Request
             $responseBody   = ($responseBody = substr($response, $headerSize)) ? $responseBody : ''; // always be a string
 
             $this->parseResponseHeaders($responseHeader);
-            $this->responseText = $responseBody; 
+            $this->responseText = $responseBody;
             curl_close($ch);
 
             if (null !== $responseStatus = $this->followRedirect()) {
