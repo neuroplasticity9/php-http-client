@@ -510,7 +510,17 @@ class ChipVN_Http_Request
     public function setCookies($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->setCookies($name . '=' . $value);
+            if (is_string($value)) {
+                $this->setCookies($name . '=' . strval($value));
+            } elseif (is_array($value)) {
+                $check = array_diff_key(
+                    array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
+                    $value
+                );
+                if (empty($check)) {
+                    $this->cookies[$value['name']] = $value;
+                }
+            }
         } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
