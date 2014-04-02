@@ -513,22 +513,22 @@ class ChipVN_Http_Request
             if (is_string($value)) {
                 $this->setCookies($name . '=' . strval($value));
             } elseif (is_array($value)) {
-                $check = array_diff_key(
-                    array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
-                    $value
-                );
-                if (empty($check)) {
+                if ($this->isValidCookie($value)) {
                     $this->cookies[$value['name']] = $value;
                 }
             }
         } else {
             if (is_array($name)) {
-                foreach ($name as $key => $value) {
-                    // key-value pairs
-                    if (!is_int($key)) {
-                        $this->setCookies($key, $value);
-                    } else {
-                        $this->setCookies($value);
+                if ($this->isValidCookie($name)) {
+                    $this->cookies[$name['name']] = $name;
+                } else {
+                    foreach ($name as $key => $value) {
+                        // key-value pairs
+                        if (!is_int($key)) {
+                            $this->setCookies($key, $value);
+                        } else {
+                            $this->setCookies($value);
+                        }
                     }
                 }
             } else {
@@ -540,6 +540,20 @@ class ChipVN_Http_Request
         }
 
         return $this;
+    }
+
+    /**
+     * Determine a value is a cookie (supported by this class)
+     *
+     * @param  mixed  $value 
+     * @return boolean     
+     */
+    public function isValidCookie($value)
+    {
+        return !array_diff_key(
+            array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
+            (array) $value
+        );
     }
 
     /**
