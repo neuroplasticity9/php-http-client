@@ -13,17 +13,17 @@
 
 ## Change logs
 ##### Version 2.5.4: Apr 2, 2014
-* Add new method: getRedirectedCount() 
-* Add new methods: setCookies(), setParameters(), setHeaders(), removeCookies(), removeParameters(), removeHeaders()
-* Add new alias methods: addCookies(), addParameters(), addHeaders()
-* Deprecated methods: setCookie(), setParam(), setHeader() (still avaliable)
-* Changed method names: readBinary() -> getFileData(), getMimeType() -> getFileType()
+* Add new method: `getRedirectedCount()` 
+* Add new methods: `setCookies()`, `setParameters()`, `setHeaders()`, `removeCookies()`, `removeParameters()`, `removeHeaders()`
+* Add new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`
+* Deprecated methods: `setCookie()`, `setParam()`, `setHeader()` (still avaliable)
+* Changed method names: `readBinary()` -> `getFileData()`, `getMimeType()` -> `getFileType()`
 
 ##### Version 2.5.3: Apr 1, 2014
-* Improve setCookie()
-* Add new methods resetResponse(), resetRequest(), parseCookie(), createCookie()
-* Add new method setFollowRedirect() to follow redirect
-* Add new method getResponseArrayCookies() to get all cookies by array [name => [info]]
+* Improve `setCookie()`
+* Add new methods `resetResponse()`, `resetRequest()`, `parseCookie()`, `createCookie()`
+* Add new method `setFollowRedirect()` to follow redirect
+* Add new method `getResponseArrayCookies()` to get all cookies by array [name => [info]]
 * Fixed a bug
 * Change all properties to protected (need use set* methods to change the properties)
 
@@ -31,7 +31,7 @@
 * Change class name to \ChipVN\Http\Request
 * Most clean and clear
 * Supports composer
-* Add new method setHttpVersion() to change HTTP protocol version
+* Add new method `setHttpVersion()` to change HTTP protocol version
 
 ##### Version 2.4: Jul 25, 2013
 * Require PHP 5.3 or newer
