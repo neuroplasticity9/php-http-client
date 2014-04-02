@@ -9,12 +9,18 @@
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
 * License:    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version:    2.5.3
+* Version:    2.5.4
 
 ## Change logs
+##### Version 2.5.4: Apr 2, 2014
+* Add new method: getRedirectedCount() 
+* Add new methods: addCookie(), addParam(), addHeader(), removeCookie(), removeParam(), removeHeader()
+* Deprecated metods: setCookie(), setParam(), setHeader() (still avaliable)
+* Changed readBinary() method name to getFileData()
+
 ##### Version 2.5.3: Apr 1, 2014
 * Improve setCookie()
-* Add new method resetResponse(), resetRequest(), parseCookie(), createCookie()
+* Add new methods resetResponse(), resetRequest(), parseCookie(), createCookie()
 * Add new method setFollowRedirect() to follow redirect
 * Add new method getResponseArrayCookies() to get all cookies by array [name => [info]]
 * Fixed a bug

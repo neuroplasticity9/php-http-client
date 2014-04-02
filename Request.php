@@ -8,8 +8,8 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5.3
- * @relase     Apr 1, 2014
+ * @version    2.5.4
+ * @relase     Apr 2, 2014
  */
 
 namespace ChipVN\Http;
@@ -255,10 +255,9 @@ class Request
      */
     public function reset()
     {
-        $this->resetRequest();
-        $this->resetResponse();
-
-        return $this;
+        return $this
+            ->resetRequest()
+            ->resetResponse();
     }
 
     /**
@@ -286,17 +285,17 @@ class Request
         $this->userAgent            = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1';
         $this->useCurl              = false;
 
-        $this->errors               = array();
-
-        $this->mimeContentType      = 'application/x-www-form-urlencoded';
-        $this->boundary             = 'chiplove.9xpro';
-
         $this->proxyIp              = '';
         $this->proxyUsername        = '';
         $this->proxyPassword        = '';
 
         $this->authUsername         = '';
         $this->authPassword         = '';
+
+        $this->mimeContentType      = 'application/x-www-form-urlencoded';
+        $this->boundary             = 'chiplove.9xpro';
+
+        $this->errors               = array();
 
         return $this;
     }
@@ -359,35 +358,6 @@ class Request
     public function setTarget($target)
     {
         $this->target = trim($target);
-
-        return $this;
-    }
-
-    /**
-     * Set parameters with name, value or array of name-value pairs.
-     *
-     * @param  string|array         $name
-     * @param  mixed                $value
-     * @return \ChipVN\Http\Request
-     */
-    public function setParam($name, $value = null)
-    {
-        if (func_num_args() == 2) {
-            $this->parameters[$name] = $value;
-        } else {
-            if (is_array($name)) {
-                foreach ($name as $key => $value) {
-                    $this->parameters[$key] = $value;
-                }
-            } elseif (is_string($name)) {
-                $name = preg_replace_callback(
-                    '#&[a-z]+;#',
-                    create_function('$match', 'return rawurlencode($match[0]);'),
-                    $name);
-                parse_str(str_replace('+', '%2B', $name), $array);
-                $this->setParam($array);
-            }
-        }
 
         return $this;
     }
@@ -459,19 +429,63 @@ class Request
     }
 
     /**
-     * Set request headers with name, value or array of name-value pairs.
+     * Add request parameters.
+     * This method is alias of {@link setParam}.
+     *
+     * @since 2.5.4
      *
      * @param  string|array         $name
-     * @param  mixed                $value
+     * @param  string|null          $value
      * @return \ChipVN\Http\Request
      */
-    public function setHeader($name, $value = null)
+    public function addParam($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->headers[trim($name) ] = trim($value);
+            // add
+            $this->parameters[$name] = $value;
         } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
+                    // key-value pairs
+                    if (!is_int($key)) {
+                        $this->addParam($key, $value);
+                    } else {
+                        $this->addParam($value);
+                    }
+                }
+            } elseif (is_string($name)) {
+                $name = preg_replace_callback(
+                    '#&[a-z]+;#',
+                    create_function('$match', 'return rawurlencode($match[0]);'),
+                    $name);
+                parse_str(str_replace('+', '%2B', $name), $array);
+
+                $this->setParam($array);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add request headers.
+     * This method is alias of {@link setHeader}.
+     *
+     * @since 2.5.4
+     *
+     * @param  string|array         $name
+     * @param  string|null          $value
+     * @return \ChipVN\Http\Request
+     */
+    public function addHeader($name, $value = null)
+    {
+        if (func_num_args() == 2) {
+            // add
+            $this->headers[$name] = $value;
+        } else {
+            if (is_array($name)) {
+                foreach ($name as $key => $value) {
+                    // key-value pairs
                     if (!is_int($key)) {
                         $this->setHeader($key, $value);
                     } else {
@@ -480,11 +494,139 @@ class Request
                 }
             } elseif (is_string($name)) {
                 list($key, $value) = explode(':', $name, 2);
+
                 $this->setHeader($key, $value);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Add request cookies.
+     *
+     * @since 2.5.4
+     *
+     * @param  string|array         $name
+     * @param  string|null          $value
+     * @return \ChipVN\Http\Request
+     */
+    public function addCookie($name, $value = null)
+    {
+        if (func_num_args() == 2) {
+            $this->addCookie($name . '=' . $value);
+        } else {
+            if (is_array($name)) {
+                foreach ($name as $key => $value) {
+                    // key-value pairs
+                    if (!is_int($key)) {
+                        $this->addCookie($key, $value);
+                    } else {
+                        $this->addCookie($value);
+                    }
+                }
+            } else {
+                // add
+                if ($cookie = $this->parseCookie($value)) {
+                    $this->cookies[$cookie['name']] = $cookie;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Remove a request header by name or all headers.
+     *
+     * @param  string|true          $name True to remove all headers.
+     * @return \ChipVN\Http\Request
+     */
+    public function removeHeader($name)
+    {
+        if ($name === true) {
+            unset($this->headers);
+        } else {
+            unser($this->headers[$name]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Remove a request cookie by name or all cookies.
+     *
+     * @param  string|true          $name True to remove all cookies.
+     * @return \ChipVN\Http\Request
+     */
+    public function removeCookie($name)
+    {
+        if ($name === true) {
+            unset($this->cookies);
+        } else {
+            unser($this->cookies[$name]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Remove a request parameter by name or all paramters.
+     *
+     * @param  string|true          $name True to remove all cookies.
+     * @return \ChipVN\Http\Request
+     */
+    public function remvoveParam($name)
+    {
+        if ($name === true) {
+            unset($this->parameters);
+        } else {
+            unser($this->parameters[$name]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set parameters with $name, $value or array of name-value pairs.
+     *
+     * @deprecated 2.5.4
+     *
+     * @param  string|array         $value
+     * @param  boolean              $append
+     * @return \ChipVN\Http\Request
+     */
+    public function setParam($name, $value = null)
+    {
+        return call_user_func_array(array($this, 'addParam'), func_get_args());
+    }
+
+    /**
+     * Set request headers with $name, $value or array of name-value pairs.
+     *
+     * @deprecated 2.5.4
+     *
+     * @param  string|array         $name
+     * @param  mixed                $value
+     * @return \ChipVN\Http\Request
+     */
+    public function setHeader($name, $value = null)
+    {
+        return call_user_func_array(array($this, 'addHeader'), func_get_args());
+    }
+
+    /**
+     * Set request cookies with $name, $value or array of name-value pairs.
+     *
+     * @deprecated 2.5.4
+     *
+     * @param  string|array         $value
+     * @param  boolean              $append
+     * @return \ChipVN\Http\Request
+     */
+    public function setCookie($name, $value = null)
+    {
+        return call_user_func_array(array($this, 'addCookie'), func_get_args());
     }
 
     /**
@@ -540,30 +682,6 @@ class Request
     public function setMimeContentType($mimeType)
     {
         $this->mimeContentType = $mimeType;
-
-        return $this;
-    }
-
-    /**
-     * Set request cookies.
-     *
-     * @param  string|array         $value
-     * @param  boolean              $append
-     * @return \ChipVN\Http\Request
-     */
-    public function setCookie($value, $append = true)
-    {
-        if (is_array($value)) {
-            foreach ($value as $val) {
-                $this->setCookie($val, $append);
-            }
-        } elseif ($cookie = $this->parseCookie($value)) {
-            if ($append) {
-                $this->cookies[$cookie['name']] = $cookie;
-            } else {
-                $this->cookies = array($cookie['name'] => $cookie);
-            }
-        }
 
         return $this;
     }
@@ -628,17 +746,17 @@ class Request
             array_shift($matches[2]);
 
             return array_combine($matches[1], $matches[2]) +
-            // defaults
-            array(
-                'name'     => $name,
-                'value'    => $value,
-                'expires'  => null,
-                'path'     => null,
-                'expires'  => null,
-                'domain'   => null,
-                'secure'   => null,
-                'httponly' => null,
-            );
+                // defaults
+                array(
+                    'name'     => $name,
+                    'value'    => $value,
+                    'expires'  => null,
+                    'path'     => null,
+                    'expires'  => null,
+                    'domain'   => null,
+                    'secure'   => null,
+                    'httponly' => null,
+                );
         }
 
         return false;
@@ -674,18 +792,10 @@ class Request
      */
     public function execute($target = null, $method = null, $parameters = null, $referer = null)
     {
-        if ($target) {
-            $this->setTarget($target);
-        }
-        if ($method) {
-            $this->setMethod($method);
-        }
-        if ($referer) {
-            $this->setReferer($referer);
-        }
-        if ($parameters) {
-            $this->setParam($parameters);
-        }
+        if ($target)        $this->setTarget($target);
+        if ($method)        $this->setMethod($method);
+        if ($parameters)    $this->setParam($parameters);
+        if ($referer)       $this->setReferer($referer);
 
         if (empty($this->target)) {
             $this->errors[] = 'ERROR: Target url must be no empty.';
@@ -820,7 +930,7 @@ class Request
                             $postData .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
                             $postData .= "Content-Type: " . $this->getMimeType($upload_file_path) . "\r\n";
                             $postData .= "Content-Transfer-Encoding: binary\r\n\r\n";
-                            $postData .= $this->readBinary($upload_file_path) . "\r\n";
+                            $postData .= $this->getFileData($upload_file_path) . "\r\n";
                         }
                     } else {
                         $postData .= "--" . $this->boundary . "\r\n";
@@ -973,7 +1083,7 @@ class Request
                 } elseif (strpos($line, ':')) {
                     list($key, $value) = explode(':', $line, 2);
                     $value = ltrim($value);
-                    $key = strtolower($key);
+                    $key   = strtolower($key);
                     // parse cookie
                     if ($key == 'set-cookie') {
                         $this->responseCookies .= $value . ';';
@@ -999,7 +1109,15 @@ class Request
         }
     }
 
-    
+    /**
+     * Get redirected count.
+     *
+     * @return integer 
+     */
+    public function getRedirectedCount()
+    {
+        return $this->redirectedCount;
+    }
 
     /**
      * Get response status code.
@@ -1084,8 +1202,9 @@ class Request
     /**
      * Get response cookies.
      *
+     * @deprecated 2.5
+     *
      * @return string
-     * @deprecated 2.6
      */
     public function getResponseCookie()
     {
@@ -1093,7 +1212,7 @@ class Request
     }
 
     /**
-     * Get absolute url.
+     * Get absolute url for following location.
      *
      * @param  string $relative
      * @param  string $base
@@ -1129,9 +1248,9 @@ class Request
      * Read binary data of file.
      *
      * @param  string $filePath
-     * @return string
+     * @return string Binary data
      */
-    protected function readBinary($filePath)
+    protected function getFileData($filePath)
     {
         $binarydata = '';
         if (file_exists($filePath)) {
