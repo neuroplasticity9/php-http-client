@@ -341,7 +341,7 @@ class ChipVN_Http_Request
     {
         $this->followRedirect = (boolean) $follow;
         if ($maxRedirect !== null) {
-            $this->maxRedirect = (int) $maxRedirect ?: 1;
+            $this->maxRedirect = max(1, (int) $maxRedirect);
         }
 
         return $this;
@@ -558,7 +558,9 @@ class ChipVN_Http_Request
      */
     public function addCookies()
     {
-        return call_user_func_array(array($this, 'setCookies'), func_get_args());
+        $argumetns = func_get_args();
+
+        return call_user_func_array(array($this, 'setCookies'), $argumetns);
     }
 
     /**
@@ -566,7 +568,9 @@ class ChipVN_Http_Request
      */
     public function addParameters()
     {
-        return call_user_func_array(array($this, 'setParameters'), func_get_args());
+        $argumetns = func_get_args();
+
+        return call_user_func_array(array($this, 'setParameters'), $argumetns);
     }
 
     /**
@@ -574,7 +578,9 @@ class ChipVN_Http_Request
      */
     public function addHeaders()
     {
-        return call_user_func_array(array($this, 'setHeaders'), func_get_args());
+        $argumetns = func_get_args();
+
+        return call_user_func_array(array($this, 'setHeaders'), $argumetns);
     }
 
     /**
@@ -639,7 +645,9 @@ class ChipVN_Http_Request
      */
     public function setParam($name, $value = null)
     {
-        return call_user_func_array(array($this, 'setParameters'), func_get_args());
+        $argumetns = func_get_args();
+
+        return call_user_func_array(array($this, 'setParameters'), $argumetns);
     }
 
     /**
@@ -653,7 +661,9 @@ class ChipVN_Http_Request
      */
     public function setHeader($name, $value = null)
     {
-        return call_user_func_array(array($this, 'addHeaders'), func_get_args());
+        $argumetns = func_get_args();
+
+        return call_user_func_array(array($this, 'addHeaders'), $argumetns);
     }
 
     /**
@@ -667,7 +677,9 @@ class ChipVN_Http_Request
      */
     public function setCookie($name, $value = null)
     {
-        return call_user_func_array(array($this, 'addCookies'), func_get_args());
+        $argumetns = func_get_args();
+
+        return call_user_func_array(array($this, 'addCookies'), $arguments);
     }
 
     /**
@@ -941,11 +953,11 @@ class ChipVN_Http_Request
                 return false;
             }
             $headerSize     = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $responseHeader = substr($response, 0, $headerSize) ?: ''; // always be a string
-            $responseBody   = substr($response, $headerSize);
+            $responseHeader = ($responseHeader = substr($response, 0, $headerSize)) ? $responseHeader : ''; // always be a string
+            $responseBody   = ($responseBody = substr($response, $headerSize)) ? $responseBody : ''; // always be a string
 
             $this->parseResponseHeaders($responseHeader);
-            $this->responseText = $responseBody ?: ''; // always be a string
+            $this->responseText = $responseBody; 
             curl_close($ch);
 
             if (null !== $responseStatus = $this->followRedirect()) {
