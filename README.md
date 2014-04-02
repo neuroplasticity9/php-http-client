@@ -16,7 +16,7 @@
 * Add new method: getRedirectedCount() 
 * Add new methods: addCookie(), addParam(), addHeader(), removeCookie(), removeParam(), removeHeader()
 * Deprecated methods: setCookie(), setParam(), setHeader() (still avaliable)
-* Changed readBinary() method name to getFileData()
+* Changed method names: readBinary() -> getFileData(), getMimeType() -> getFileType()
 
 ##### Version 2.5.3: Apr 1, 2014
 * Improve setCookie()
