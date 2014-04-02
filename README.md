@@ -14,7 +14,8 @@
 ## Change logs
 ##### Version 2.5.4: Apr 2, 2014
 * Add new method: getRedirectedCount() 
-* Add new methods: addCookie(), addParam(), addHeader(), removeCookie(), removeParam(), removeHeader()
+* Add new methods: setCookies(), setParameters(), setHeaders(), removeCookies(), removeParameters(), removeHeaders()
+* Add new alias methods: addCookies(), addParameters(), addHeaders()
 * Deprecated methods: setCookie(), setParam(), setHeader() (still avaliable)
 * Changed method names: readBinary() -> getFileData(), getMimeType() -> getFileType()
 
@@ -93,15 +94,15 @@ Create an \ChipVN\Http\Request instnace
 
 **Use cookies**
 	
-	$request->addCookie('name=value');
+	$request->setCookies('name=value');
 
 	// or (does not support 'name' => 'value')
-	$request->addCookie(array(
+	$request->setCookies(array(
 		'name1=value1',
 		'name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT'
 	));
 
-	$request->addCookie(array(
+	$request->setCookies(array(
 		'name1' => 'value1',
 		'name2' => 'value2'
 	));
@@ -122,10 +123,10 @@ Create an \ChipVN\Http\Request instnace
 
 **Parameters / Upload file**
 	
-	$request->addParam('name', 'value');
+	$request->setParameters('name', 'value');
 
 	// or
-	$request->addParam('name=value&name2=value2&name3=value3');
+	$request->setParameters('name=value&name2=value2&name3=value3');
 
 	$request->setParam(array(
 		'name1=value1',
@@ -133,13 +134,13 @@ Create an \ChipVN\Http\Request instnace
 	));
 
 	// or
-	$request->addParam(array(
+	$request->setParameters(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
 	));
 
 	// for uploading
-	$request->addParam('filedata', '@/path/path/file.jpg');
+	$request->setParameters('filedata', '@/path/path/file.jpg');
 
 **Post raw data**
 
@@ -179,35 +180,35 @@ Create an \ChipVN\Http\Request instnace
 
 **Use Headers**
 	
-	$request->addHeader('Origin', 'xxx');
+	$request->setHeaders('Origin', 'xxx');
 
 	// or
-	$request->addHeader('User-Agent: Firefox/9.0.1');
+	$request->setHeaders('User-Agent: Firefox/9.0.1');
 
 	// or
-	$request->addHeader(array(
+	$request->setHeaders(array(
 		'name1=value1',
 		'name2=value2',
 	));
 
 	// or
-	$request->addHeader(array(
+	$request->setHeaders(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
 	));
 
 **Use Cookie**
 
-	$request->addCookie('name=value');
+	$request->setCookies('name=value');
 
 	// or
-	$request->addCookie(array(
+	$request->setCookies(array(
 		'name=value',
 		'name2=value2',
 	));
 
 	// or
-	$request->addCookie(array(
+	$request->setCookies(array(
 		'name' => 'value',
 		'name' => 'value',
 	));
@@ -225,14 +226,14 @@ Create an \ChipVN\Http\Request instnace
 
 **Remove cookies/ parameters/ headers added**
 	
-	$request->removeHeader(true); // remove all headers
-	$request->removeHeader('Referer'); // remove a header
+	$request->removeHeaders(true); // remove all headers
+	$request->removeHeaders('Referer'); // remove a header
 
-	$request->removeCookie(true); // remove all cookies
-	$request->removeHeader('name'); // remove a cookie
+	$request->removeCookies(true); // remove all cookies
+	$request->removeCookies('name'); // remove a cookie
 
-	$request->removeParam(true); // remove all parameters
-	$request->removeParam('name'); // remove a parameter
+	$request->removeParameters(true); // remove all parameters
+	$request->removeParameters('name'); // remove a parameter
 
 #### Helpers 
 

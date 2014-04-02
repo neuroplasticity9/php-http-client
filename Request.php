@@ -430,7 +430,6 @@ class Request
 
     /**
      * Add request parameters.
-     * This method is alias of {@link setParam}.
      *
      * @since 2.5.4
      *
@@ -438,7 +437,7 @@ class Request
      * @param  string|null          $value
      * @return \ChipVN\Http\Request
      */
-    public function addParam($name, $value = null)
+    public function setParameters($name, $value = null)
     {
         if (func_num_args() == 2) {
             // add
@@ -448,9 +447,9 @@ class Request
                 foreach ($name as $key => $value) {
                     // key-value pairs
                     if (!is_int($key)) {
-                        $this->addParam($key, $value);
+                        $this->setParameters($key, $value);
                     } else {
-                        $this->addParam($value);
+                        $this->setParameters($value);
                     }
                 }
             } elseif (is_string($name)) {
@@ -460,7 +459,7 @@ class Request
                     $name);
                 parse_str(str_replace('+', '%2B', $name), $array);
 
-                $this->setParam($array);
+                $this->setParameters($array);
             }
         }
 
@@ -469,7 +468,6 @@ class Request
 
     /**
      * Add request headers.
-     * This method is alias of {@link setHeader}.
      *
      * @since 2.5.4
      *
@@ -477,7 +475,7 @@ class Request
      * @param  string|null          $value
      * @return \ChipVN\Http\Request
      */
-    public function addHeader($name, $value = null)
+    public function setHeaders($name, $value = null)
     {
         if (func_num_args() == 2) {
             // add
@@ -487,15 +485,15 @@ class Request
                 foreach ($name as $key => $value) {
                     // key-value pairs
                     if (!is_int($key)) {
-                        $this->setHeader($key, $value);
+                        $this->setHeaders($key, $value);
                     } else {
-                        $this->setHeader($value);
+                        $this->setHeaders($value);
                     }
                 }
             } elseif (is_string($name)) {
                 list($key, $value) = explode(':', $name, 2);
 
-                $this->setHeader($key, $value);
+                $this->setHeaders($key, $value);
             }
         }
 
@@ -511,18 +509,18 @@ class Request
      * @param  string|null          $value
      * @return \ChipVN\Http\Request
      */
-    public function addCookie($name, $value = null)
+    public function setCookies($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->addCookie($name . '=' . $value);
+            $this->setCookies($name . '=' . $value);
         } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
                     // key-value pairs
                     if (!is_int($key)) {
-                        $this->addCookie($key, $value);
+                        $this->setCookies($key, $value);
                     } else {
-                        $this->addCookie($value);
+                        $this->setCookies($value);
                     }
                 }
             } else {
@@ -537,12 +535,36 @@ class Request
     }
 
     /**
+     * Alias of {@link setCookies()}
+     */
+    public function addCookies()
+    {
+        return call_user_func_array(array($this, 'setCookies'), func_get_args());
+    }
+
+    /**
+     * Alias of {@link setParameters()}
+     */
+    public function addParameters()
+    {
+        return call_user_func_array(array($this, 'setParameters'), func_get_args());
+    }
+
+    /**
+     * Alias of {@link setHeaders()}
+     */
+    public function addHeaders()
+    {
+        return call_user_func_array(array($this, 'setHeaders'), func_get_args());
+    }
+
+    /**
      * Remove a request header by name or all headers.
      *
      * @param  string|true          $name True to remove all headers.
      * @return \ChipVN\Http\Request
      */
-    public function removeHeader($name)
+    public function removeHeaders($name)
     {
         if ($name === true) {
             unset($this->headers);
@@ -559,7 +581,7 @@ class Request
      * @param  string|true          $name True to remove all cookies.
      * @return \ChipVN\Http\Request
      */
-    public function removeCookie($name)
+    public function removeCookies($name)
     {
         if ($name === true) {
             unset($this->cookies);
@@ -576,7 +598,7 @@ class Request
      * @param  string|true          $name True to remove all cookies.
      * @return \ChipVN\Http\Request
      */
-    public function remvoveParam($name)
+    public function removeParameters($name)
     {
         if ($name === true) {
             unset($this->parameters);
@@ -598,7 +620,7 @@ class Request
      */
     public function setParam($name, $value = null)
     {
-        return call_user_func_array(array($this, 'addParam'), func_get_args());
+        return call_user_func_array(array($this, 'setParameters'), func_get_args());
     }
 
     /**
@@ -612,7 +634,7 @@ class Request
      */
     public function setHeader($name, $value = null)
     {
-        return call_user_func_array(array($this, 'addHeader'), func_get_args());
+        return call_user_func_array(array($this, 'addHeaders'), func_get_args());
     }
 
     /**
@@ -626,7 +648,7 @@ class Request
      */
     public function setCookie($name, $value = null)
     {
-        return call_user_func_array(array($this, 'addCookie'), func_get_args());
+        return call_user_func_array(array($this, 'addCookies'), func_get_args());
     }
 
     /**
@@ -794,7 +816,7 @@ class Request
     {
         if ($target)        $this->setTarget($target);
         if ($method)        $this->setMethod($method);
-        if ($parameters)    $this->setParam($parameters);
+        if ($parameters)    $this->setParameters($parameters);
         if ($referer)       $this->setReferer($referer);
 
         if (empty($this->target)) {
