@@ -120,12 +120,12 @@ Create an \ChipVN\Http\Request instnace
 	// or maximum redirect 5 times. Default is 3 times and return last response
 	$request->setFollowRedirect(true, 5);
 
-**Parameters / Upload**
+**Parameters / Upload file**
 	
-	$request->setParam('name', 'value');
+	$request->addParam('name', 'value');
 
 	// or
-	$request->setParam('name=value&name2=value2&name3=value3');
+	$request->addParam('name=value&name2=value2&name3=value3');
 
 	$request->setParam(array(
 		'name1=value1',
@@ -133,13 +133,13 @@ Create an \ChipVN\Http\Request instnace
 	));
 
 	// or
-	$request->setParam(array(
+	$request->addParam(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
 	));
 
-	// upload
-	$request->setParam('filedata', '@/path/path/file.jpg');
+	// for uploading
+	$request->addParam('filedata', '@/path/path/file.jpg');
 
 **Post raw data**
 
@@ -185,13 +185,13 @@ Create an \ChipVN\Http\Request instnace
 	$request->addHeader('User-Agent: Firefox/9.0.1');
 
 	// or
-	$request->setHeader(array(
+	$request->addHeader(array(
 		'name1=value1',
 		'name2=value2',
 	));
 
 	// or
-	$request->setHeader(array(
+	$request->addHeader(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
 	));
