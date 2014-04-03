@@ -560,13 +560,13 @@ class ChipVN_Http_Request
             if (is_string($value)) {
                 $this->setCookies($name . '=' . strval($value));
             } elseif (is_array($value)) {
-                if ($this->isCookieArray($value)) {
+                if ($this->isValidCookie($value)) {
                     $this->cookies[$value['name']] = $value;
                 }
             }
         } else {
             if (is_array($name)) {
-                if ($this->isCookieArray($name)) {
+                if ($this->isValidCookie($name)) {
                     $this->cookies[$name['name']] = $name;
                 } else {
                     foreach ($name as $key => $value) {
@@ -594,12 +594,14 @@ class ChipVN_Http_Request
      * @param  mixed   $value
      * @return boolean
      */
-    public function isCookieArray($value)
+    public function isValidCookie($value)
     {
+        $value = (array) $value;
+
         return !array_diff_key(
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
-            (array) $value
-        );
+            $value
+        ) && strtotime($cookie['expires']) >= time();
     }
 
     /**
