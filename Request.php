@@ -598,10 +598,14 @@ class ChipVN_Http_Request
     {
         $value = (array) $value;
 
-        return !array_diff_key(
+        $valid = !array_diff_key(
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
             $value
-        ) && strtotime($value['expires']) >= time();
+        );
+        if ($value['expires']) {
+            $valid = $valid && strtotime($value['expires']) >= time();
+        }
+        return $valid;
     }
 
     /**
