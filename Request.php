@@ -267,18 +267,18 @@ class ChipVN_Http_Request
     {
         if (in_array($type = substr($name, 0, 3), array('get', 'set'), true)) {
             $property = strtolower(substr($name, 3, 1)) . substr($name, 4);
+            if (!property_exists($this, $property)) {
+                throw new Exception(sprintf('Property %s is not exist.', $property));
+            }
             if ($type == 'get') {
-                if (property_exists($this, $property)) {
-                   return $this->$property;
-                }
-
-                return null;
-            } elseif (property_exists($this, $property)) {
+                return $this->$property;
+            } else {
                 $this->$property = $arguments[0];
             }
             if (stripos($property, 'response') === 0) {
                 throw new Exception('Response properties is not writable.');
             }
+
             return $this;
         }
     }
