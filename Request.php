@@ -601,7 +601,7 @@ class ChipVN_Http_Request
         return !array_diff_key(
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
             $value
-        ) && strtotime($cookie['expires']) >= time();
+        ) && strtotime($value['expires']) >= time();
     }
 
     /**
