@@ -868,6 +868,10 @@ class ChipVN_Http_Request
     public function createCookie(array $cookie)
     {
         $result = $cookie['name'] . '=' . $cookie['value'] . ';';
+        
+        if ($cookie['expires'] && strtotime($cookie['expires']) < time()) {
+            return null;
+        }
         // unset($cookie['name'], $cookie['value']);
         // foreach ($cookie as $key => $value) {
         //     if ($value !== null) {
@@ -1078,7 +1082,7 @@ class ChipVN_Http_Request
                     . base64_encode($this->authUsername . ":" . $this->authPassword)
                     . "\r\n";
             }
-            if ($this->cookies) {
+            if ($cookies) {
                 $requestHeader .= "Cookie: " . $cookies . "\r\n";
             }
             if ($postData && $this->method == 'POST') {
@@ -1092,6 +1096,8 @@ class ChipVN_Http_Request
             }
             $requestHeader .= "\r\n\r\n";
 
+            echo "Send<br/>";
+            echo $requestHeader;
             // send request
             fwrite($filePointer, $requestHeader);
 
