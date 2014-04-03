@@ -130,6 +130,13 @@ class ChipVN_Http_Request
     protected $redirectedCount;
 
     /**
+     * Total cookies while redirect.
+     *
+     * @var array
+     */
+    protected $redirectCookies;
+
+    /**
      * Determine the request will use cURL or not.
      *
      * @var boolean
@@ -291,33 +298,33 @@ class ChipVN_Http_Request
      */
     public function resetRequest()
     {
-        $this->httpVersion          = '1.1';
-        $this->target               = '';
-        $this->schema               = 'http';
-        $this->host                 = '';
-        $this->port                 = 0;
-        $this->path                 = '';
-        $this->method               = 'GET';
-        $this->parameters           = array();
-        $this->rawData              = '';
-        $this->cookies              = array();
-        $this->headers              = array();
-        $this->timeout              = 10;
+        $this->httpVersion     = '1.1';
+        $this->target          = '';
+        $this->schema          = 'http';
+        $this->host            = '';
+        $this->port            = 0;
+        $this->path            = '';
+        $this->method          = 'GET';
+        $this->parameters      = array();
+        $this->rawData         = '';
+        $this->cookies         = array();
+        $this->headers         = array();
+        $this->timeout         = 10;
 
-        $this->userAgent            = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1';
-        $this->useCurl              = false;
+        $this->userAgent       = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1';
+        $this->useCurl         = false;
 
-        $this->proxyIp              = '';
-        $this->proxyUsername        = '';
-        $this->proxyPassword        = '';
+        $this->proxyIp         = '';
+        $this->proxyUsername   = '';
+        $this->proxyPassword   = '';
 
-        $this->authUsername         = '';
-        $this->authPassword         = '';
+        $this->authUsername    = '';
+        $this->authPassword    = '';
 
-        $this->mimeContentType      = 'application/x-www-form-urlencoded';
-        $this->boundary             = 'chiplove.9xpro';
+        $this->mimeContentType = 'application/x-www-form-urlencoded';
+        $this->boundary        = 'chiplove.9xpro';
 
-        $this->errors               = array();
+        $this->errors          = array();
 
         return $this;
     }
@@ -329,9 +336,10 @@ class ChipVN_Http_Request
      */
     public function resetFollowRedirect()
     {
-        $this->followRedirect       = false;
-        $this->maxRedirect          = 3;
-        $this->redirectedCount      = 0;
+        $this->followRedirect  = false;
+        $this->maxRedirect     = 3;
+        $this->redirectedCount = 0;
+        $this->redirectCookies = array();
 
         return $this;
     }
@@ -927,7 +935,8 @@ class ChipVN_Http_Request
             if ($cookie['domain'] && strcasecmp(trim($cookie['domain'], '.'), $domain) !== 0) {
                 continue;
             }
-            $cookies .= ($cookies ? ' ' : '') . $this->createCookie($cookie);
+            $cookie = $this->createCookie($cookie);
+            $cookies .= ($cookies && $cookie ? ' ' : '') . $cookie ;
         }
 
         // use cURL to send request
@@ -1096,8 +1105,6 @@ class ChipVN_Http_Request
             }
             $requestHeader .= "\r\n\r\n";
 
-            echo "Send<br/>";
-            echo $requestHeader;
             // send request
             fwrite($filePointer, $requestHeader);
 
@@ -1159,9 +1166,10 @@ class ChipVN_Http_Request
             $location = $this->getAbsoluteUrl($location, $this->target);
 
             $this->redirectedCount++;
+            $this->setRedirectCookies($this->getCookies());
 
             $this->resetRequest();
-            $this->setCookies($this->getResponseArrayCookies());
+            $this->setCookies($this->getResponseArrayCookies() + $this->getRedirectCookies());
             $this->resetResponse();
 
             return $this->execute($location);
