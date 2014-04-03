@@ -255,6 +255,7 @@ class ChipVN_Http_Request
     {
         return $this
             ->resetRequest()
+            ->resetFollowRedirect()
             ->resetResponse();
     }
 
@@ -302,9 +303,7 @@ class ChipVN_Http_Request
         $this->cookies              = array();
         $this->headers              = array();
         $this->timeout              = 10;
-        $this->followRedirect       = false;
-        $this->maxRedirect          = 3;
-        $this->redirectedCount      = 0;
+
         $this->userAgent            = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1';
         $this->useCurl              = false;
 
@@ -321,6 +320,13 @@ class ChipVN_Http_Request
         $this->errors               = array();
 
         return $this;
+    }
+
+    public function resetFollowRedirect()
+    {
+        $this->followRedirect       = false;
+        $this->maxRedirect          = 3;
+        $this->redirectedCount      = 0;
     }
 
     /**
@@ -830,6 +836,7 @@ class ChipVN_Http_Request
             if ($matches[1] && $matches[2]) {
                 $cookie += array_combine($matches[1], $matches[2]);
             }
+
             return  $cookie + array(
                 'name'     => $name,
                 'value'    => $value,
@@ -1140,8 +1147,8 @@ class ChipVN_Http_Request
 
             $this->redirectedCount++;
 
-            $this->resetRequest(); // reset request before
-            $this->setCookie($this->getResponseArrayCookies());
+            $this->resetRequest();
+            $this->setCookies($this->getResponseArrayCookies());
             $this->resetResponse();
 
             return $this->execute($location);
