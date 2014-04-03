@@ -1076,10 +1076,7 @@ class ChipVN_Http_Request
                 $requestHeader .= $postData;
             }
             $requestHeader .= "\r\n\r\n";
-
-            echo "Send\n\n";
-            echo $requestHeader;
-
+            
             // send request
             fwrite($filePointer, $requestHeader);
 
