@@ -933,6 +933,7 @@ class ChipVN_Http_Request
         $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
         foreach ($this->cookies as $name => $cookie) {
             if ($cookie['domain'] && strcasecmp(trim($cookie['domain'], '.'), $domain) !== 0) {
+                unset($this->cookies[$name]);
                 continue;
             }
             $cookie = $this->createCookie($cookie);
@@ -1166,7 +1167,7 @@ class ChipVN_Http_Request
             $location = $this->getAbsoluteUrl($location, $this->target);
 
             $this->redirectedCount++;
-            $this->setRedirectCookies($this->getCookies());
+            $this->redirectCookies += $this->getCookies();
 
             $this->resetRequest();
             $this->setCookies($this->getResponseArrayCookies() + $this->getRedirectCookies());
