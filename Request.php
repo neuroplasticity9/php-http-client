@@ -906,7 +906,7 @@ class ChipVN_Http_Request
         $cookies = '';
         $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
         foreach ($this->cookies as $name => $cookie) {
-            if ($cookie['domain'] && stripos($cookie['domain'], $domain) === false) {
+            if ($cookie['domain'] && strcasecmp(trim($cookie['domain'], '.'), $domain) !== 0) {
                 continue;
             }
             $cookies .= ($cookies ? ' ' : '') . $this->createCookie($cookie);
