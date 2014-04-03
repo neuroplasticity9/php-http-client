@@ -463,7 +463,7 @@ class ChipVN_Http_Request
     public function setParameters($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->parameters[$name] = $value;
+            $this->parameters[$name] = rawurlencode($value);
         } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
@@ -475,13 +475,20 @@ class ChipVN_Http_Request
                     }
                 }
             } elseif (is_string($name)) {
-                $name = preg_replace_callback(
+                $name = str_replace('+', '%2B', preg_replace_callback(
                     '#&[a-z]+;#',
                     create_function('$match', 'return rawurlencode($match[0]);'),
-                    $name);
-                parse_str(str_replace('+', '%2B', $name), $array);
+                    $name));
 
-                $this->setParameters($array);
+                // parse_str have a bug when parse data like ".name=value&.name2=value"
+                // $array = parse_str($name, $array);
+                // $this->setParameters($array);
+
+                foreach (explode('&', $name) as $p) {
+                    list($k, $v) = explode('=', $p, 2);
+
+                    $this->setParameters($k, $v);
+                }
             }
         }
 
@@ -1069,6 +1076,9 @@ class ChipVN_Http_Request
                 $requestHeader .= $postData;
             }
             $requestHeader .= "\r\n\r\n";
+
+            echo "Send\n\n";
+            echo $requestHeader;
 
             // send request
             fwrite($filePointer, $requestHeader);
