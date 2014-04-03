@@ -1140,6 +1140,7 @@ class ChipVN_Http_Request
 
             $this->redirectedCount++;
 
+            $this->resetRequest(); // reset request before
             $this->setCookie($this->getResponseArrayCookies());
             $this->resetResponse();
 
