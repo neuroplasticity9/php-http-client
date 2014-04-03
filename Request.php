@@ -237,7 +237,7 @@ class ChipVN_Http_Request
     protected $responseText;
 
     /**
-     * Create a \ChipVN\Http\Request instance.
+     * Create a ChipVN_Http_Request instance.
      *
      * @return void
      */
@@ -249,7 +249,7 @@ class ChipVN_Http_Request
     /**
      * Reset request and response data.
      *
-     * @return \ChipVN\Http\Request
+     * @return ChipVN_Http_Request
      */
     public function reset()
     {
@@ -287,7 +287,7 @@ class ChipVN_Http_Request
     /**
      * Reset request data.
      *
-     * @return \ChipVN\Http\Request
+     * @return ChipVN_Http_Request
      */
     public function resetRequest()
     {
@@ -322,17 +322,24 @@ class ChipVN_Http_Request
         return $this;
     }
 
+    /**
+     * Reset request follow redirect option.
+     *
+     * @return ChipVN_Http_Request
+     */
     public function resetFollowRedirect()
     {
         $this->followRedirect       = false;
         $this->maxRedirect          = 3;
         $this->redirectedCount      = 0;
+
+        return $this;
     }
 
     /**
      * Reset response data.
      *
-     * @return \ChipVN\Http\Request
+     * @return ChipVN_Http_Request
      */
     public function resetResponse()
     {
@@ -349,8 +356,8 @@ class ChipVN_Http_Request
      * Set http version.
      *
      * @since  2.5
-     * @param  string               $version
-     * @return \ChipVN\Http\Request
+     * @param  string              $version
+     * @return ChipVN_Http_Request
      */
     public function setHttpVersion($version)
     {
@@ -364,9 +371,9 @@ class ChipVN_Http_Request
     /**
      * Set follow response location (if have).
      *
-     * @param  boolean              $follow
-     * @param  integer|null         $maxRedirect Null to use default value
-     * @return \ChipVN\Http\Request
+     * @param  boolean             $follow
+     * @param  integer|null        $maxRedirect Null to use default value
+     * @return ChipVN_Http_Request
      */
     public function setFollowRedirect($follow = true, $maxRedirect = null)
     {
@@ -381,8 +388,8 @@ class ChipVN_Http_Request
     /**
      * Set URL target.
      *
-     * @param  string               $target
-     * @return \ChipVN\Http\Request
+     * @param  string              $target
+     * @return ChipVN_Http_Request
      */
     public function setTarget($target)
     {
@@ -394,8 +401,8 @@ class ChipVN_Http_Request
     /**
      * Set request URL referer.
      *
-     * @param  string               $referer
-     * @return \ChipVN\Http\Request
+     * @param  string              $referer
+     * @return ChipVN_Http_Request
      */
     public function setReferer($referer)
     {
@@ -407,8 +414,8 @@ class ChipVN_Http_Request
     /**
      * Set request user agent.
      *
-     * @param  string               $userAgent
-     * @return \ChipVN\Http\Request
+     * @param  string              $userAgent
+     * @return ChipVN_Http_Request
      */
     public function setUserAgent($userAgent)
     {
@@ -419,8 +426,8 @@ class ChipVN_Http_Request
     /**
      * Set number of seconds to time out.
      *
-     * @param  integer              $seconds
-     * @return \ChipVN\Http\Request
+     * @param  integer             $seconds
+     * @return ChipVN_Http_Request
      */
     public function setTimeout($seconds)
     {
@@ -434,8 +441,8 @@ class ChipVN_Http_Request
     /**
      * Set request raw post data.
      *
-     * @param  string               $rawData
-     * @return \ChipVN\Http\Request
+     * @param  string              $rawData
+     * @return ChipVN_Http_Request
      */
     public function setRawPost($rawData)
     {
@@ -447,8 +454,8 @@ class ChipVN_Http_Request
     /**
      * Set request method.
      *
-     * @param  string               $method
-     * @return \ChipVN\Http\Request
+     * @param  string              $method
+     * @return ChipVN_Http_Request
      */
     public function setMethod($method)
     {
@@ -462,9 +469,9 @@ class ChipVN_Http_Request
      *
      * @since 2.5.4
      *
-     * @param  string|array         $name
-     * @param  string|null          $value
-     * @return \ChipVN\Http\Request
+     * @param  string|array        $name
+     * @param  string|null         $value
+     * @return ChipVN_Http_Request
      */
     public function setParameters($name, $value = null)
     {
@@ -502,9 +509,9 @@ class ChipVN_Http_Request
      *
      * @since 2.5.4
      *
-     * @param  string|array         $name
-     * @param  string|null          $value
-     * @return \ChipVN\Http\Request
+     * @param  string|array        $name
+     * @param  string|null         $value
+     * @return ChipVN_Http_Request
      */
     public function setHeaders($name, $value = null)
     {
@@ -535,9 +542,9 @@ class ChipVN_Http_Request
      *
      * @since 2.5.4
      *
-     * @param  string|array         $name
-     * @param  string|null          $value
-     * @return \ChipVN\Http\Request
+     * @param  string|array        $name
+     * @param  string|null         $value
+     * @return ChipVN_Http_Request
      */
     public function setCookies($name, $value = null)
     {
@@ -620,8 +627,8 @@ class ChipVN_Http_Request
     /**
      * Remove a request header by name or all headers.
      *
-     * @param  string|true          $name True to remove all headers.
-     * @return \ChipVN\Http\Request
+     * @param  string|true         $name True to remove all headers.
+     * @return ChipVN_Http_Request
      */
     public function removeHeaders($name)
     {
@@ -637,8 +644,8 @@ class ChipVN_Http_Request
     /**
      * Remove a request cookie by name or all cookies.
      *
-     * @param  string|true          $name True to remove all cookies.
-     * @return \ChipVN\Http\Request
+     * @param  string|true         $name True to remove all cookies.
+     * @return ChipVN_Http_Request
      */
     public function removeCookies($name)
     {
@@ -654,8 +661,8 @@ class ChipVN_Http_Request
     /**
      * Remove a request parameter by name or all paramters.
      *
-     * @param  string|true          $name True to remove all cookies.
-     * @return \ChipVN\Http\Request
+     * @param  string|true         $name True to remove all cookies.
+     * @return ChipVN_Http_Request
      */
     public function removeParameters($name)
     {
@@ -673,9 +680,9 @@ class ChipVN_Http_Request
      *
      * @deprecated 2.5.4
      *
-     * @param  string|array         $value
-     * @param  boolean              $append
-     * @return \ChipVN\Http\Request
+     * @param  string|array        $value
+     * @param  boolean             $append
+     * @return ChipVN_Http_Request
      */
     public function setParam($name, $value = null)
     {
@@ -689,9 +696,9 @@ class ChipVN_Http_Request
      *
      * @deprecated 2.5.4
      *
-     * @param  string|array         $name
-     * @param  mixed                $value
-     * @return \ChipVN\Http\Request
+     * @param  string|array        $name
+     * @param  mixed               $value
+     * @return ChipVN_Http_Request
      */
     public function setHeader($name, $value = null)
     {
@@ -705,9 +712,9 @@ class ChipVN_Http_Request
      *
      * @deprecated 2.5.4
      *
-     * @param  string|array         $value
-     * @param  boolean              $append
-     * @return \ChipVN\Http\Request
+     * @param  string|array        $value
+     * @param  boolean             $append
+     * @return ChipVN_Http_Request
      */
     public function setCookie($name, $value = null)
     {
@@ -720,8 +727,8 @@ class ChipVN_Http_Request
      * Determine if the request will use cURL or not.
      * Default is use fsockopen.
      *
-     * @param  boolean              $useCurl
-     * @return \ChipVN\Http\Request
+     * @param  boolean             $useCurl
+     * @return ChipVN_Http_Request
      */
     public function useCurl($useCurl)
     {
@@ -733,8 +740,8 @@ class ChipVN_Http_Request
     /**
      * Set submit multipart.
      *
-     * @param  string               $type
-     * @return \ChipVN\Http\Request
+     * @param  string              $type
+     * @return ChipVN_Http_Request
      */
     public function setSubmitMultipart($type = 'form-data')
     {
@@ -748,8 +755,8 @@ class ChipVN_Http_Request
     /**
      * Set submit normal.
      *
-     * @param  string               $method
-     * @return \ChipVN\Http\Request
+     * @param  string              $method
+     * @return ChipVN_Http_Request
      */
     public function setSubmitNormal($method = 'POST')
     {
@@ -763,8 +770,8 @@ class ChipVN_Http_Request
     /**
      * Set request content type.
      *
-     * @param  string               $mimeType
-     * @return \ChipVN\Http\Request
+     * @param  string              $mimeType
+     * @return ChipVN_Http_Request
      */
     public function setMimeContentType($mimeType)
     {
@@ -776,10 +783,10 @@ class ChipVN_Http_Request
     /**
      * Set request with proxy.
      *
-     * @param  string               $proxyIp  Format: ipaddress:port
-     * @param  string               $username
-     * @param  string               $password
-     * @return \ChipVN\Http\Request
+     * @param  string              $proxyIp  Format: ipaddress:port
+     * @param  string              $username
+     * @param  string              $password
+     * @return ChipVN_Http_Request
      */
     public function setProxy($proxyIp, $username = '', $password = '')
     {
@@ -793,9 +800,9 @@ class ChipVN_Http_Request
     /**
      * Set request authentication.
      *
-     * @param  string               $username
-     * @param  string               $password
-     * @return \ChipVN\Http\Request
+     * @param  string              $username
+     * @param  string              $password
+     * @return ChipVN_Http_Request
      */
     public function setAuth($username, $password = '')
     {
@@ -808,8 +815,8 @@ class ChipVN_Http_Request
     /**
      * Set boundary.
      *
-     * @param  string               $boundary
-     * @return \ChipVN\Http\Request
+     * @param  string              $boundary
+     * @return ChipVN_Http_Request
      */
     public function setBoundary($boundary)
     {
