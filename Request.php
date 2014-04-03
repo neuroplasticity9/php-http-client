@@ -463,7 +463,7 @@ class ChipVN_Http_Request
     public function setParameters($name, $value = null)
     {
         if (func_num_args() == 2) {
-            $this->parameters[$name] = rawurlencode($value);
+            $this->parameters[$name] = $value;
         } else {
             if (is_array($name)) {
                 foreach ($name as $key => $value) {
@@ -479,11 +479,7 @@ class ChipVN_Http_Request
                     '#&[a-z]+;#',
                     create_function('$match', 'return rawurlencode($match[0]);'),
                     $name));
-
                 // parse_str have a bug when parse data like ".name=value&.name2=value"
-                // $array = parse_str($name, $array);
-                // $this->setParameters($array);
-
                 foreach (explode('&', $name) as $p) {
                     list($k, $v) = explode('=', $p, 2);
 
@@ -562,7 +558,7 @@ class ChipVN_Http_Request
                     }
                 }
             } else {
-                if ($cookie = $this->parseCookie($value)) {
+                if ($cookie = $this->parseCookie($name)) {
                     $this->cookies[$cookie['name']] = $cookie;
                 }
             }
@@ -830,18 +826,20 @@ class ChipVN_Http_Request
             array_shift($matches[1]);
             array_shift($matches[2]);
 
-            return array_combine($matches[1], $matches[2]) +
-                // defaults
-                array(
-                    'name'     => $name,
-                    'value'    => $value,
-                    'expires'  => null,
-                    'path'     => null,
-                    'expires'  => null,
-                    'domain'   => null,
-                    'secure'   => null,
-                    'httponly' => null,
-                );
+            $cookie = array();
+            if ($matches[1] && $matches[2]) {
+                $cookie += array_combine($matches[1], $matches[2]);
+            }
+            return  $cookie + array(
+                'name'     => $name,
+                'value'    => $value,
+                'expires'  => null,
+                'path'     => null,
+                'expires'  => null,
+                'domain'   => null,
+                'secure'   => null,
+                'httponly' => null,
+            );
         }
 
         return false;
@@ -856,13 +854,12 @@ class ChipVN_Http_Request
     public function createCookie(array $cookie)
     {
         $result = $cookie['name'] . '=' . $cookie['value'] . ';';
-        unset($cookie['name'], $cookie['value']);
-        foreach ($cookie as $key => $value) {
-            if ($value !== null) {
-                $result .= ' ' . $key . '=' . $value . ';';
-            }
-        }
-
+        // unset($cookie['name'], $cookie['value']);
+        // foreach ($cookie as $key => $value) {
+        //     if ($value !== null) {
+        //         $result .= ' ' . $key . '=' . $value . ';';
+        //     }
+        // }
         return $result;
     }
 
@@ -907,8 +904,12 @@ class ChipVN_Http_Request
                     . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
 
         $cookies = '';
+        $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
         foreach ($this->cookies as $name => $cookie) {
-            $cookies .= $this->createCookie($cookie);
+            if ($cookie['domain'] && stripos($cookie['domain'], $domain) === false) {
+                continue;
+            }
+            $cookies .= ($cookies ? ' ' : '') . $this->createCookie($cookie);
         }
 
         // use cURL to send request
@@ -1076,7 +1077,7 @@ class ChipVN_Http_Request
                 $requestHeader .= $postData;
             }
             $requestHeader .= "\r\n\r\n";
-            
+
             // send request
             fwrite($filePointer, $requestHeader);
 
