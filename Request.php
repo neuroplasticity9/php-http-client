@@ -500,12 +500,9 @@ class ChipVN_Http_Request
                     '#&[a-z]+;#',
                     create_function('$match', 'return rawurlencode($match[0]);'),
                     $name));
-                // parse_str have a bug when parse data like ".name=value&.name2=value"
-                foreach (explode('&', $name) as $p) {
-                    list($k, $v) = explode('=', $p, 2);
 
-                    $this->setParameters($k, $v);
-                }
+                $array = $this->parseParameters($name);
+                $this->setParameters($array);
             }
         }
 
@@ -605,6 +602,7 @@ class ChipVN_Http_Request
         if ($value['expires']) {
             $valid = $valid && strtotime($value['expires']) >= time();
         }
+
         return $valid;
     }
 
@@ -761,7 +759,7 @@ class ChipVN_Http_Request
     {
         $this->setMethod('POST');
         $this->isMultipart     = true;
-        $this->mimeContentType = "multipart/" . $type;
+        $this->mimeContentType = 'multipart/' . $type;
 
         return $this;
     }
@@ -776,7 +774,7 @@ class ChipVN_Http_Request
     {
         $this->setMethod($method);
         $this->isMultipart     = false;
-        $this->mimeContentType = "application/x-www-form-urlencoded";
+        $this->mimeContentType = 'application/x-www-form-urlencoded';
 
         return $this;
     }
@@ -882,10 +880,11 @@ class ChipVN_Http_Request
     public function createCookie(array $cookie)
     {
         $result = $cookie['name'] . '=' . $cookie['value'] . ';';
-        
+
         if ($cookie['expires'] && strtotime($cookie['expires']) < time()) {
             return null;
         }
+        // don't need extra args
         // unset($cookie['name'], $cookie['value']);
         // foreach ($cookie as $key => $value) {
         //     if ($value !== null) {
@@ -1063,10 +1062,9 @@ class ChipVN_Http_Request
             }
             // submit normal
             else {
-                foreach ($this->parameters as $key => $param) {
-                    $postData .= urlencode($key) . '=' . rawurlencode($param) . '&';
-                }
-                $postData = substr($postData, 0, -1);
+                $postData = preg_replace_callback('#([^=&]+)=([^&]+)#i', create_function('$match', '
+                    return urlencode($match[1]) . "=" . rawurlencode($match[2]);
+                '), urldecode(http_build_query($this->parameters)));
             }
             // open connection
             $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
@@ -1337,6 +1335,68 @@ class ChipVN_Http_Request
         return $this->getResponseCookies();
     }
 
+    protected function buildPostData($data, $name = null, $depth = -1)
+    {
+        $return = '';
+        foreach ($data as $key => $param) {
+            if (is_array($param)) {
+                $return .= $this->buildPostData($param, $key, $depth + 1) . '&';
+            } else {
+                if ($depth > -1) {
+                    $return .= urlencode($name . str_repeat('[]', $depth)) . '=' . rawurlencode($param) . '&';
+                } else {
+                    $return .= urlencode($key) . '=' . rawurlencode($param) . '&';
+                }
+            }
+        }
+
+        return substr($return, 0, -1);
+    }
+
+
+    /**
+     * There is a bug while using parse_str function built in PHP
+     * @example
+     *     @code   : parse_str('.a=1&.b=2', $array);
+     *     @output : array('_a' => 1, '_b' => 2);
+     *     @expect : array('.a' => 1, '.b' => 2);
+     *
+     * The thing issues when i try to make a script automatic login Yahoo.
+     * So we just create the method to get expect result.
+     *
+     * @since 2.5.4
+     *
+     * @param  string $query
+     * @param  array  &$array
+     * @return void
+     */
+    protected function parseParameters($query, &$array = array())
+    {
+        $array = array();
+        foreach (explode('&', $query) as $param) {
+            list($key, $value) = explode('=', $param, 2);
+            if (preg_match_all('#\[([^\]]+)?\]#i', $key, $matches)) {
+                $key = str_replace($matches[0], '', $key);
+                if (!isset($array[$key])) {
+                    $array[$key] = array();
+                }
+                $children =& $array[$key];
+                $deth = array();
+                foreach ($matches[1] as $sub) {
+                    $sub = $sub !== '' ? $sub : count($children);
+                    if (!array_key_exists($sub, $children)) {
+                        $children[$sub] = array();
+                    }
+                    $children =& $children[$sub];
+                }
+                $children = urldecode($value);
+            } else {
+                $array[$key] = urldecode($value);
+            }
+        }
+        return $array;
+    }
+
     /**
      * Get absolute url for following location.
      *
@@ -1362,7 +1422,7 @@ class ChipVN_Http_Request
         if ($relative[0] == '/') {
             $path = '';
         }
-        $absolute = "$host$path/$relative";
+        $absolute = $host . $path . '/' . $relative;
 
         $patterns = array('#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#');
         for ($count = 1; $count > 0; $absolute = preg_replace($patterns, '/', $absolute, -1, $count)) {}
@@ -1380,7 +1440,7 @@ class ChipVN_Http_Request
     {
         $binarydata = '';
         if (file_exists($filePath)) {
-            $handle = fopen($filePath, "rb");
+            $handle = fopen($filePath, 'rb');
             while ($buff = fread($handle, 128)) {
                 $binarydata .= $buff;
             }
