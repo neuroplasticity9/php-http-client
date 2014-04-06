@@ -950,6 +950,7 @@ class ChipVN_Http_Request
             if ($this->isMultipart) {
                 foreach ($this->parameters as $key => $value) {
                     if (substr($value, 0, 1) == '@') {
+                        // need specify ;type= to resolve issue when upload image to server has strong security
                         $this->parameters[$key] = $value . ';type=' . $this->getFileType(substr($value, 1));
                     }
                 }
@@ -1062,9 +1063,9 @@ class ChipVN_Http_Request
             }
             // submit normal
             else {
-                $postData .= preg_replace_callback('#([^=&]+)=([^&]+)#i', create_function('$match', '
-                    return urlencode($match[1]) . "=" . rawurlencode(urldecode($match[2]));
-                '), http_build_query($this->parameters));
+                $postData .= preg_replace_callback('#([^=&]+)=([^&]+)#i', create_function('$match',
+                    'return urlencode($match[1]) . \'=\' . rawurlencode(urldecode($match[2]));'
+                ), http_build_query($this->parameters));
             }
             // open connection
             $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
@@ -1374,6 +1375,7 @@ class ChipVN_Http_Request
                 $array[$key] = urldecode($value);
             }
         }
+
         return $array;
     }
 
