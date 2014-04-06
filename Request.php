@@ -1211,7 +1211,6 @@ class ChipVN_Http_Request
                         if ($cookie = $this->parseCookie($value)) {
                             $this->responseArrayCookies[$cookie['name']] = $cookie;
                         }
-                        // responseHeaders[set-cookies] always return an array.
                         if (!isset($this->responseHeaders[$key])) {
                             $this->responseHeaders[$key] = array();
                         }
