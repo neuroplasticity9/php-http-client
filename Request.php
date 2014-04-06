@@ -1335,25 +1335,6 @@ class ChipVN_Http_Request
         return $this->getResponseCookies();
     }
 
-    protected function buildPostData($data, $name = null, $depth = -1)
-    {
-        $return = '';
-        foreach ($data as $key => $param) {
-            if (is_array($param)) {
-                $return .= $this->buildPostData($param, $key, $depth + 1) . '&';
-            } else {
-                if ($depth > -1) {
-                    $return .= urlencode($name . str_repeat('[]', $depth)) . '=' . rawurlencode($param) . '&';
-                } else {
-                    $return .= urlencode($key) . '=' . rawurlencode($param) . '&';
-                }
-            }
-        }
-
-        return substr($return, 0, -1);
-    }
-
-
     /**
      * There is a bug while using parse_str function built in PHP
      * @example
