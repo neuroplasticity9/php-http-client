@@ -1062,9 +1062,9 @@ class ChipVN_Http_Request
             }
             // submit normal
             else {
-                $postData = preg_replace_callback('#([^=&]+)=([^&]+)#i', create_function('$match', '
-                    return urlencode($match[1]) . "=" . rawurlencode($match[2]);
-                '), urldecode(http_build_query($this->parameters)));
+                $postData .= preg_replace_callback('#([^=&]+)=([^&]+)#i', create_function('$match', '
+                    return urlencode($match[1]) . "=" . rawurlencode(urldecode($match[2]));
+                '), http_build_query($this->parameters));
             }
             // open connection
             $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
