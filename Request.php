@@ -960,11 +960,7 @@ class ChipVN_Http_Request
 
         $body    = $this->prepareRequestBody();
         $headers = $this->prepareRequestHeaders();
-
-        // var_dump($body);
-        // var_dump($headers);
-        // exit;
-
+      
         // use cURL to send request
         if ($this->useCurl) {
             $ch = curl_init();
