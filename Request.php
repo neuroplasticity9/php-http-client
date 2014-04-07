@@ -8,8 +8,8 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5.4
- * @relase     Apr 2, 2014
+ * @version    2.5.5
+ * @relase     Apr 07, 2014
  */
 
 class ChipVN_Http_Request
@@ -89,7 +89,7 @@ class ChipVN_Http_Request
      *
      * @var mixed
      */
-    protected $rawData;
+    protected $rawPostData;
 
     /**
      * Request user agent.
@@ -115,9 +115,10 @@ class ChipVN_Http_Request
 
     /**
      * The maximum amount of HTTP redirections to follow.
+     * True is not limited
      *
      * @since 2.5.2
-     * @var integer
+     * @var integer|true
      */
     protected $maxRedirect;
 
@@ -148,7 +149,7 @@ class ChipVN_Http_Request
      *
      * @var string
      */
-    protected $authUsername;
+    protected $authUser;
 
     /**
      * Authentication password.
@@ -165,14 +166,14 @@ class ChipVN_Http_Request
     protected $proxyIp;
 
     /**
-     * Proxy username.
+     * Proxy username (only cURL).
      *
      * @var string
      */
-    protected $proxyUsername;
+    protected $proxyUser;
 
     /**
-     * Proxy password.
+     * Proxy password (only cURL).
      *
      * @var string
      */
@@ -190,7 +191,7 @@ class ChipVN_Http_Request
      *
      * @var string
      */
-    protected $mimeContentType;
+    protected $enctype;
 
     /**
      * Boundary name (use when upload).
@@ -271,23 +272,39 @@ class ChipVN_Http_Request
      *
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call($method, $arguments)
     {
-        if (in_array($type = substr($name, 0, 3), array('get', 'set'), true)) {
-            $property = strtolower(substr($name, 3, 1)) . substr($name, 4);
+        if (in_array($type = substr($method, 0, 3), array('get', 'set'), true)) {
+            $property = strtolower(substr($method, 3, 1)) . substr($method, 4);
             if (!property_exists($this, $property)) {
-                throw new Exception(sprintf('Property %s is not exist.', $property));
+                throw new Exception(sprintf('Property "%s" is not exist.', $property));
             }
             if ($type == 'get') {
                 return $this->$property;
-            } else {
-                $this->$property = $arguments[0];
             }
-            if (stripos($property, 'response') === 0) {
-                throw new Exception('Response properties is not writable.');
+            if ($type == 'set') {
+                if (stripos($property, 'response') === 0) {
+                    throw new Exception('Properties used to storage response informations is not writable.');
+                }
+                $this->$property = $arguments[0];
             }
 
             return $this;
+        }
+        $deprecatedMethods = array(
+            'setparam'          => 'setParameters',      // @since 2.5.2
+            'addparameters'     => 'setParameters',      // @since 2.5.4
+            'setcookie'         => 'setCookies',         // @since 2.5.2
+            'addcookies'        => 'setCookies',         // @since 2.5.4
+            'setheader'         => 'setHeaders',         // @since 2.5.2
+            'addheaders'        => 'setHeaders',         // @since 2.5.2
+            'getresponsecookie' => 'getResponseCookies', // @since 2.5.0
+        );
+        if (isset($deprecatedMethods[strtolower($method)])) {
+            return call_user_func_array(
+                array($this, $deprecatedMethods[strtolower($method)]),
+                $arguments
+            );
         }
     }
 
@@ -298,33 +315,32 @@ class ChipVN_Http_Request
      */
     public function resetRequest()
     {
-        $this->httpVersion     = '1.1';
-        $this->target          = '';
-        $this->schema          = 'http';
-        $this->host            = '';
-        $this->port            = 0;
-        $this->path            = '';
-        $this->method          = 'GET';
-        $this->parameters      = array();
-        $this->rawData         = '';
-        $this->cookies         = array();
-        $this->headers         = array();
-        $this->timeout         = 10;
+        $this->httpVersion   = '1.1';
+        $this->target        = '';
+        $this->schema        = 'http';
+        $this->host          = '';
+        $this->port          = 0;
+        $this->path          = '';
+        $this->method        = 'GET';
+        $this->parameters    = array();
+        $this->rawPostData   = '';
+        $this->cookies       = array();
+        $this->headers       = array();
+        $this->timeout       = 10;
+        $this->userAgent     = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
+        $this->useCurl       = false;
 
-        $this->userAgent       = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1';
-        $this->useCurl         = false;
+        $this->proxyIp       = '';
+        $this->proxyUser     = '';
+        $this->proxyPassword = '';
 
-        $this->proxyIp         = '';
-        $this->proxyUsername   = '';
-        $this->proxyPassword   = '';
+        $this->authUser      = '';
+        $this->authPassword  = '';
 
-        $this->authUsername    = '';
-        $this->authPassword    = '';
+        $this->enctype       = 'application/x-www-form-urlencoded';
+        $this->boundary      = '--' . md5('Phan Thanh Cong <ptcong90@gmail.com>');
 
-        $this->mimeContentType = 'application/x-www-form-urlencoded';
-        $this->boundary        = 'chiplove.9xpro';
-
-        $this->errors          = array();
+        $this->errors        = array();
 
         return $this;
     }
@@ -337,7 +353,7 @@ class ChipVN_Http_Request
     public function resetFollowRedirect()
     {
         $this->followRedirect  = false;
-        $this->maxRedirect     = 3;
+        $this->maxRedirect     = true;
         $this->redirectedCount = 0;
         $this->redirectCookies = array();
 
@@ -386,7 +402,9 @@ class ChipVN_Http_Request
     public function setFollowRedirect($follow = true, $maxRedirect = null)
     {
         $this->followRedirect = (boolean) $follow;
-        if ($maxRedirect !== null) {
+        if ($maxRedirect === true) {
+            $this->maxRedirect = true;
+        } elseif ($maxRedirect !== null) {
             $this->maxRedirect = max(1, (int) $maxRedirect);
         }
 
@@ -418,19 +436,7 @@ class ChipVN_Http_Request
 
         return $this;
     }
-
-    /**
-     * Set request user agent.
-     *
-     * @param  string              $userAgent
-     * @return ChipVN_Http_Request
-     */
-    public function setUserAgent($userAgent)
-    {
-        $this->userAgent = $userAgent;
-
-        return $this;
-    }
+    
     /**
      * Set number of seconds to time out.
      *
@@ -449,12 +455,12 @@ class ChipVN_Http_Request
     /**
      * Set request raw post data.
      *
-     * @param  string              $rawData
+     * @param  string              $rawPostData
      * @return ChipVN_Http_Request
      */
-    public function setRawPost($rawData)
+    public function setRawPost($data)
     {
-        $this->rawData = $rawData;
+        $this->rawPostData = $data;
 
         return $this;
     }
@@ -521,6 +527,9 @@ class ChipVN_Http_Request
     public function setHeaders($name, $value = null)
     {
         if (func_num_args() == 2) {
+            if (strcasecmp($name, 'Cookie') === 0) {
+                return $this->setCookies($name, $value);
+            }
             $this->headers[trim($name)] = trim($value);
         } else {
             if (is_array($name)) {
@@ -607,36 +616,6 @@ class ChipVN_Http_Request
     }
 
     /**
-     * Alias of {@link setCookies()}
-     */
-    public function addCookies()
-    {
-        $argumetns = func_get_args();
-
-        return call_user_func_array(array($this, 'setCookies'), $argumetns);
-    }
-
-    /**
-     * Alias of {@link setParameters()}
-     */
-    public function addParameters()
-    {
-        $argumetns = func_get_args();
-
-        return call_user_func_array(array($this, 'setParameters'), $argumetns);
-    }
-
-    /**
-     * Alias of {@link setHeaders()}
-     */
-    public function addHeaders()
-    {
-        $argumetns = func_get_args();
-
-        return call_user_func_array(array($this, 'setHeaders'), $argumetns);
-    }
-
-    /**
      * Remove a request header by name or all headers.
      *
      * @param  string|true         $name True to remove all headers.
@@ -645,7 +624,7 @@ class ChipVN_Http_Request
     public function removeHeaders($name)
     {
         if ($name === true) {
-            unset($this->headers);
+            $this->headers = array();
         } else {
             unser($this->headers[$name]);
         }
@@ -662,7 +641,7 @@ class ChipVN_Http_Request
     public function removeCookies($name)
     {
         if ($name === true) {
-            unset($this->cookies);
+            $this->cookies = array();
         } else {
             unser($this->cookies[$name]);
         }
@@ -672,6 +651,8 @@ class ChipVN_Http_Request
 
     /**
      * Remove a request parameter by name or all paramters.
+     * If parameters is an array name[0], name[1]
+     * you may only remove [1] by `$obj->removeParameters('name.1');`
      *
      * @param  string|true         $name True to remove all cookies.
      * @return ChipVN_Http_Request
@@ -679,60 +660,21 @@ class ChipVN_Http_Request
     public function removeParameters($name)
     {
         if ($name === true) {
-            unset($this->parameters);
+            $this->parameters = array();
         } else {
-            unser($this->parameters[$name]);
+            $subs = explode('.', $name);
+            $last = array_pop($subs);
+            $temp =& $this->parameters;
+
+            foreach ($subs as $sub) {
+                if (isset($temp[$sub])) {
+                    $temp =& $temp[$sub];
+                }
+            }
+            unset($temp[$last]);
         }
 
         return $this;
-    }
-
-    /**
-     * Set parameters with $name, $value or array of name-value pairs.
-     *
-     * @deprecated 2.5.4
-     *
-     * @param  string|array        $value
-     * @param  boolean             $append
-     * @return ChipVN_Http_Request
-     */
-    public function setParam($name, $value = null)
-    {
-        $argumetns = func_get_args();
-
-        return call_user_func_array(array($this, 'setParameters'), $argumetns);
-    }
-
-    /**
-     * Set request headers with $name, $value or array of name-value pairs.
-     *
-     * @deprecated 2.5.4
-     *
-     * @param  string|array        $name
-     * @param  mixed               $value
-     * @return ChipVN_Http_Request
-     */
-    public function setHeader($name, $value = null)
-    {
-        $argumetns = func_get_args();
-
-        return call_user_func_array(array($this, 'addHeaders'), $argumetns);
-    }
-
-    /**
-     * Set request cookies with $name, $value or array of name-value pairs.
-     *
-     * @deprecated 2.5.4
-     *
-     * @param  string|array        $value
-     * @param  boolean             $append
-     * @return ChipVN_Http_Request
-     */
-    public function setCookie($name, $value = null)
-    {
-        $arguments = func_get_args();
-
-        return call_user_func_array(array($this, 'addCookies'), $arguments);
     }
 
     /**
@@ -753,13 +695,14 @@ class ChipVN_Http_Request
      * Set submit multipart.
      *
      * @param  string              $type
+     * @param  string              $method
      * @return ChipVN_Http_Request
      */
-    public function setSubmitMultipart($type = 'form-data')
+    public function setSubmitMultipart($type = 'form-data', $method = 'POST')
     {
-        $this->setMethod('POST');
-        $this->isMultipart     = true;
-        $this->mimeContentType = 'multipart/' . $type;
+        $this->isMultipart = true;
+        $this->setMethod($method);
+        $this->setEnctype('multipart/' . $type);
 
         return $this;
     }
@@ -772,22 +715,9 @@ class ChipVN_Http_Request
      */
     public function setSubmitNormal($method = 'POST')
     {
+        $this->isMultipart = false;
         $this->setMethod($method);
-        $this->isMultipart     = false;
-        $this->mimeContentType = 'application/x-www-form-urlencoded';
-
-        return $this;
-    }
-
-    /**
-     * Set request content type.
-     *
-     * @param  string              $mimeType
-     * @return ChipVN_Http_Request
-     */
-    public function setMimeContentType($mimeType)
-    {
-        $this->mimeContentType = $mimeType;
+        $this->setEnctype('application/x-www-form-urlencoded');
 
         return $this;
     }
@@ -803,7 +733,7 @@ class ChipVN_Http_Request
     public function setProxy($proxyIp, $username = '', $password = '')
     {
         $this->proxyIp       = trim($proxyIp);
-        $this->proxyUsername = $username;
+        $this->proxyUser = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -818,7 +748,7 @@ class ChipVN_Http_Request
      */
     public function setAuth($username, $password = '')
     {
-        $this->authUsername = $username;
+        $this->authUser = $username;
         $this->authPassword = $password;
 
         return $this;
@@ -895,6 +825,100 @@ class ChipVN_Http_Request
     }
 
     /**
+     * Get request headers.
+     *
+     * @return array
+     */
+    protected function prepareRequestHeaders()
+    {
+        $headers = array();
+
+        if ($this->authUser) {
+            $this->setHeaders('Authorization: Basic ' . base64_encode($this->authUser . ':' . $this->authPassword));
+        }
+        if ($this->userAgent) {
+            $this->setHeaders('User-Agent', $this->userAgent);
+        }
+        if ($this->enctype) {
+            $this->setHeaders('Content-Type',  $this->enctype . ($this->isMultipart ? ';boundary=' . $this->boundary : ''));
+        }
+        if ($this->headers) {
+            foreach ($this->headers as $name => $value) {
+                $headers[] = $name . ': ' . $value;
+            }
+        }
+        // cookies
+        $cookies = '';
+        $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
+        foreach ($this->cookies as $name => $cookie) {
+            if ($cookie['domain'] && strcasecmp(trim($cookie['domain'], '.'), $domain) !== 0) {
+                unset($this->cookies[$name]);
+                continue;
+            }
+            $cookie = $this->createCookie($cookie);
+            $cookies .= ($cookies && $cookie ? ' ' : '') . $cookie ;
+        }
+        if ($cookies) {
+            $headers[] = 'Cookie: ' . $cookies;
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Get request body.
+     *
+     * @return string
+     */
+    protected function prepareRequestBody()
+    {
+        $body = '';
+        if ($this->rawPostData) {
+            $body .= $this->isMultipart ? "--" . $this->boundary . "\r\n" : "";
+            $body .= $this->rawPostData . "\r\n";
+        }
+
+        if ($this->method == 'POST' || $this->method == 'PUT') {
+            $data = array_map(create_function('$value', 'return (string) $value;'), $this->parameters);
+            $data = http_build_query($data);
+            if ($this->isMultipart) {
+                preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches);
+                foreach (array_combine($matches[1], $matches[2]) as $key => $value) {
+                    $key = urldecode($key);
+                    $value = urldecode($value);
+                    if (substr($value, 0, 1) == '@') {
+                        $upload_file_path  = substr($value, 1);
+                        $upload_field_name = $key;
+                        if (file_exists($upload_file_path)) {
+                            $body .= "--" . $this->boundary . "\r\n";
+                            $body .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
+                            $body .= "Content-Type: " . $this->getFileType($upload_file_path) . "\r\n";
+                            $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
+                            $body .= $this->getFileData($upload_file_path) . "\r\n";
+                        }
+                    } else {
+                        $body .= "--" . $this->boundary . "\r\n";
+                        $body .= "Content-Disposition: form-data; name=\"" . $key . "\"\r\n";
+                        $body .= "\r\n";
+                        $body .= $value . "\r\n";
+                    }
+                }
+                $body .= "--" . $this->boundary . "--\r\n";
+            } else {
+                $body .= preg_replace_callback('#([^=&]+)=([^&]*)#i', create_function('$match',
+                    'return urlencode($match[1]) . \'=\' . rawurlencode(urldecode($match[2]));'
+                ), $data);
+            }
+        }
+
+        if ($body && $this->method == 'POST' || $this->method == 'PUT') {
+            $this->setHeaders('Content-Length', strlen($body));
+        }
+
+        return $body;
+    }
+
+    /**
      * Execute sending request and trigger errors messages if have.
      *
      * @param  string|null       $target
@@ -934,27 +958,15 @@ class ChipVN_Http_Request
         $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
                     . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
 
-        $cookies = '';
-        $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
-        foreach ($this->cookies as $name => $cookie) {
-            if ($cookie['domain'] && strcasecmp(trim($cookie['domain'], '.'), $domain) !== 0) {
-                unset($this->cookies[$name]);
-                continue;
-            }
-            $cookie = $this->createCookie($cookie);
-            $cookies .= ($cookies && $cookie ? ' ' : '') . $cookie ;
-        }
+        $body    = $this->prepareRequestBody();
+        $headers = $this->prepareRequestHeaders();
+
+        // var_dump($body);
+        // var_dump($headers);
+        // exit;
 
         // use cURL to send request
         if ($this->useCurl) {
-            if ($this->isMultipart) {
-                foreach ($this->parameters as $key => $value) {
-                    if (substr($value, 0, 1) == '@') {
-                        // need specify ;type= to resolve issue when upload image to server has strong security
-                        $this->parameters[$key] = $value . ';type=' . $this->getFileType(substr($value, 1));
-                    }
-                }
-            }
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $this->target);
 
@@ -963,54 +975,29 @@ class ChipVN_Http_Request
                 $httpVersion = CURL_HTTP_VERSION_1_1;
             }
             curl_setopt($ch, CURLOPT_HTTP_VERSION, $httpVersion);
+            curl_setopt($ch, CURLOPT_HEADER, true);
+            curl_setopt($ch, CURLOPT_NOBODY, false);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
-            if ($this->isMultipart) {
-                $this->headers[] = 'Content-Type: ' . $this->mimeContentType;
-            }
-            if ($this->method == 'POST') {
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->parameters);
-            }
-            if ($cookies) {
-                curl_setopt($ch, CURLOPT_COOKIE, $cookies);
-            }
-            if ($this->headers) {
-                $headers = array();
-                foreach ($this->headers as $name => $value) {
-                    $headers[] = $name . ': ' . $value;
-                }
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            }
             if ($this->timeout) {
                 curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
             }
-            if ($this->authUsername) {
-                curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-                curl_setopt($ch, CURLOPT_USERPWD, $this->authUsername . ':' . $this->authPassword);
+            if ($headers) {
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            }
+            if ($this->method == 'POST' || $this->method == 'PUT') {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
             }
             if ($this->proxyIp) {
                 curl_setopt($ch, CURLOPT_PROXY, $this->proxyIp);
                 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
 
-                if ($this->proxyUsername) {
-                    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUsername . ':' . $this->proxyPassword);
+                if ($this->proxyUser) {
+                    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUser . ':' . $this->proxyPassword);
                 }
             }
-            // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
-            // because of if redirect count greater than $maxRedirect
-            // CURL will trigger an error, so we can't get any responses
-            // if ($this->followRedirect) {
-            //     curl_setopt($ch, CURLOPT_MAXREDIRS, $this->maxRedirect);
-            //     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $this->followRedirect);
-            // }
-            curl_setopt($ch, CURLOPT_USERAGENT, $this->userAgent);
-            curl_setopt($ch, CURLOPT_HEADER, true);
-            curl_setopt($ch, CURLOPT_NOBODY, false);
-
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-
             // send request
             $response = curl_exec($ch);
 
@@ -1027,46 +1014,16 @@ class ChipVN_Http_Request
             $this->responseText = $responseBody;
             curl_close($ch);
 
+            // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
+            // because of if redirect count greater than $maxRedirect
+            // CURL will trigger an error, so we can't get any responses
             if (null !== $responseStatus = $this->followRedirect()) {
                 return $responseStatus;
             }
         }
         // use fsockopen to send request
         else {
-            $postData = '';
-            if ($this->rawData) {
-                $postData .= $this->isMultipart ? "--" . $this->boundary . "\r\n" : "";
-                $postData .= $this->rawData . "\r\n";
-            }
-            // upload file
-            if ($this->isMultipart) {
-                foreach ($this->parameters as $key => $value) {
-                    if (substr($value, 0, 1) == '@') {
-                        $upload_file_path  = substr($value, 1);
-                        $upload_field_name = $key;
 
-                        if (file_exists($upload_file_path)) {
-                            $postData .= "--" . $this->boundary . "\r\n";
-                            $postData .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
-                            $postData .= "Content-Type: " . $this->getFileType($upload_file_path) . "\r\n";
-                            $postData .= "Content-Transfer-Encoding: binary\r\n\r\n";
-                            $postData .= $this->getFileData($upload_file_path) . "\r\n";
-                        }
-                    } else {
-                        $postData .= "--" . $this->boundary . "\r\n";
-                        $postData .= "Content-Disposition: form-data; name=\"" . $key . "\"\r\n";
-                        $postData .= "\r\n";
-                        $postData .= $value . "\r\n";
-                    }
-                }
-                $postData .= "--" . $this->boundary . "--\r\n";
-            }
-            // submit normal
-            else {
-                $postData .= preg_replace_callback('#([^=&]+)=([^&]+)#i', create_function('$match',
-                    'return urlencode($match[1]) . \'=\' . rawurlencode(urldecode($match[2]));'
-                ), http_build_query($this->parameters));
-            }
             // open connection
             $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
 
@@ -1081,33 +1038,14 @@ class ChipVN_Http_Request
             }
             $requestHeader = $this->method . " " . $this->path . " HTTP/" . $this->httpVersion . "\r\n";
             $requestHeader .= "Host: " . $urlParsed['host'] . "\r\n";
-            $requestHeader .= "User-Agent: " . $this->userAgent . "\r\n";
-            if ($this->headers) {
-                foreach ($this->headers as $name => $value) {
-                    $requestHeader .= $name . ': ' . $value . "\r\n";
-                }
-            }
-            if ($this->mimeContentType) {
-                $requestHeader .= "Content-Type: " . $this->mimeContentType
-                    . ($this->isMultipart ? "; boundary=" . $this->boundary : "")
-                    . "\r\n";
-            }
-            if ($this->authUsername) {
-                $requestHeader .= "Authorization: Basic "
-                    . base64_encode($this->authUsername . ":" . $this->authPassword)
-                    . "\r\n";
-            }
-            if ($cookies) {
-                $requestHeader .= "Cookie: " . $cookies . "\r\n";
-            }
-            if ($postData && $this->method == 'POST') {
-                $requestHeader .= "Content-length: " . strlen($postData) . "\r\n";
+            if ($headers) {
+                $requestHeader .= implode("\r\n", $headers) . "\r\n";
             }
             $requestHeader .= "Connection: close\r\n";
             $requestHeader .= "\r\n";
 
-            if ($postData && $this->method == "POST") {
-                $requestHeader .= $postData;
+            if ($body && $this->method == 'POST' || $this->method == 'PUT') {
+                $requestHeader .= $body;
             }
             $requestHeader .= "\r\n\r\n";
 
@@ -1167,7 +1105,7 @@ class ChipVN_Http_Request
         if (
             $this->followRedirect
             && ($location = $this->getResponseHeaders('location'))
-            && $this->redirectedCount < $this->maxRedirect
+            && ($this->maxRedirect === true || $this->redirectedCount < $this->maxRedirect)
         ) {
             $location = $this->getAbsoluteUrl($location, $this->target);
 
@@ -1318,21 +1256,9 @@ class ChipVN_Http_Request
      *
      * @return string
      */
-    public function _toString()
+    public function __toString()
     {
         return $this->getResponseText();
-    }
-
-    /**
-     * Get response cookies.
-     *
-     * @deprecated 2.5
-     *
-     * @return string
-     */
-    public function getResponseCookie()
-    {
-        return $this->getResponseCookies();
     }
 
     /**

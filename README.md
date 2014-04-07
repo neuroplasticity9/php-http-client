@@ -1,4 +1,4 @@
-# PHP Http Request Class 
+# PHP Http Client Class 
 
 - ChipVN\Http\Request class used to sending request, scraping web content and get response like a browser.
 - Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
@@ -9,9 +9,15 @@
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
 * License:    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version:    2.5.4
+* Version:    2.5.5
 
 ## Change logs
+##### Version 2.5.5: Apr 7, 2014
+* Optimize and clear code
+* Improve `execute()`
+* Sync request data  between Socket and cURL
+* Allows unlimit follow redirect by `setFollowRedirect(true, true)`
+
 ##### Version 2.5.4: Apr 2, 2014
 * Changed class name from `\ChipVN\Http\Request` to `ChipVN_Http_Request` to support PHP >= 5.0
 * Fixed some bugs while scraping login Flickr.
@@ -81,7 +87,7 @@
 
 ## Usage
 
-Add require `"ptcong/php-http-class": "2.5.*@dev"` to _composer.json_ and run `composer update` if you use composer
+Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `composer update` if you use composer
 
 Create an `ChipVN_Http_Request` instnace
 	
