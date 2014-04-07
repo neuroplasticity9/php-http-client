@@ -1,6 +1,6 @@
 # PHP Http Client Class 
 
-- ChipVN\Http\Request class used to sending request, scraping web content and get response like a browser.
+- ChipVN_Http_Client class used to sending request, scraping web content and get response like a browser.
 - Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
 - Supports POST (fields, raw data), file uploading, GET, PUT, etc..
 
@@ -14,16 +14,17 @@
 ## Change logs
 ##### Version 2.5.5: Apr 7, 2014
 * Optimize and clear code
+* Change class name to `ChipVN_Http_Client` (old class name still avaliable and just extends new class name)
 * Improve `execute()`
 * Sync request data  between Socket and cURL
 * Allows unlimit follow redirect by `setFollowRedirect(true, true)`
 
 ##### Version 2.5.4: Apr 2, 2014
-* Changed class name from `\ChipVN\Http\Request` to `ChipVN_Http_Request` to support PHP >= 5.0
+* Changed class name from ~~\ChipVN\Http\Request~~ to ~~ChipVN_Http_Request~~ to support PHP >= 5.0
 * Fixed some bugs while scraping login Flickr.
 * Improved followRedirect, parsing/ creating cookies.
 * Added new method `resetFollowRedirect()`
-* Added dynamic getters, setters
+* Added dynamic getters, setters (so you may get/set any properties for sending request easier)
 * Added new method: `getRedirectedCount()` 
 * Added new methods: `setCookies()`, `setParameters()`, `setHeaders()`, `removeCookies()`, `removeParameters()`, `removeHeaders()`
 * Added new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`
@@ -39,7 +40,7 @@
 * Change all properties to protected (need use set* methods to change the properties)
 
 ##### Version 2.5: Mar 07, 2014
-* Change class name to \ChipVN\Http\Request
+* ~~Change class name to \ChipVN\Http\Request~~
 * Most clean and clear
 * Supports composer
 * Added new method `setHttpVersion()` to change HTTP protocol version
@@ -89,9 +90,9 @@
 
 Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `composer update` if you use composer
 
-Create an `ChipVN_Http_Request` instnace
+Create an `ChipVN_Http_Client` instnace
 	
-	$request = new ChipVN_Http_Request;
+	$request = new ChipVN_Http_Client;
 
 #### Send a request
 
