@@ -329,6 +329,7 @@ class ChipVN_Http_Client
         $this->timeout       = 10;
         $this->userAgent     = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
         $this->useCurl       = false;
+        $this->isMultipart   = false;
 
         $this->proxyIp       = '';
         $this->proxyUser     = '';
@@ -436,7 +437,7 @@ class ChipVN_Http_Client
 
         return $this;
     }
-    
+
     /**
      * Set number of seconds to time out.
      *
@@ -959,7 +960,7 @@ class ChipVN_Http_Client
 
         $body    = $this->prepareRequestBody();
         $headers = $this->prepareRequestHeaders();
-      
+
         // use cURL to send request
         if ($this->useCurl) {
             $ch = curl_init();
