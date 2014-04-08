@@ -284,7 +284,7 @@ class ChipVN_Http_Client
             }
             if ($type == 'set') {
                 if (stripos($property, 'response') === 0) {
-                    throw new Exception('Properties used to storage response informations is not writable.');
+                    throw new Exception('Properties used to store response informations is not writable.');
                 }
                 $this->$property = $arguments[0];
             }
