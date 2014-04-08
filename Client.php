@@ -879,8 +879,7 @@ class ChipVN_Http_Client
         }
 
         if ($this->method == 'POST' || $this->method == 'PUT') {
-            $data = array_map(create_function('$value', 'return (string) $value;'), $this->parameters);
-            $data = http_build_query($data);
+            $data = http_build_query($this->parameters);
             if ($this->isMultipart) {
                 preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches);
                 foreach (array_combine($matches[1], $matches[2]) as $key => $value) {
