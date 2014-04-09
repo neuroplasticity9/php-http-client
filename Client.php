@@ -609,7 +609,7 @@ class ChipVN_Http_Client
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
             $value
         );
-        if ($value['expires']) {
+        if ($valid && $value['expires']) {
             $valid = $valid && strtotime($value['expires']) >= time();
         }
 
