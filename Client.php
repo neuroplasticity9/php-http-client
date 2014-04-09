@@ -882,28 +882,29 @@ class ChipVN_Http_Client
         if ($this->method == 'POST' || $this->method == 'PUT') {
             $data = http_build_query($this->parameters);
             if ($this->isMultipart) {
-                preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches);
-                foreach (array_combine($matches[1], $matches[2]) as $key => $value) {
-                    $key = urldecode($key);
-                    $value = urldecode($value);
-                    if (substr($value, 0, 1) == '@') {
-                        $upload_file_path  = substr($value, 1);
-                        $upload_field_name = $key;
-                        if (file_exists($upload_file_path)) {
+                if (preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches)) {
+                    foreach (array_combine($matches[1], $matches[2]) as $key => $value) {
+                        $key   = urldecode($key);
+                        $value = urldecode($value);
+                        if (substr($value, 0, 1) == '@') {
+                            $upload_file_path  = substr($value, 1);
+                            $upload_field_name = $key;
+                            if (file_exists($upload_file_path)) {
+                                $body .= "--" . $this->boundary . "\r\n";
+                                $body .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
+                                $body .= "Content-Type: " . $this->getFileType($upload_file_path) . "\r\n";
+                                $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
+                                $body .= $this->getFileData($upload_file_path) . "\r\n";
+                            }
+                        } else {
                             $body .= "--" . $this->boundary . "\r\n";
-                            $body .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
-                            $body .= "Content-Type: " . $this->getFileType($upload_file_path) . "\r\n";
-                            $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
-                            $body .= $this->getFileData($upload_file_path) . "\r\n";
+                            $body .= "Content-Disposition: form-data; name=\"" . $key . "\"\r\n";
+                            $body .= "\r\n";
+                            $body .= $value . "\r\n";
                         }
-                    } else {
-                        $body .= "--" . $this->boundary . "\r\n";
-                        $body .= "Content-Disposition: form-data; name=\"" . $key . "\"\r\n";
-                        $body .= "\r\n";
-                        $body .= $value . "\r\n";
                     }
-                }
-                $body .= "--" . $this->boundary . "--\r\n";
+                    $body .= "--" . $this->boundary . "--\r\n";
+                };
             } else {
                 $body .= preg_replace_callback('#([^=&]+)=([^&]*)#i', create_function('$match',
                     'return urlencode($match[1]) . \'=\' . rawurlencode(urldecode($match[2]));'
@@ -1131,8 +1132,7 @@ class ChipVN_Http_Client
         foreach ($lines as $line) {
             if ($line = trim($line)) {
                 // parse headers to array
-                if (empty($this->responseHeaders)) {
-                    preg_match('#HTTP/.*?\s+(\d+)#i', $line, $match);
+                if (!isset($this->responseHeaders['status']) && preg_match('#HTTP/.*?\s+(\d+)#i', $line, $match)) {
                     $this->responseStatus = intval($match[1]);
                     $this->responseHeaders['status'] = $line;
                 } elseif (strpos($line, ':')) {
