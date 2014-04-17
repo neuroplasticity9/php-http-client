@@ -1,4 +1,4 @@
-# PHP Http Client Class 
+# PHP Http Client Class
 
 - ChipVN_Http_Client class used to sending request, scraping web content and get response like a browser.
 - Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
@@ -25,7 +25,7 @@
 * Improved followRedirect, parsing/ creating cookies.
 * Added new method `resetFollowRedirect()`
 * Added dynamic getters, setters (so you may get/set any properties for sending request easier)
-* Added new method: `getRedirectedCount()` 
+* Added new method: `getRedirectedCount()`
 * Added new methods: `setCookies()`, `setParameters()`, `setHeaders()`, `removeCookies()`, `removeParameters()`, `removeHeaders()`
 * Added new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`
 * Deprecated methods: `setCookie()`, `setParam()`, `setHeader()` (still avaliable)
@@ -75,7 +75,7 @@
 * Fixed some bugs
 
 ##### Version 1.2: April 19, 2011
-* Mime-type bug on upload file fixed 
+* Mime-type bug on upload file fixed
 
 ##### Version 1.1:
 * Supports upload multiple files
@@ -91,7 +91,7 @@
 Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `composer update` if you use composer
 
 Create an `ChipVN_Http_Client` instnace
-	
+
 	$request = new ChipVN_Http_Client;
 
 #### Send a request
@@ -101,11 +101,11 @@ Create an `ChipVN_Http_Client` instnace
 	$request->useCurl(false);
 
 **Set target url** (like to browse a url on browser)
-	
+
 	$request->setTarget('http://google.com');
 
 **Use cookies**
-	
+
 	$request->setCookies('name=value');
 
 	// or (does not support 'name' => 'value')
@@ -120,7 +120,7 @@ Create an `ChipVN_Http_Client` instnace
 	));
 
 **Change HTTP Protocol version**
-	
+
 	$request->setHttpVersion('1.1');
 
 	// or
@@ -134,7 +134,7 @@ Create an `ChipVN_Http_Client` instnace
 	$request->setFollowRedirect(true, 5);
 
 **Parameters / Upload file**
-	
+
 	$request->setParameters('name', 'value');
 
 	// or
@@ -159,7 +159,7 @@ Create an `ChipVN_Http_Client` instnace
 	$request->setRawPost('your data');
 
 **Referer**
-	
+
 	$request->setReferer('http://domain.com');
 
 **User Agent**
@@ -179,19 +179,19 @@ Create an `ChipVN_Http_Client` instnace
 	// etc
 
 **Submit type**
-	
+
 	// use to upload file
 	$request->setSubmitMultipart();
 
 	// submit normal form
 	$request->setSubmitNormal();
 
-**Request mime content type**
+**Request enctype**
 
-	$request->setMimeContentType('application/x-www-form-urlencoded');
+	$request->setEnctype('application/x-www-form-urlencoded');
 
 **Use Headers**
-	
+
 	$request->setHeaders('Origin', 'xxx');
 
 	// or
@@ -225,7 +225,7 @@ Create an `ChipVN_Http_Client` instnace
 		'name' => 'value',
 	));
 
-**Use Proxy** The method only avaliable if you use cURL for sending request 
+**Use Proxy** The method only avaliable if you use cURL for sending request
 
 	$request->setProxy('127.0.0.1:80');
 
@@ -237,7 +237,7 @@ Create an `ChipVN_Http_Client` instnace
 	$request->setAuth('user', 'pass');
 
 **Remove cookies/ parameters/ headers added**
-	
+
 	$request->removeHeaders(true); // remove all headers
 	$request->removeHeaders('Referer'); // remove a header
 
@@ -247,9 +247,9 @@ Create an `ChipVN_Http_Client` instnace
 	$request->removeParameters(true); // remove all parameters
 	$request->removeParameters('name'); // remove a parameter
 
-#### Helpers 
+#### Helpers
 
-**parseCookie()**: 
+**parseCookie()**:
 
 	$cookie = $request->parseCookie('gostep=1; expires=Tue, 01-Apr-2014 05:20:23 GMT; Max-Age=300; path=/; domain=domain.com; secure;');
 
@@ -289,7 +289,7 @@ Create an `ChipVN_Http_Client` instnace
 	print_r($request->getResponseHeaders('set-cookie'));
 
 **Get response cookies**
-	
+
 	// by string
 	echo $request->getResponseCookies();
 
@@ -302,7 +302,7 @@ Create an `ChipVN_Http_Client` instnace
 
 	echo $request->getResponseText();
 
-**Reset request** Just call 
+**Reset request** Just call
 
 	$request->reset();
 
