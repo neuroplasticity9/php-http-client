@@ -1284,7 +1284,6 @@ class ChipVN_Http_Client
                     $array[$key] = array();
                 }
                 $children =& $array[$key];
-                $deth = array();
                 foreach ($matches[1] as $sub) {
                     $sub = $sub !== '' ? $sub : count($children);
                     if (!array_key_exists($sub, $children)) {
