@@ -734,7 +734,7 @@ class ChipVN_Http_Client
     public function setProxy($proxyIp, $username = '', $password = '')
     {
         $this->proxyIp       = trim($proxyIp);
-        $this->proxyUser = $username;
+        $this->proxyUser     = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -749,7 +749,7 @@ class ChipVN_Http_Client
      */
     public function setAuth($username, $password = '')
     {
-        $this->authUser = $username;
+        $this->authUser     = $username;
         $this->authPassword = $password;
 
         return $this;
@@ -1284,6 +1284,7 @@ class ChipVN_Http_Client
                     $array[$key] = array();
                 }
                 $children =& $array[$key];
+                $deth = array();
                 foreach ($matches[1] as $sub) {
                     $sub = $sub !== '' ? $sub : count($children);
                     if (!array_key_exists($sub, $children)) {
