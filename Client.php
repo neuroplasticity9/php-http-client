@@ -225,7 +225,7 @@ class ChipVN_Http_Client
      * "name", "value", "path", "expires", "domains", "secure", "httponly".
      * Default is null.
      *
-     * @var [type]
+     * @var array
      */
     protected $responseArrayCookies;
 
