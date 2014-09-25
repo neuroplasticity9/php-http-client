@@ -1,8 +1,7 @@
 # PHP Http Client Class
 
-- ChipVN_Http_Client class used to sending request, scraping web content and get response like a browser.
+- ChipVN_Http_Client is a flexible class used to sending request, scraping web content and get response like a browser.
 - Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
-- Supports POST (fields, raw data), file uploading, GET, PUT, etc..
 
 **Note**: _fsockopen_ is faster also it is default. Both methods are the same, but _fsockopen_ limited use proxy feature (only this feature).
 
@@ -108,15 +107,39 @@ Create an `ChipVN_Http_Client` instnace
 
 	$request->setCookies('name=value');
 
-	// or (does not support 'name' => 'value')
+	// or
+	$request->setCookies('path=/; name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT');
+
+	// or
 	$request->setCookies(array(
 		'name1=value1',
 		'name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT'
 	));
 
+	// or
 	$request->setCookies(array(
-		'name1' => 'value1',
-		'name2' => 'value2'
+		'name' => 'name1',
+		'value' => 'value1',
+		'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
+		// not required
+		// 'path' => '/',
+		// 'domain' => null,
+		// 'secure' => null,
+		// 'httponly' => null
+	));
+
+	// or
+	$request->setCookies(array(
+		array(
+			'name' => 'name1',
+			'value' => 'value1',
+			'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
+		),
+		array(
+			'name' => 'name2',
+			'value' => 'value2',
+			'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
+		)
 	));
 
 **Change HTTP Protocol version**
@@ -207,22 +230,6 @@ Create an `ChipVN_Http_Client` instnace
 	$request->setHeaders(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
-	));
-
-**Use Cookie**
-
-	$request->setCookies('name=value');
-
-	// or
-	$request->setCookies(array(
-		'name=value',
-		'name2=value2',
-	));
-
-	// or
-	$request->setCookies(array(
-		'name' => 'value',
-		'name' => 'value',
 	));
 
 **Use Proxy** The method only avaliable if you use cURL for sending request
