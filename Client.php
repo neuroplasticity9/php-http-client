@@ -1,9 +1,8 @@
 <?php
 /**
- * ChipVN_Http_Client class used to sending request and get response like a browser.
- * Use 2 functions: cURL, fsockopen
- * so you can use this class like "curl" WITHOUT CURL extension installed
- * Supports POST (fields, raw data), file uploading, GET, PUT, etc..
+ * ChipVN_Http_Client is a flexible class used to sending request and get response like a browser.
+ * Use 2 functions: cURL, fsockopen so you can use this class
+ * like "curl" WITHOUT CURL extension installed
  *
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
