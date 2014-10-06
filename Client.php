@@ -8,7 +8,7 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5.5
+ * @version    2.5.6
  * @relase     Apr 07, 2014
  */
 
