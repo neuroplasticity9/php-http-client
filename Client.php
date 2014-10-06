@@ -9,7 +9,7 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  * @version    2.5.6
- * @relase     Apr 07, 2014
+ * @relase     Oct 06, 2014
  */
 
 class ChipVN_Http_Client
