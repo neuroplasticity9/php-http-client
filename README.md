@@ -8,9 +8,13 @@
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
 * License:    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version:    2.5.5
+* Version:    2.5.6
 
 ## Change logs
+
+##### Version 2.5.6: Oct 06, 2014
+* Changed prepareRequestHeaders() to allows send cookies from sub-domain.
+
 ##### Version 2.5.5: Apr 7, 2014
 * Optimize and clear code
 * Change class name to `ChipVN_Http_Client` (old class name still avaliable and just extends new class name)

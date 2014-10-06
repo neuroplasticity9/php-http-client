@@ -1,8 +1,9 @@
 <?php
 /**
- * ChipVN_Http_Client is a flexible class used to sending request and get response like a browser.
- * Use 2 functions: cURL, fsockopen so you can use this class
- * like "curl" WITHOUT CURL extension installed
+ * ChipVN_Http_Client class used to sending request and get response like a browser.
+ * Use 2 functions: cURL, fsockopen
+ * so you can use this class like "curl" WITHOUT CURL extension installed
+ * Supports POST (fields, raw data), file uploading, GET, PUT, etc..
  *
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
@@ -225,7 +226,7 @@ class ChipVN_Http_Client
      * "name", "value", "path", "expires", "domains", "secure", "httponly".
      * Default is null.
      *
-     * @var array
+     * @var [type]
      */
     protected $responseArrayCookies;
 
@@ -733,7 +734,7 @@ class ChipVN_Http_Client
     public function setProxy($proxyIp, $username = '', $password = '')
     {
         $this->proxyIp       = trim($proxyIp);
-        $this->proxyUser     = $username;
+        $this->proxyUser = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -748,7 +749,7 @@ class ChipVN_Http_Client
      */
     public function setAuth($username, $password = '')
     {
-        $this->authUser     = $username;
+        $this->authUser = $username;
         $this->authPassword = $password;
 
         return $this;
@@ -851,7 +852,7 @@ class ChipVN_Http_Client
         $cookies = '';
         $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
         foreach ($this->cookies as $name => $cookie) {
-            if ($cookie['domain'] && strcasecmp(trim($cookie['domain'], '.'), $domain) !== 0) {
+            if ($cookie['domain'] && stripos($cookie['domain'], $domain) === false) {
                 unset($this->cookies[$name]);
                 continue;
             }
