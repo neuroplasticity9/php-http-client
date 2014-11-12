@@ -609,9 +609,9 @@ class ChipVN_Http_Client
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
             $value
         );
-        if ($valid && $value['expires']) {
-            $valid = $valid && strtotime($value['expires']) >= time();
-        }
+        // if ($valid && $value['expires']) {
+        //     $valid = $valid && strtotime($value['expires']) >= time();
+        // }
 
         return $valid;
     }
@@ -812,9 +812,9 @@ class ChipVN_Http_Client
     {
         $result = $cookie['name'] . '=' . $cookie['value'] . ';';
 
-        if ($cookie['expires'] && strtotime($cookie['expires']) < time()) {
-            return null;
-        }
+        // if ($cookie['expires'] && strtotime($cookie['expires']) < time()) {
+        //     return null;
+        // }
         // don't need extra args
         // unset($cookie['name'], $cookie['value']);
         // foreach ($cookie as $key => $value) {
