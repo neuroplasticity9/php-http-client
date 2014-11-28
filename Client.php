@@ -29,11 +29,11 @@ class ChipVN_Http_Client
     protected $target;
 
     /**
-     * URL schema.
+     * URL scheme.
      *
      * @var string
      */
-    protected $schema;
+    protected $scheme;
 
     /**
      * URL host.
@@ -317,7 +317,7 @@ class ChipVN_Http_Client
     {
         $this->httpVersion   = '1.1';
         $this->target        = '';
-        $this->schema        = 'http';
+        $this->scheme        = 'http';
         $this->host          = '';
         $this->port          = 0;
         $this->path          = '';
@@ -734,7 +734,7 @@ class ChipVN_Http_Client
     public function setProxy($proxyIp, $username = '', $password = '')
     {
         $this->proxyIp       = trim($proxyIp);
-        $this->proxyUser = $username;
+        $this->proxyUser     = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -947,7 +947,7 @@ class ChipVN_Http_Client
         }
 
         $urlParsed    = parse_url($this->target);
-        $this->schema = $urlParsed['scheme'];
+        $this->scheme = $urlParsed['scheme'];
 
         if ($urlParsed['scheme'] == 'https') {
             $this->host = 'ssl://' . $urlParsed['host'];
