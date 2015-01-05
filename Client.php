@@ -8,8 +8,8 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5.6
- * @relase     Oct 06, 2014
+ * @version    2.5.7
+ * @relase     06 1, 2015
  */
 
 class ChipVN_Http_Client
@@ -29,11 +29,11 @@ class ChipVN_Http_Client
     protected $target;
 
     /**
-     * URL scheme.
+     * URL schema.
      *
      * @var string
      */
-    protected $scheme;
+    protected $schema;
 
     /**
      * URL host.
@@ -317,7 +317,7 @@ class ChipVN_Http_Client
     {
         $this->httpVersion   = '1.1';
         $this->target        = '';
-        $this->scheme        = 'http';
+        $this->schema        = 'http';
         $this->host          = '';
         $this->port          = 0;
         $this->path          = '';
@@ -734,7 +734,7 @@ class ChipVN_Http_Client
     public function setProxy($proxyIp, $username = '', $password = '')
     {
         $this->proxyIp       = trim($proxyIp);
-        $this->proxyUser     = $username;
+        $this->proxyUser = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -840,7 +840,7 @@ class ChipVN_Http_Client
         if ($this->userAgent) {
             $this->setHeaders('User-Agent', $this->userAgent);
         }
-        if ($this->enctype) {
+        if ($this->enctype && ($this->method == 'POST' || $this->method == 'PUT')) {
             $this->setHeaders('Content-Type',  $this->enctype . ($this->isMultipart ? ';boundary=' . $this->boundary : ''));
         }
         if ($this->headers) {
@@ -875,12 +875,17 @@ class ChipVN_Http_Client
     {
         $body = '';
         if ($this->rawPostData) {
-            $body .= $this->isMultipart ? "--" . $this->boundary . "\r\n" : "";
-            $body .= $this->rawPostData . "\r\n";
+            $body .= $this->isMultipart ? "--" . $this->boundary . "--\r\n" : "";
+            // if use only raw data, don't append EOL to data
+            $body .= $this->rawPostData; // "\r\n"
         }
 
         if ($this->method == 'POST' || $this->method == 'PUT') {
             $data = http_build_query($this->parameters);
+            if ($data && $this->rawPostData) {
+                // append EOL to separate rawdata with form data
+                $body .= "\r\n";
+            }
             if ($this->isMultipart) {
                 if (preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches)) {
                     foreach (array_combine($matches[1], $matches[2]) as $key => $value) {
@@ -947,7 +952,7 @@ class ChipVN_Http_Client
         }
 
         $urlParsed    = parse_url($this->target);
-        $this->scheme = $urlParsed['scheme'];
+        $this->schema = $urlParsed['scheme'];
 
         if ($urlParsed['scheme'] == 'https') {
             $this->host = 'ssl://' . $urlParsed['host'];
@@ -1038,7 +1043,9 @@ class ChipVN_Http_Client
             if ($headers) {
                 $requestHeader .= implode("\r\n", $headers) . "\r\n";
             }
-            $requestHeader .= "Connection: close\r\n";
+            if (stripos($requestHeader, 'Connection:') === false) {
+                $requestHeader .= "Connection: close\r\n";
+            }
             $requestHeader .= "\r\n";
 
             if ($body && $this->method == 'POST' || $this->method == 'PUT') {
@@ -1342,16 +1349,19 @@ class ChipVN_Http_Client
      */
     protected function getFileData($filePath)
     {
-        $binarydata = '';
-        if (file_exists($filePath)) {
-            $handle = fopen($filePath, 'rb');
-            while ($buff = fread($handle, 128)) {
-                $binarydata .= $buff;
-            }
-            fclose($handle);
-        }
+        if (!file_exists($filePath)) return '';
 
-        return $binarydata;
+        ob_start();
+        readfile($filePath);
+        return ob_get_clean();
+
+        // $binarydata = '';
+        // $handle = fopen($filePath, 'rb');
+        // while ($buff = fread($handle, 8192)) {
+        //     $binarydata .= $buff;
+        // }
+        // fclose($handle);
+        // return $binarydata;
     }
 
     /**
