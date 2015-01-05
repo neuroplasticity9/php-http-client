@@ -29,11 +29,11 @@ class ChipVN_Http_Client
     protected $target;
 
     /**
-     * URL schema.
+     * URL scheme.
      *
      * @var string
      */
-    protected $schema;
+    protected $scheme;
 
     /**
      * URL host.
@@ -317,7 +317,7 @@ class ChipVN_Http_Client
     {
         $this->httpVersion   = '1.1';
         $this->target        = '';
-        $this->schema        = 'http';
+        $this->scheme        = 'http';
         $this->host          = '';
         $this->port          = 0;
         $this->path          = '';
@@ -875,7 +875,7 @@ class ChipVN_Http_Client
     {
         $body = '';
         if ($this->rawPostData) {
-            $body .= $this->isMultipart ? "--".$this->boundary."--\r\n" : "";
+            $body .= $this->isMultipart ? "--".$this->boundary."\r\n" : "";
             // if use only raw data, don't append EOL to data
             $body .= $this->rawPostData; // "\r\n"
         }
@@ -908,7 +908,7 @@ class ChipVN_Http_Client
                             $body .= $value."\r\n";
                         }
                     }
-                    $body .= "--".$this->boundary."--\r\n";
+                    $body .= "--".$this->boundary."--\r\n"; // end
                 };
             } else {
                 $body .= preg_replace_callback('#([^=&]+)=([^&]*)#i', create_function('$match',
@@ -960,7 +960,7 @@ class ChipVN_Http_Client
         }
 
         $urlParsed    = parse_url($this->target);
-        $this->schema = $urlParsed['scheme'];
+        $this->scheme = $urlParsed['scheme'];
 
         if ($urlParsed['scheme'] == 'https') {
             $this->host = 'ssl://'.$urlParsed['host'];
