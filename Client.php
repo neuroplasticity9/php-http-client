@@ -275,7 +275,7 @@ class ChipVN_Http_Client
     public function __call($method, $arguments)
     {
         if (in_array($type = substr($method, 0, 3), array('get', 'set'), true)) {
-            $property = strtolower(substr($method, 3, 1)) . substr($method, 4);
+            $property = strtolower(substr($method, 3, 1)).substr($method, 4);
             if (!property_exists($this, $property)) {
                 throw new Exception(sprintf('Property "%s" is not exist.', $property));
             }
@@ -339,7 +339,7 @@ class ChipVN_Http_Client
         $this->authPassword  = '';
 
         $this->enctype       = 'application/x-www-form-urlencoded';
-        $this->boundary      = '--' . md5('Phan Thanh Cong <ptcong90@gmail.com>');
+        $this->boundary      = '--'.md5('Phan Thanh Cong <ptcong90@gmail.com>');
 
         $this->errors        = array();
 
@@ -381,13 +381,13 @@ class ChipVN_Http_Client
      * Set http version.
      *
      * @since  2.5
-     * @param  string              $version
+     * @param  string             $version
      * @return ChipVN_Http_Client
      */
     public function setHttpVersion($version)
     {
         if (in_array($version, array('1.0', '1.1'))) {
-           $this->httpVersion = $version;
+            $this->httpVersion = $version;
         }
 
         return $this;
@@ -396,8 +396,8 @@ class ChipVN_Http_Client
     /**
      * Set follow response location (if have).
      *
-     * @param  boolean             $follow
-     * @param  integer|null        $maxRedirect Null to use default value
+     * @param  boolean            $follow
+     * @param  integer|null       $maxRedirect Null to use default value
      * @return ChipVN_Http_Client
      */
     public function setFollowRedirect($follow = true, $maxRedirect = null)
@@ -415,7 +415,7 @@ class ChipVN_Http_Client
     /**
      * Set URL target.
      *
-     * @param  string              $target
+     * @param  string             $target
      * @return ChipVN_Http_Client
      */
     public function setTarget($target)
@@ -428,7 +428,7 @@ class ChipVN_Http_Client
     /**
      * Set request URL referer.
      *
-     * @param  string              $referer
+     * @param  string             $referer
      * @return ChipVN_Http_Client
      */
     public function setReferer($referer)
@@ -441,7 +441,7 @@ class ChipVN_Http_Client
     /**
      * Set number of seconds to time out.
      *
-     * @param  integer             $seconds
+     * @param  integer            $seconds
      * @return ChipVN_Http_Client
      */
     public function setTimeout($seconds)
@@ -456,7 +456,7 @@ class ChipVN_Http_Client
     /**
      * Set request raw post data.
      *
-     * @param  string              $rawPostData
+     * @param  string             $rawPostData
      * @return ChipVN_Http_Client
      */
     public function setRawPost($data)
@@ -469,7 +469,7 @@ class ChipVN_Http_Client
     /**
      * Set request method.
      *
-     * @param  string              $method
+     * @param  string             $method
      * @return ChipVN_Http_Client
      */
     public function setMethod($method)
@@ -484,8 +484,8 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string|array        $name
-     * @param  string|null         $value
+     * @param  string|array       $name
+     * @param  string|null        $value
      * @return ChipVN_Http_Client
      */
     public function setParameters($name, $value = null)
@@ -521,8 +521,8 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string|array        $name
-     * @param  string|null         $value
+     * @param  string|array       $name
+     * @param  string|null        $value
      * @return ChipVN_Http_Client
      */
     public function setHeaders($name, $value = null)
@@ -557,15 +557,15 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string|array        $name
-     * @param  string|null         $value
+     * @param  string|array       $name
+     * @param  string|null        $value
      * @return ChipVN_Http_Client
      */
     public function setCookies($name, $value = null)
     {
         if (func_num_args() == 2) {
             if (is_string($value)) {
-                $this->setCookies($name . '=' . strval($value));
+                $this->setCookies($name.'='.strval($value));
             } elseif (is_array($value)) {
                 if ($this->isValidCookie($value)) {
                     $this->cookies[$value['name']] = $value;
@@ -619,7 +619,7 @@ class ChipVN_Http_Client
     /**
      * Remove a request header by name or all headers.
      *
-     * @param  string|true         $name True to remove all headers.
+     * @param  string|true        $name True to remove all headers.
      * @return ChipVN_Http_Client
      */
     public function removeHeaders($name)
@@ -636,7 +636,7 @@ class ChipVN_Http_Client
     /**
      * Remove a request cookie by name or all cookies.
      *
-     * @param  string|true         $name True to remove all cookies.
+     * @param  string|true        $name True to remove all cookies.
      * @return ChipVN_Http_Client
      */
     public function removeCookies($name)
@@ -655,7 +655,7 @@ class ChipVN_Http_Client
      * If parameters is an array name[0], name[1]
      * you may only remove [1] by `$obj->removeParameters('name.1');`
      *
-     * @param  string|true         $name True to remove all cookies.
+     * @param  string|true        $name True to remove all cookies.
      * @return ChipVN_Http_Client
      */
     public function removeParameters($name)
@@ -665,11 +665,11 @@ class ChipVN_Http_Client
         } else {
             $subs = explode('.', $name);
             $last = array_pop($subs);
-            $temp =& $this->parameters;
+            $temp = & $this->parameters;
 
             foreach ($subs as $sub) {
                 if (isset($temp[$sub])) {
-                    $temp =& $temp[$sub];
+                    $temp = & $temp[$sub];
                 }
             }
             unset($temp[$last]);
@@ -682,7 +682,7 @@ class ChipVN_Http_Client
      * Determine if the request will use cURL or not.
      * Default is use fsockopen.
      *
-     * @param  boolean             $useCurl
+     * @param  boolean            $useCurl
      * @return ChipVN_Http_Client
      */
     public function useCurl($useCurl)
@@ -695,15 +695,15 @@ class ChipVN_Http_Client
     /**
      * Set submit multipart.
      *
-     * @param  string              $type
-     * @param  string              $method
+     * @param  string             $type
+     * @param  string             $method
      * @return ChipVN_Http_Client
      */
     public function setSubmitMultipart($type = 'form-data', $method = 'POST')
     {
         $this->isMultipart = true;
         $this->setMethod($method);
-        $this->setEnctype('multipart/' . $type);
+        $this->setEnctype('multipart/'.$type);
 
         return $this;
     }
@@ -711,7 +711,7 @@ class ChipVN_Http_Client
     /**
      * Set submit normal.
      *
-     * @param  string              $method
+     * @param  string             $method
      * @return ChipVN_Http_Client
      */
     public function setSubmitNormal($method = 'POST')
@@ -726,9 +726,9 @@ class ChipVN_Http_Client
     /**
      * Set request with proxy.
      *
-     * @param  string              $proxyIp  Format: ipaddress:port
-     * @param  string              $username
-     * @param  string              $password
+     * @param  string             $proxyIp  Format: ipaddress:port
+     * @param  string             $username
+     * @param  string             $password
      * @return ChipVN_Http_Client
      */
     public function setProxy($proxyIp, $username = '', $password = '')
@@ -743,8 +743,8 @@ class ChipVN_Http_Client
     /**
      * Set request authentication.
      *
-     * @param  string              $username
-     * @param  string              $password
+     * @param  string             $username
+     * @param  string             $password
      * @return ChipVN_Http_Client
      */
     public function setAuth($username, $password = '')
@@ -758,7 +758,7 @@ class ChipVN_Http_Client
     /**
      * Set boundary.
      *
-     * @param  string              $boundary
+     * @param  string             $boundary
      * @return ChipVN_Http_Client
      */
     public function setBoundary($boundary)
@@ -810,7 +810,7 @@ class ChipVN_Http_Client
      */
     public function createCookie(array $cookie)
     {
-        $result = $cookie['name'] . '=' . $cookie['value'] . ';';
+        $result = $cookie['name'].'='.$cookie['value'].';';
 
         // if ($cookie['expires'] && strtotime($cookie['expires']) < time()) {
         //     return null;
@@ -835,17 +835,17 @@ class ChipVN_Http_Client
         $headers = array();
 
         if ($this->authUser) {
-            $this->setHeaders('Authorization: Basic ' . base64_encode($this->authUser . ':' . $this->authPassword));
+            $this->setHeaders('Authorization: Basic '.base64_encode($this->authUser.':'.$this->authPassword));
         }
         if ($this->userAgent) {
             $this->setHeaders('User-Agent', $this->userAgent);
         }
         if ($this->enctype && ($this->method == 'POST' || $this->method == 'PUT')) {
-            $this->setHeaders('Content-Type',  $this->enctype . ($this->isMultipart ? ';boundary=' . $this->boundary : ''));
+            $this->setHeaders('Content-Type',  $this->enctype.($this->isMultipart ? ';boundary='.$this->boundary : ''));
         }
         if ($this->headers) {
             foreach ($this->headers as $name => $value) {
-                $headers[] = $name . ': ' . $value;
+                $headers[] = $name.': '.$value;
             }
         }
         // cookies
@@ -857,10 +857,10 @@ class ChipVN_Http_Client
                 continue;
             }
             $cookie = $this->createCookie($cookie);
-            $cookies .= ($cookies && $cookie ? ' ' : '') . $cookie ;
+            $cookies .= ($cookies && $cookie ? ' ' : '').$cookie;
         }
         if ($cookies) {
-            $headers[] = 'Cookie: ' . $cookies;
+            $headers[] = 'Cookie: '.$cookies;
         }
 
         return $headers;
@@ -875,7 +875,7 @@ class ChipVN_Http_Client
     {
         $body = '';
         if ($this->rawPostData) {
-            $body .= $this->isMultipart ? "--" . $this->boundary . "--\r\n" : "";
+            $body .= $this->isMultipart ? "--".$this->boundary."--\r\n" : "";
             // if use only raw data, don't append EOL to data
             $body .= $this->rawPostData; // "\r\n"
         }
@@ -895,20 +895,20 @@ class ChipVN_Http_Client
                             $upload_file_path  = substr($value, 1);
                             $upload_field_name = $key;
                             if (file_exists($upload_file_path)) {
-                                $body .= "--" . $this->boundary . "\r\n";
-                                $body .= "Content-disposition: form-data; name=\"" . $upload_field_name . "\"; filename=\"" . basename($upload_file_path) . "\"\r\n";
-                                $body .= "Content-Type: " . $this->getFileType($upload_file_path) . "\r\n";
+                                $body .= "--".$this->boundary."\r\n";
+                                $body .= "Content-disposition: form-data; name=\"".$upload_field_name."\"; filename=\"".basename($upload_file_path)."\"\r\n";
+                                $body .= "Content-Type: ".$this->getFileType($upload_file_path)."\r\n";
                                 $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
-                                $body .= $this->getFileData($upload_file_path) . "\r\n";
+                                $body .= $this->getFileData($upload_file_path)."\r\n";
                             }
                         } else {
-                            $body .= "--" . $this->boundary . "\r\n";
-                            $body .= "Content-Disposition: form-data; name=\"" . $key . "\"\r\n";
+                            $body .= "--".$this->boundary."\r\n";
+                            $body .= "Content-Disposition: form-data; name=\"".$key."\"\r\n";
                             $body .= "\r\n";
-                            $body .= $value . "\r\n";
+                            $body .= $value."\r\n";
                         }
                     }
-                    $body .= "--" . $this->boundary . "--\r\n";
+                    $body .= "--".$this->boundary."--\r\n";
                 };
             } else {
                 $body .= preg_replace_callback('#([^=&]+)=([^&]*)#i', create_function('$match',
@@ -935,10 +935,18 @@ class ChipVN_Http_Client
      */
     public function execute($target = null, $method = null, $parameters = null, $referer = null)
     {
-        if ($target)        $this->setTarget($target);
-        if ($method)        $this->setMethod($method);
-        if ($parameters)    $this->setParameters($parameters);
-        if ($referer)       $this->setReferer($referer);
+        if ($target) {
+            $this->setTarget($target);
+        }
+        if ($method) {
+            $this->setMethod($method);
+        }
+        if ($parameters) {
+            $this->setParameters($parameters);
+        }
+        if ($referer) {
+            $this->setReferer($referer);
+        }
 
         if (empty($this->target)) {
             $this->errors[] = 'ERROR: Target url must be no empty.';
@@ -948,21 +956,21 @@ class ChipVN_Http_Client
 
         if ($this->parameters && $this->method == 'GET') {
             $this->target .= ($this->method == 'GET' ? (strpos($this->target, '?') ? '&' : '?')
-                . http_build_query($this->parameters) : '');
+                .http_build_query($this->parameters) : '');
         }
 
         $urlParsed    = parse_url($this->target);
         $this->schema = $urlParsed['scheme'];
 
         if ($urlParsed['scheme'] == 'https') {
-            $this->host = 'ssl://' . $urlParsed['host'];
+            $this->host = 'ssl://'.$urlParsed['host'];
             $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 443;
         } else {
             $this->host = $urlParsed['host'];
             $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 80;
         }
         $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
-                    . (isset($urlParsed['query']) ? '?' . $urlParsed['query'] : '');
+                    .(isset($urlParsed['query']) ? '?'.$urlParsed['query'] : '');
 
         $body    = $this->prepareRequestBody();
         $headers = $this->prepareRequestHeaders();
@@ -997,7 +1005,7 @@ class ChipVN_Http_Client
                 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
 
                 if ($this->proxyUser) {
-                    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUser . ':' . $this->proxyPassword);
+                    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUser.':'.$this->proxyPassword);
                 }
             }
             // send request
@@ -1025,7 +1033,6 @@ class ChipVN_Http_Client
         }
         // use fsockopen to send request
         else {
-
             // open connection
             $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
 
@@ -1038,10 +1045,10 @@ class ChipVN_Http_Client
 
                 return false;
             }
-            $requestHeader = $this->method . " " . $this->path . " HTTP/" . $this->httpVersion . "\r\n";
-            $requestHeader .= "Host: " . $urlParsed['host'] . "\r\n";
+            $requestHeader = $this->method." ".$this->path." HTTP/".$this->httpVersion."\r\n";
+            $requestHeader .= "Host: ".$urlParsed['host']."\r\n";
             if ($headers) {
-                $requestHeader .= implode("\r\n", $headers) . "\r\n";
+                $requestHeader .= implode("\r\n", $headers)."\r\n";
             }
             if (stripos($requestHeader, 'Connection:') === false) {
                 $requestHeader .= "Connection: close\r\n";
@@ -1123,7 +1130,7 @@ class ChipVN_Http_Client
             return $this->execute($location);
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -1148,7 +1155,7 @@ class ChipVN_Http_Client
                     $key   = strtolower($key);
                     // parse cookie
                     if ($key == 'set-cookie') {
-                        $this->responseCookies .= $value . ';';
+                        $this->responseCookies .= $value.';';
 
                         if ($cookie = $this->parseCookie($value)) {
                             $this->responseArrayCookies[$cookie['name']] = $cookie;
@@ -1290,14 +1297,14 @@ class ChipVN_Http_Client
                 if (!isset($array[$key])) {
                     $array[$key] = array();
                 }
-                $children =& $array[$key];
+                $children = & $array[$key];
                 $deth = array();
                 foreach ($matches[1] as $sub) {
                     $sub = $sub !== '' ? $sub : count($children);
                     if (!array_key_exists($sub, $children)) {
                         $children[$sub] = array();
                     }
-                    $children =& $children[$sub];
+                    $children = & $children[$sub];
                 }
                 $children = urldecode($value);
             } else {
@@ -1324,7 +1331,7 @@ class ChipVN_Http_Client
             return $relative;
         }
         if ($relative[0] == '#' || $relative[0] == '?') {
-            return $base . $relative;
+            return $base.$relative;
         }
         extract(parse_url($base));
 
@@ -1333,10 +1340,11 @@ class ChipVN_Http_Client
         if ($relative[0] == '/') {
             $path = '';
         }
-        $absolute = $host . $path . '/' . $relative;
+        $absolute = $host.$path.'/'.$relative;
 
         $patterns = array('#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#');
-        for ($count = 1; $count > 0; $absolute = preg_replace($patterns, '/', $absolute, -1, $count)) {}
+        for ($count = 1; $count > 0; $absolute = preg_replace($patterns, '/', $absolute, -1, $count)) {
+        }
 
         return $scheme.'://'.$absolute;
     }
@@ -1349,19 +1357,19 @@ class ChipVN_Http_Client
      */
     protected function getFileData($filePath)
     {
-        if (!file_exists($filePath)) return '';
-
-        ob_start();
-        readfile($filePath);
-        return ob_get_clean();
-
-        // $binarydata = '';
+        $data = '';
+        if (file_exists($filePath)) {
+            ob_start();
+            readfile($filePath);
+            $data = ob_get_clean();
+        }
         // $handle = fopen($filePath, 'rb');
         // while ($buff = fread($handle, 8192)) {
-        //     $binarydata .= $buff;
+        //     $data .= $buff;
         // }
         // fclose($handle);
-        // return $binarydata;
+
+        return $data;
     }
 
     /**
@@ -1378,7 +1386,9 @@ class ChipVN_Http_Client
         if (preg_match('/^(?:jpe?g|png|[gt]if|bmp|swf)$/', $extension)) {
             $file = getimagesize($filename);
 
-            if (isset($file['mime'])) return $file['mime'];
+            if (isset($file['mime'])) {
+                return $file['mime'];
+            }
         }
         if (class_exists('finfo', false)) {
             if ($info = new finfo(defined('FILEINFO_MIME_TYPE') ? FILEINFO_MIME_TYPE : FILEINFO_MIME)) {
