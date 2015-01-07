@@ -12,6 +12,9 @@
 
 ## Change logs
 
+##### Version 2.5.8: Oct 07, 2014
+* Optimize code
+
 ##### Version 2.5.6: Oct 06, 2014
 * Changed prepareRequestHeaders() to allows send cookies from sub-domain.
 

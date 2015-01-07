@@ -8,8 +8,8 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
- * @version    2.5.7
- * @relase     06 1, 2015
+ * @version    2.5.8
+ * @relase     07 1, 2015
  */
 
 class ChipVN_Http_Client
@@ -609,9 +609,6 @@ class ChipVN_Http_Client
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
             $value
         );
-        // if ($valid && $value['expires']) {
-        //     $valid = $valid && strtotime($value['expires']) >= time();
-        // }
 
         return $valid;
     }
@@ -711,14 +708,15 @@ class ChipVN_Http_Client
     /**
      * Set submit normal.
      *
+     * @param  string             $enctype
      * @param  string             $method
      * @return ChipVN_Http_Client
      */
-    public function setSubmitNormal($method = 'POST')
+    public function setSubmitNormal($enctype = 'application/x-www-form-urlencoded', $method = 'POST')
     {
         $this->isMultipart = false;
         $this->setMethod($method);
-        $this->setEnctype('application/x-www-form-urlencoded');
+        $this->setEnctype($enctype);
 
         return $this;
     }
@@ -734,7 +732,7 @@ class ChipVN_Http_Client
     public function setProxy($proxyIp, $username = '', $password = '')
     {
         $this->proxyIp       = trim($proxyIp);
-        $this->proxyUser = $username;
+        $this->proxyUser     = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -749,7 +747,7 @@ class ChipVN_Http_Client
      */
     public function setAuth($username, $password = '')
     {
-        $this->authUser = $username;
+        $this->authUser     = $username;
         $this->authPassword = $password;
 
         return $this;
@@ -812,9 +810,6 @@ class ChipVN_Http_Client
     {
         $result = $cookie['name'].'='.$cookie['value'].';';
 
-        // if ($cookie['expires'] && strtotime($cookie['expires']) < time()) {
-        //     return null;
-        // }
         // don't need extra args
         // unset($cookie['name'], $cookie['value']);
         // foreach ($cookie as $key => $value) {
@@ -835,12 +830,12 @@ class ChipVN_Http_Client
         $headers = array();
 
         if ($this->authUser) {
-            $this->setHeaders('Authorization: Basic '.base64_encode($this->authUser.':'.$this->authPassword));
+            $this->setHeaders('Authorization', 'Basic '.base64_encode($this->authUser.':'.$this->authPassword));
         }
         if ($this->userAgent) {
             $this->setHeaders('User-Agent', $this->userAgent);
         }
-        if ($this->enctype && ($this->method == 'POST' || $this->method == 'PUT')) {
+        if ($this->enctype && $this->isPut()) {
             $this->setHeaders('Content-Type',  $this->enctype.($this->isMultipart ? ';boundary='.$this->boundary : ''));
         }
         if ($this->headers) {
@@ -880,7 +875,7 @@ class ChipVN_Http_Client
             $body .= $this->rawPostData; // "\r\n"
         }
 
-        if ($this->method == 'POST' || $this->method == 'PUT') {
+        if ($this->isPut()) {
             $data = http_build_query($this->parameters);
             if ($data && $this->rawPostData) {
                 // append EOL to separate rawdata with form data
@@ -888,22 +883,21 @@ class ChipVN_Http_Client
             }
             if ($this->isMultipart) {
                 if (preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches)) {
-                    foreach (array_combine($matches[1], $matches[2]) as $key => $value) {
-                        $key   = urldecode($key);
+                    foreach (array_combine($matches[1], $matches[2]) as $name => $value) {
+                        $name  = urldecode($name);
                         $value = urldecode($value);
                         if (substr($value, 0, 1) == '@') {
-                            $upload_file_path  = substr($value, 1);
-                            $upload_field_name = $key;
-                            if (file_exists($upload_file_path)) {
+                            $uploadFilePath  = substr($value, 1);
+                            if (file_exists($uploadFilePath)) {
                                 $body .= "--".$this->boundary."\r\n";
-                                $body .= "Content-disposition: form-data; name=\"".$upload_field_name."\"; filename=\"".basename($upload_file_path)."\"\r\n";
-                                $body .= "Content-Type: ".$this->getFileType($upload_file_path)."\r\n";
+                                $body .= "Content-disposition: form-data; name=\"".$name."\"; filename=\"".basename($uploadFilePath)."\"\r\n";
+                                $body .= "Content-Type: ".$this->getFileType($uploadFilePath)."\r\n";
                                 $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
-                                $body .= $this->getFileData($upload_file_path)."\r\n";
+                                $body .= $this->getFileData($uploadFilePath)."\r\n";
                             }
                         } else {
                             $body .= "--".$this->boundary."\r\n";
-                            $body .= "Content-Disposition: form-data; name=\"".$key."\"\r\n";
+                            $body .= "Content-Disposition: form-data; name=\"".$name."\"\r\n";
                             $body .= "\r\n";
                             $body .= $value."\r\n";
                         }
@@ -912,12 +906,12 @@ class ChipVN_Http_Client
                 };
             } else {
                 $body .= preg_replace_callback('#([^=&]+)=([^&]*)#i', create_function('$match',
-                    'return urlencode($match[1]) . \'=\' . rawurlencode(urldecode($match[2]));'
+                    'return urlencode($match[1]).\'=\'.rawurlencode(urldecode($match[2]));'
                 ), $data);
             }
         }
 
-        if ($body && $this->method == 'POST' || $this->method == 'PUT') {
+        if ($body && $this->isPut()) {
             $this->setHeaders('Content-Length', strlen($body));
         }
 
@@ -1017,15 +1011,15 @@ class ChipVN_Http_Client
                 return false;
             }
             $headerSize     = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $responseHeader = ($responseHeader = substr($response, 0, $headerSize)) ? $responseHeader : ''; // always be a string
-            $responseBody   = ($responseBody = substr($response, $headerSize)) ? $responseBody : ''; // always be a string
+            $responseHeader = (string) substr($response, 0, $headerSize);
+            $responseBody   = (string) substr($response, $headerSize);
 
             $this->parseResponseHeaders($responseHeader);
             $this->responseText = $responseBody;
             curl_close($ch);
 
             // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
-            // because of if redirect count greater than $maxRedirect
+            // because if redirect count greater than $maxRedirect
             // CURL will trigger an error, so we can't get any responses
             if (null !== $responseStatus = $this->followRedirect()) {
                 return $responseStatus;
@@ -1055,7 +1049,7 @@ class ChipVN_Http_Client
             }
             $requestHeader .= "\r\n";
 
-            if ($body && $this->method == 'POST' || $this->method == 'PUT') {
+            if ($body && $this->isPut()) {
                 $requestHeader .= $body;
             }
             $requestHeader .= "\r\n\r\n";
@@ -1272,14 +1266,24 @@ class ChipVN_Http_Client
     }
 
     /**
-     * There is a bug while using parse_str function built in PHP
+     * Determine if method is put/post.
+     *
+     * @return boolean
+     */
+    public function isPut()
+    {
+        return $this->method == 'POST' || $this->method == 'PUT';
+    }
+
+    /**
+     * There is a bug while using parse_str function built in PHP.
      * @example
      *     @code   : parse_str('.a=1&.b=2', $array);
      *     @output : array('_a' => 1, '_b' => 2);
      *     @expect : array('.a' => 1, '.b' => 2);
      *
-     * The thing issues when i try to make a script automatic login Yahoo.
-     * So we just create the method to get expect result.
+     * The issue occured when i try to make a script automatic login Yahoo.
+     * So we just create the method to get the expected result.
      *
      * @since 2.5.4
      *
@@ -1316,7 +1320,7 @@ class ChipVN_Http_Client
     }
 
     /**
-     * Get absolute url for following location.
+     * Get absolute url for following redirect.
      *
      * @param  string $relative
      * @param  string $base
@@ -1363,11 +1367,6 @@ class ChipVN_Http_Client
             readfile($filePath);
             $data = ob_get_clean();
         }
-        // $handle = fopen($filePath, 'rb');
-        // while ($buff = fread($handle, 8192)) {
-        //     $data .= $buff;
-        // }
-        // fclose($handle);
 
         return $data;
     }
