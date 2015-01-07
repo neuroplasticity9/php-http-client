@@ -8,12 +8,13 @@
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
 * License:    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version:    2.5.6
+* Version:    2.5.8
 
 ## Change logs
 
 ##### Version 2.5.8: Oct 07, 2014
 * Optimize code
+* Added new method `setCookiesPairs()`
 
 ##### Version 2.5.6: Oct 06, 2014
 * Changed prepareRequestHeaders() to allows send cookies from sub-domain.

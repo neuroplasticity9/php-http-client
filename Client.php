@@ -565,7 +565,7 @@ class ChipVN_Http_Client
     {
         if (func_num_args() == 2) {
             if (is_string($value)) {
-                $this->setCookies($name.'='.strval($value));
+                $this->cookies[$name] = $this->parseCookie($name.'='.$value);
             } elseif (is_array($value)) {
                 if ($this->isValidCookie($value)) {
                     $this->cookies[$value['name']] = $value;
@@ -596,21 +596,28 @@ class ChipVN_Http_Client
     }
 
     /**
-     * Determine a value is a cookie array (supported by this class)
+     * Helper to set multiple cookies by list string of name-value pairs.
+     * @since 2.5.9
      *
-     * @param  mixed   $value
-     * @return boolean
+     * @param string $value
+     * @return ChipVN_Http_Client
      */
-    public function isValidCookie($value)
+    public function setCookiesPairs($value)
     {
-        $value = (array) $value;
+        if (preg_match_all('#(?:^|;)\s*([^=]+)=([^;]+)\s*(?:;|\s$)\s*?#', $value, $matches, PREG_SET_ORDER)) {
+            foreach($matches as $match) {
+                list(, $name, $value) = $match;
+                if (!strcasecmp($name, 'expires') && strtotime($value)
+                    || !strcasecmp($name, 'path') && urldecode($value) == $value
+                    || !strcasecmp($name, 'max-age')
+                ) {
+                    continue;
+                }
+                $this->setCookies($name, $value);
+            }
+        }
 
-        $valid = !array_diff_key(
-            array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
-            $value
-        );
-
-        return $valid;
+        return $this;
     }
 
     /**
@@ -764,6 +771,24 @@ class ChipVN_Http_Client
         $this->boundary = $boundary;
 
         return $this;
+    }
+
+    /**
+     * Determine a value is a cookie array (supported by this class)
+     *
+     * @param  mixed   $value
+     * @return boolean
+     */
+    public function isValidCookie($value)
+    {
+        $value = (array) $value;
+
+        $valid = !array_diff_key(
+            array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
+            $value
+        );
+
+        return $valid;
     }
 
     /**
