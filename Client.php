@@ -323,7 +323,7 @@ class ChipVN_Http_Client
         $this->path          = '';
         $this->method        = 'GET';
         $this->parameters    = array();
-        $this->rawPostData   = '';
+        $this->rawPostData   = null;
         $this->cookies       = array();
         $this->headers       = array();
         $this->timeout       = 10;
@@ -456,12 +456,31 @@ class ChipVN_Http_Client
     /**
      * Set request raw post data.
      *
-     * @param  string             $rawPostData
+     * @param  string             $data
      * @return ChipVN_Http_Client
      */
     public function setRawPost($data)
     {
-        $this->rawPostData = $data;
+        $this->rawPostData = array(
+            'type' => 'raw',
+            'data' => $data
+        );
+
+        return $this;
+    }
+
+    /**
+     * Set request raw post data.
+     *
+     * @param  string             $path
+     * @return ChipVN_Http_Client
+     */
+    public function setRawPostFile($path)
+    {
+        $this->rawPostData = array(
+            'type' => 'file',
+            'data' => $path
+        );
 
         return $this;
     }
@@ -897,7 +916,11 @@ class ChipVN_Http_Client
         if ($this->rawPostData) {
             $body .= $this->isMultipart ? "--".$this->boundary."\r\n" : "";
             // if use only raw data, don't append EOL to data
-            $body .= $this->rawPostData; // "\r\n"
+            if ($this->rawPostData['type'] == 'file') {
+                $body .= $this->getFileData($this->rawPostData['data']);
+            } else {
+                $body .= $this->rawPostData['data'];
+            }
         }
 
         if ($this->isPut()) {
