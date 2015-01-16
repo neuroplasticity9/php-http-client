@@ -623,7 +623,7 @@ class ChipVN_Http_Client
      */
     public function setCookiesPairs($value)
     {
-        if (preg_match_all('#(?:^|;)\s*([^=]+)=([^;]+)\s*(?:;|\s$)\s*?#', $value, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('#(?:^|;)\s*([^=]+)=([^;]+)\s*?#', $value, $matches, PREG_SET_ORDER)) {
             foreach($matches as $match) {
                 list(, $name, $value) = $match;
                 if (!strcasecmp($name, 'expires') && strtotime($value)
