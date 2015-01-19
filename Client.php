@@ -901,7 +901,6 @@ class ChipVN_Http_Client
         if ($cookies) {
             $headers[] = 'Cookie: '.$cookies;
         }
-        var_dump($headers);
 
         return $headers;
     }
