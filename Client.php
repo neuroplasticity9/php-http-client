@@ -548,7 +548,7 @@ class ChipVN_Http_Client
     {
         if (func_num_args() == 2) {
             if (strcasecmp($name, 'Cookie') === 0) {
-                return $this->setCookies($name, $value);
+                return $this->setCookiesPairs($value);
             }
             $this->headers[trim($name)] = trim($value);
         } else {
@@ -901,6 +901,7 @@ class ChipVN_Http_Client
         if ($cookies) {
             $headers[] = 'Cookie: '.$cookies;
         }
+        var_dump($headers);
 
         return $headers;
     }
