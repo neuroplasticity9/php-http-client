@@ -715,6 +715,16 @@ class ChipVN_Http_Client
     }
 
     /**
+     * Avoid use dynamic setter then bypass requirement checking.
+     *
+     * @param boolean $value
+     */
+    public function setUseCurl($value)
+    {
+        return $this->useCurl($value);
+    }
+
+    /**
      * Determine if the request will use cURL or not.
      * Default is use fsockopen.
      *
