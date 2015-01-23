@@ -226,7 +226,7 @@ class ChipVN_Http_Client
      * "name", "value", "path", "expires", "domains", "secure", "httponly".
      * Default is null.
      *
-     * @var [type]
+     * @var array
      */
     protected $responseArrayCookies;
 
@@ -245,12 +245,25 @@ class ChipVN_Http_Client
     protected $responseText;
 
     /**
+     * Flag to determine socket is enabled
+     *
+     * @var null
+     */
+    protected static $socketEnabled = null;
+
+    /**
      * Create a ChipVN_Http_Client instance.
      *
      * @return void
      */
     public function __construct()
     {
+        if (self::$socketEnabled === null) {
+            self::$socketEnabled = function_exists('fsockopen');
+            if (!self::$socketEnabled && !function_exists('curl_init')) {
+                throw new Exception('The library require fsockopen or curl.');
+            }
+        }
         $this->reset();
     }
 
@@ -328,7 +341,7 @@ class ChipVN_Http_Client
         $this->headers       = array();
         $this->timeout       = 10;
         $this->userAgent     = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
-        $this->useCurl       = false;
+        $this->useCurl       = !self::$socketEnabled;
         $this->isMultipart   = false;
 
         $this->proxyIp       = '';
@@ -707,10 +720,15 @@ class ChipVN_Http_Client
      *
      * @param  boolean            $useCurl
      * @return ChipVN_Http_Client
+     *
+     * @throws Exception
      */
     public function useCurl($useCurl)
     {
         $this->useCurl = (boolean) $useCurl;
+        if (!$this->useCurl && !self::$socketEnabled) {
+            throw new Exception('Function "fsockopen" is disabled, please enable to use otherwise use "curl".');
+        }
 
         return $this;
     }
@@ -1076,7 +1094,7 @@ class ChipVN_Http_Client
         // use fsockopen to send request
         else {
             // open connection
-            $filePointer = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
+            $filePointer = fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
 
             if (!$filePointer) {
                 if ($errstr) {
