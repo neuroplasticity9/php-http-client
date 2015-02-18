@@ -1103,8 +1103,18 @@ class ChipVN_Http_Client
         }
         // use fsockopen to send request
         else {
-            // open connection
+
+            static $errorHandler = null;
+            if ($errorHandler === null) {
+                $errorHandler = create_function('', '');
+            }
+            // Ignore warning
+            $handler = set_error_handler($errorHandler);
+
             $filePointer = fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
+
+            // restore error handler
+            $handler ? set_error_handler($handler) : restore_error_handler();
 
             if (!$filePointer) {
                 if ($errstr) {
@@ -1180,7 +1190,7 @@ class ChipVN_Http_Client
      * Execute follow redirect.
      *
      * @return null|boolean {@link execute()}
-     */
+
     protected function followRedirect()
     {
         if (
