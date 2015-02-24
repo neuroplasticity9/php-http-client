@@ -8,10 +8,10 @@
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
+ *
  * @version    2.5.8
  * @relase     07 1, 2015
  */
-
 class ChipVN_Http_Client
 {
     /**
@@ -109,15 +109,17 @@ class ChipVN_Http_Client
      * Determine follow response location (if have) or not.
      *
      * @since 2.5.2
+     *
      * @var boolean
      */
     protected $followRedirect;
 
     /**
      * The maximum amount of HTTP redirections to follow.
-     * True is not limited
+     * True is not limited.
      *
      * @since 2.5.2
+     *
      * @var integer|true
      */
     protected $maxRedirect;
@@ -126,6 +128,7 @@ class ChipVN_Http_Client
      * Redirected count (for use fsockopen).
      *
      * @since 2.5.2
+     *
      * @var integer
      */
     protected $redirectedCount;
@@ -245,7 +248,7 @@ class ChipVN_Http_Client
     protected $responseText;
 
     /**
-     * Flag to determine socket is enabled
+     * Flag to determine socket is enabled.
      *
      * @var null
      */
@@ -253,8 +256,6 @@ class ChipVN_Http_Client
 
     /**
      * Create a ChipVN_Http_Client instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -270,7 +271,7 @@ class ChipVN_Http_Client
     /**
      * Reset request and response data.
      *
-     * @return ChipVN_Http_Client
+     * @return self
      */
     public function reset()
     {
@@ -324,7 +325,7 @@ class ChipVN_Http_Client
     /**
      * Reset request data.
      *
-     * @return ChipVN_Http_Client
+     * @return self
      */
     public function resetRequest()
     {
@@ -362,7 +363,7 @@ class ChipVN_Http_Client
     /**
      * Reset request follow redirect option.
      *
-     * @return ChipVN_Http_Client
+     * @return self
      */
     public function resetFollowRedirect()
     {
@@ -377,7 +378,7 @@ class ChipVN_Http_Client
     /**
      * Reset response data.
      *
-     * @return ChipVN_Http_Client
+     * @return self
      */
     public function resetResponse()
     {
@@ -394,8 +395,10 @@ class ChipVN_Http_Client
      * Set http version.
      *
      * @since  2.5
-     * @param  string             $version
-     * @return ChipVN_Http_Client
+     *
+     * @param string $version
+     *
+     * @return self
      */
     public function setHttpVersion($version)
     {
@@ -409,9 +412,10 @@ class ChipVN_Http_Client
     /**
      * Set follow response location (if have).
      *
-     * @param  boolean            $follow
-     * @param  integer|null       $maxRedirect Null to use default value
-     * @return ChipVN_Http_Client
+     * @param boolean      $follow
+     * @param integer|null $maxRedirect Null to use default value
+     *
+     * @return self
      */
     public function setFollowRedirect($follow = true, $maxRedirect = null)
     {
@@ -428,8 +432,9 @@ class ChipVN_Http_Client
     /**
      * Set URL target.
      *
-     * @param  string             $target
-     * @return ChipVN_Http_Client
+     * @param string $target
+     *
+     * @return self
      */
     public function setTarget($target)
     {
@@ -441,8 +446,9 @@ class ChipVN_Http_Client
     /**
      * Set request URL referer.
      *
-     * @param  string             $referer
-     * @return ChipVN_Http_Client
+     * @param string $referer
+     *
+     * @return self
      */
     public function setReferer($referer)
     {
@@ -454,8 +460,9 @@ class ChipVN_Http_Client
     /**
      * Set number of seconds to time out.
      *
-     * @param  integer            $seconds
-     * @return ChipVN_Http_Client
+     * @param integer $seconds
+     *
+     * @return self
      */
     public function setTimeout($seconds)
     {
@@ -469,14 +476,15 @@ class ChipVN_Http_Client
     /**
      * Set request raw post data.
      *
-     * @param  string             $data
-     * @return ChipVN_Http_Client
+     * @param string $data
+     *
+     * @return self
      */
     public function setRawPost($data)
     {
         $this->rawPostData = array(
             'type' => 'raw',
-            'data' => $data
+            'data' => $data,
         );
 
         return $this;
@@ -485,14 +493,15 @@ class ChipVN_Http_Client
     /**
      * Set request raw post data.
      *
-     * @param  string             $path
-     * @return ChipVN_Http_Client
+     * @param string $path
+     *
+     * @return self
      */
     public function setRawPostFile($path)
     {
         $this->rawPostData = array(
             'type' => 'file',
-            'data' => $path
+            'data' => $path,
         );
 
         return $this;
@@ -501,8 +510,9 @@ class ChipVN_Http_Client
     /**
      * Set request method.
      *
-     * @param  string             $method
-     * @return ChipVN_Http_Client
+     * @param string $method
+     *
+     * @return self
      */
     public function setMethod($method)
     {
@@ -516,9 +526,10 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string|array       $name
-     * @param  string|null        $value
-     * @return ChipVN_Http_Client
+     * @param string|array $name
+     * @param string|null  $value
+     *
+     * @return self
      */
     public function setParameters($name, $value = null)
     {
@@ -553,9 +564,10 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string|array       $name
-     * @param  string|null        $value
-     * @return ChipVN_Http_Client
+     * @param string|array $name
+     * @param string|null  $value
+     *
+     * @return self
      */
     public function setHeaders($name, $value = null)
     {
@@ -589,9 +601,10 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string|array       $name
-     * @param  string|null        $value
-     * @return ChipVN_Http_Client
+     * @param string|array $name
+     * @param string|null  $value
+     *
+     * @return self
      */
     public function setCookies($name, $value = null)
     {
@@ -629,15 +642,17 @@ class ChipVN_Http_Client
 
     /**
      * Helper to set multiple cookies by list string of name-value pairs.
+     *
      * @since 2.5.9
      *
      * @param string $value
-     * @return ChipVN_Http_Client
+     *
+     * @return self
      */
     public function setCookiesPairs($value)
     {
         if (preg_match_all('#(?:^|;)\s*([^=]+)=([^;]+)\s*?#', $value, $matches, PREG_SET_ORDER)) {
-            foreach($matches as $match) {
+            foreach ($matches as $match) {
                 list(, $name, $value) = $match;
                 if (!strcasecmp($name, 'expires') && strtotime($value)
                     || !strcasecmp($name, 'path') && urldecode($value) == $value
@@ -655,8 +670,9 @@ class ChipVN_Http_Client
     /**
      * Remove a request header by name or all headers.
      *
-     * @param  string|true        $name True to remove all headers.
-     * @return ChipVN_Http_Client
+     * @param string|true $name True to remove all headers.
+     *
+     * @return self
      */
     public function removeHeaders($name)
     {
@@ -672,8 +688,9 @@ class ChipVN_Http_Client
     /**
      * Remove a request cookie by name or all cookies.
      *
-     * @param  string|true        $name True to remove all cookies.
-     * @return ChipVN_Http_Client
+     * @param string|true $name True to remove all cookies.
+     *
+     * @return self
      */
     public function removeCookies($name)
     {
@@ -689,10 +706,11 @@ class ChipVN_Http_Client
     /**
      * Remove a request parameter by name or all paramters.
      * If parameters is an array name[0], name[1]
-     * you may only remove [1] by `$obj->removeParameters('name.1');`
+     * you may only remove [1] by `$obj->removeParameters('name.1');`.
      *
-     * @param  string|true        $name True to remove all cookies.
-     * @return ChipVN_Http_Client
+     * @param string|true $name True to remove all cookies.
+     *
+     * @return self
      */
     public function removeParameters($name)
     {
@@ -728,8 +746,9 @@ class ChipVN_Http_Client
      * Determine if the request will use cURL or not.
      * Default is use fsockopen.
      *
-     * @param  boolean            $useCurl
-     * @return ChipVN_Http_Client
+     * @param boolean $useCurl
+     *
+     * @return self
      *
      * @throws Exception
      */
@@ -746,9 +765,10 @@ class ChipVN_Http_Client
     /**
      * Set submit multipart.
      *
-     * @param  string             $type
-     * @param  string             $method
-     * @return ChipVN_Http_Client
+     * @param string $type
+     * @param string $method
+     *
+     * @return self
      */
     public function setSubmitMultipart($type = 'form-data', $method = 'POST')
     {
@@ -762,9 +782,10 @@ class ChipVN_Http_Client
     /**
      * Set submit normal.
      *
-     * @param  string             $enctype
-     * @param  string             $method
-     * @return ChipVN_Http_Client
+     * @param string $enctype
+     * @param string $method
+     *
+     * @return self
      */
     public function setSubmitNormal($enctype = 'application/x-www-form-urlencoded', $method = 'POST')
     {
@@ -778,10 +799,11 @@ class ChipVN_Http_Client
     /**
      * Set request with proxy.
      *
-     * @param  string             $proxyIp  Format: ipaddress:port
-     * @param  string             $username
-     * @param  string             $password
-     * @return ChipVN_Http_Client
+     * @param string $proxyIp  Format: ipaddress:port
+     * @param string $username
+     * @param string $password
+     *
+     * @return self
      */
     public function setProxy($proxyIp, $username = '', $password = '')
     {
@@ -795,9 +817,10 @@ class ChipVN_Http_Client
     /**
      * Set request authentication.
      *
-     * @param  string             $username
-     * @param  string             $password
-     * @return ChipVN_Http_Client
+     * @param string $username
+     * @param string $password
+     *
+     * @return self
      */
     public function setAuth($username, $password = '')
     {
@@ -810,8 +833,9 @@ class ChipVN_Http_Client
     /**
      * Set boundary.
      *
-     * @param  string             $boundary
-     * @return ChipVN_Http_Client
+     * @param string $boundary
+     *
+     * @return self
      */
     public function setBoundary($boundary)
     {
@@ -821,9 +845,10 @@ class ChipVN_Http_Client
     }
 
     /**
-     * Determine a value is a cookie array (supported by this class)
+     * Determine a value is a cookie array (supported by this class).
      *
-     * @param  mixed   $value
+     * @param mixed $value
+     *
      * @return boolean
      */
     public function isValidCookie($value)
@@ -841,7 +866,8 @@ class ChipVN_Http_Client
     /**
      * Parses a URL and returns an associative array.
      *
-     * @param  string      $value
+     * @param string $value
+     *
      * @return array|false False if can't parse the value
      */
     public function parseCookie($value)
@@ -875,7 +901,8 @@ class ChipVN_Http_Client
     /**
      * Create cookie from array.
      *
-     * @param  array  $cookie
+     * @param array $cookie
+     *
      * @return string
      */
     public function createCookie(array $cookie)
@@ -997,10 +1024,11 @@ class ChipVN_Http_Client
     /**
      * Execute sending request and trigger errors messages if have.
      *
-     * @param  string|null       $target
-     * @param  string|null       $method
-     * @param  string|array|null $parameters
-     * @param  string|null       $referer
+     * @param string|null       $target
+     * @param string|null       $method
+     * @param string|array|null $parameters
+     * @param string|null       $referer
+     *
      * @return boolean
      */
     public function execute($target = null, $method = null, $parameters = null, $referer = null)
@@ -1067,7 +1095,7 @@ class ChipVN_Http_Client
             if ($headers) {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             }
-            if ($this->method == 'POST' || $this->method == 'PUT') {
+            if ($this->isPut()) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
             }
             if ($this->proxyIp) {
@@ -1103,7 +1131,6 @@ class ChipVN_Http_Client
         }
         // use fsockopen to send request
         else {
-
             static $errorHandler = null;
             if ($errorHandler === null) {
                 $errorHandler = create_function('', '');
@@ -1190,7 +1217,7 @@ class ChipVN_Http_Client
      * Execute follow redirect.
      *
      * @return null|boolean {@link execute()}
-
+     */
     protected function followRedirect()
     {
         if (
@@ -1216,8 +1243,7 @@ class ChipVN_Http_Client
     /**
      * Parse response headers.
      *
-     * @param  string $headers
-     * @return void
+     * @param string $headers
      */
     protected function parseResponseHeaders($headers)
     {
@@ -1294,9 +1320,10 @@ class ChipVN_Http_Client
     /**
      * Get response cookies by array with keys:
      * "name", "value", "path", "expires", "domains", "secure", "httponly".
-     * If response cookie does not provides the keys, default is null
+     * If response cookie does not provides the keys, default is null.
      *
-     * @param  string|null $name Null to get all cookies
+     * @param string|null $name Null to get all cookies
+     *
      * @return array|false False if cookie name is not exist.
      */
     public function getResponseArrayCookies($name = null)
@@ -1315,7 +1342,8 @@ class ChipVN_Http_Client
     /**
      * Get response headers.
      *
-     * @param  string|null   $name Null to get all headers
+     * @param string|null $name Null to get all headers
+     *
      * @return mixed|boolean False If get header by name and it is not exist
      */
     public function getResponseHeaders($name = null)
@@ -1358,11 +1386,12 @@ class ChipVN_Http_Client
      */
     public function isPut()
     {
-        return $this->method == 'POST' || $this->method == 'PUT';
+        return $this->method === 'POST' || $this->method === 'PUT';
     }
 
     /**
      * There is a bug while using parse_str function built in PHP.
+     *
      * @example
      *     @code   : parse_str('.a=1&.b=2', $array);
      *     @output : array('_a' => 1, '_b' => 2);
@@ -1373,9 +1402,8 @@ class ChipVN_Http_Client
      *
      * @since 2.5.4
      *
-     * @param  string $query
-     * @param  array  &$array
-     * @return void
+     * @param string $query
+     * @param array  &$array
      */
     protected function parseParameters($query, &$array = array())
     {
@@ -1408,8 +1436,9 @@ class ChipVN_Http_Client
     /**
      * Get absolute url for following redirect.
      *
-     * @param  string $relative
-     * @param  string $base
+     * @param string $relative
+     * @param string $base
+     *
      * @return string
      */
     protected function getAbsoluteUrl($relative, $base)
@@ -1442,7 +1471,8 @@ class ChipVN_Http_Client
     /**
      * Read binary data of file.
      *
-     * @param  string $filePath
+     * @param string $filePath
+     *
      * @return string Binary data
      */
     protected function getFileData($filePath)
@@ -1460,7 +1490,8 @@ class ChipVN_Http_Client
     /**
      * Get mime type of file.
      *
-     * @param  string $filePath
+     * @param string $filePath
+     *
      * @return string
      */
     protected function getFileType($filePath)
