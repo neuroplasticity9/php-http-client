@@ -9,8 +9,8 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
- * @version    2.5.8
- * @relase     07 1, 2015
+ * @version    2.5.9
+ * @relase     Jan 07, 2015
  */
 class ChipVN_Http_Client
 {
@@ -1180,7 +1180,7 @@ class ChipVN_Http_Client
 
             // get body
             while (!feof($filePointer)) {
-                $responseBody .= fgets($filePointer, 128);
+                $responseBody .= fgets($filePointer);
             }
             fclose($filePointer);
 
