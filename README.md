@@ -8,7 +8,6 @@
 * Author:     Phan Thanh Cong <ptcong90@gmail.com>
 * Copyright:  2011-2014 Phan Thanh Cong.
 * License:    http://www.opensource.org/licenses/mit-license.php  MIT License
-* Version:    2.5.8
 
 ## Change logs
 ##### Version 2.6.0: Apr 02, 2015
