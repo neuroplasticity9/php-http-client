@@ -322,21 +322,6 @@ class ChipVN_Http_Client
 
             return $this;
         }
-        $deprecatedMethods = array(
-            'setparam'          => 'setParameters',      // @since 2.5.2
-            'addparameters'     => 'setParameters',      // @since 2.5.4
-            'setcookie'         => 'setCookies',         // @since 2.5.2
-            'addcookies'        => 'setCookies',         // @since 2.5.4
-            'setheader'         => 'setHeaders',         // @since 2.5.2
-            'addheaders'        => 'setHeaders',         // @since 2.5.2
-            'getresponsecookie' => 'getResponseCookies', // @since 2.5.0
-        );
-        if (isset($deprecatedMethods[strtolower($method)])) {
-            return call_user_func_array(
-                array($this, $deprecatedMethods[strtolower($method)]),
-                $arguments
-            );
-        }
     }
 
     /**
