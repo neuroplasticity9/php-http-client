@@ -1280,7 +1280,9 @@ class ChipVN_Http_Client
         foreach ($lines as $line) {
             if ($line = trim($line)) {
                 // parse headers to array
-                if (!isset($this->responseHeaders['status']) && preg_match('#HTTP/.*?\s+(\d+)#i', $line, $match)) {
+                if (!isset($this->responseHeaders['status'])
+                    && preg_match('#HTTP/.*?\s+(\d+)#i', $line, $match)
+                ) {
                     $this->responseStatus = intval($match[1]);
                     $this->responseHeaders['status'] = $line;
                 } elseif (strpos($line, ':')) {
