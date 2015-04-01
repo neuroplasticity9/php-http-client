@@ -14,6 +14,7 @@
 ##### Version 2.6.0: Apr 02, 2015
 * Fixed parsing cookie with httpOnly, Secure flags
 * Fixed following redirect with cookies for domain. (for automatic signin to google)
+* Add `$nobody` option to get only headers (helpful to get headers of a video url). Use `$client->setNobody(true)`;
 
 ##### Version 2.5.8: Oct 07, 2014
 * Optimize code
