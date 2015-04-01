@@ -11,6 +11,9 @@
 * Version:    2.5.8
 
 ## Change logs
+##### Version 2.6.0: Apr 02, 2015
+* Fixed parsing cookie with httpOnly, Secure flags
+* Fixed following redirect with cookies for domain. (for automatic signin to google)
 
 ##### Version 2.5.8: Oct 07, 2014
 * Optimize code

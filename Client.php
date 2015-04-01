@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ChipVN_Http_Client class used to sending request and get response like a browser.
  * Use 2 functions: cURL, fsockopen
@@ -9,7 +10,7 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
- * @version    2.5.9
+ * @version    2.6.0
  * @relase     Jan 07, 2015
  */
 class ChipVN_Http_Client
@@ -45,7 +46,7 @@ class ChipVN_Http_Client
     /**
      * URL port.
      *
-     * @var integer
+     * @var int
      */
     protected $port;
 
@@ -101,16 +102,23 @@ class ChipVN_Http_Client
     /**
      * Number of seconds to timeout.
      *
-     * @var integer
+     * @var int
      */
     protected $timeout;
+
+    /**
+     * Determine to get response body text or header only.
+     *
+     * @var bool
+     */
+    protected $nobody;
 
     /**
      * Determine follow response location (if have) or not.
      *
      * @since 2.5.2
      *
-     * @var boolean
+     * @var bool
      */
     protected $followRedirect;
 
@@ -120,7 +128,7 @@ class ChipVN_Http_Client
      *
      * @since 2.5.2
      *
-     * @var integer|true
+     * @var int|true
      */
     protected $maxRedirect;
 
@@ -129,21 +137,28 @@ class ChipVN_Http_Client
      *
      * @since 2.5.2
      *
-     * @var integer
+     * @var int
      */
     protected $redirectedCount;
 
     /**
-     * Total cookies while redirect.
+     * Reditected request objects.
+     *
+     * @var aray
+     */
+    protected $redirectedRequests;
+
+    /**
+     * Redirected urls.
      *
      * @var array
      */
-    protected $redirectCookies;
+    protected $redirectedUrls;
 
     /**
      * Determine the request will use cURL or not.
      *
-     * @var boolean
+     * @var bool
      */
     protected $useCurl;
 
@@ -185,7 +200,7 @@ class ChipVN_Http_Client
     /**
      * Determine the request is multipart or not.
      *
-     * @var boolean
+     * @var bool
      */
     protected $isMultipart;
 
@@ -213,7 +228,7 @@ class ChipVN_Http_Client
     /**
      * Response status code.
      *
-     * @var integer
+     * @var int
      */
     protected $responseStatus;
 
@@ -275,6 +290,8 @@ class ChipVN_Http_Client
      */
     public function reset()
     {
+        $this->nobody = false;
+
         return $this
             ->resetRequest()
             ->resetFollowRedirect()
@@ -367,10 +384,11 @@ class ChipVN_Http_Client
      */
     public function resetFollowRedirect()
     {
-        $this->followRedirect  = false;
-        $this->maxRedirect     = true;
-        $this->redirectedCount = 0;
-        $this->redirectCookies = array();
+        $this->followRedirect     = false;
+        $this->maxRedirect        = true;
+        $this->redirectedCount    = 0;
+        $this->redirectUrls       = array();
+        $this->redirectedRequests = array();
 
         return $this;
     }
@@ -412,8 +430,8 @@ class ChipVN_Http_Client
     /**
      * Set follow response location (if have).
      *
-     * @param boolean      $follow
-     * @param integer|null $maxRedirect Null to use default value
+     * @param bool     $follow
+     * @param int|null $maxRedirect Null to use default value
      *
      * @return self
      */
@@ -460,7 +478,7 @@ class ChipVN_Http_Client
     /**
      * Set number of seconds to time out.
      *
-     * @param integer $seconds
+     * @param int $seconds
      *
      * @return self
      */
@@ -735,7 +753,7 @@ class ChipVN_Http_Client
     /**
      * Avoid use dynamic setter then bypass requirement checking.
      *
-     * @param boolean $value
+     * @param bool $value
      */
     public function setUseCurl($value)
     {
@@ -746,7 +764,7 @@ class ChipVN_Http_Client
      * Determine if the request will use cURL or not.
      * Default is use fsockopen.
      *
-     * @param boolean $useCurl
+     * @param bool $useCurl
      *
      * @return self
      *
@@ -849,7 +867,7 @@ class ChipVN_Http_Client
      *
      * @param mixed $value
      *
-     * @return boolean
+     * @return bool
      */
     public function isValidCookie($value)
     {
@@ -873,14 +891,18 @@ class ChipVN_Http_Client
     public function parseCookie($value)
     {
         if (is_string($value) && preg_match_all('#([^=;\s]+)(?:=([^;]+))?;?\s*?#', $value, $matches)) {
-            $name  = $matches[1][0];
-            $value = $matches[2][0];
-            array_shift($matches[1]);
-            array_shift($matches[2]);
+            $name  = array_shift($matches[1]);
+            $value = array_shift($matches[2]);
 
             $cookie = array();
             if ($matches[1] && $matches[2]) {
-                $cookie += array_combine($matches[1], $matches[2]);
+                $matches[1] = array_map('strtolower', $matches[1]);
+                $cookie = array_combine($matches[1], $matches[2]);
+                foreach (array('secure', 'httponly') as $k) {
+                    if (isset($cookie[$k])) {
+                        $cookie[$k] = true;
+                    }
+                }
             }
 
             return  $cookie + array(
@@ -969,7 +991,7 @@ class ChipVN_Http_Client
     {
         $body = '';
         if ($this->rawPostData) {
-            $body .= $this->isMultipart ? "--".$this->boundary."\r\n" : "";
+            $body .= $this->isMultipart ? '--'.$this->boundary."\r\n" : '';
             // if use only raw data, don't append EOL to data
             if ($this->rawPostData['type'] == 'file') {
                 $body .= $this->getFileData($this->rawPostData['data']);
@@ -992,20 +1014,20 @@ class ChipVN_Http_Client
                         if (substr($value, 0, 1) == '@') {
                             $uploadFilePath  = substr($value, 1);
                             if (file_exists($uploadFilePath)) {
-                                $body .= "--".$this->boundary."\r\n";
+                                $body .= '--'.$this->boundary."\r\n";
                                 $body .= "Content-disposition: form-data; name=\"".$name."\"; filename=\"".basename($uploadFilePath)."\"\r\n";
-                                $body .= "Content-Type: ".$this->getFileType($uploadFilePath)."\r\n";
+                                $body .= 'Content-Type: '.$this->getFileType($uploadFilePath)."\r\n";
                                 $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
                                 $body .= $this->getFileData($uploadFilePath)."\r\n";
                             }
                         } else {
-                            $body .= "--".$this->boundary."\r\n";
+                            $body .= '--'.$this->boundary."\r\n";
                             $body .= "Content-Disposition: form-data; name=\"".$name."\"\r\n";
                             $body .= "\r\n";
                             $body .= $value."\r\n";
                         }
                     }
-                    $body .= "--".$this->boundary."--\r\n"; // end
+                    $body .= '--'.$this->boundary."--\r\n"; // end
                 };
             } else {
                 $body .= preg_replace_callback('#([^=&]+)=([^&]*)#i', create_function('$match',
@@ -1029,7 +1051,7 @@ class ChipVN_Http_Client
      * @param string|array|null $parameters
      * @param string|null       $referer
      *
-     * @return boolean
+     * @return bool
      */
     public function execute($target = null, $method = null, $parameters = null, $referer = null)
     {
@@ -1088,6 +1110,9 @@ class ChipVN_Http_Client
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+            if ($this->nobody) {
+                curl_setopt($ch, CURLOPT_NOBODY, true);
+            }
 
             if ($this->timeout) {
                 curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
@@ -1152,8 +1177,8 @@ class ChipVN_Http_Client
 
                 return false;
             }
-            $requestHeader = $this->method." ".$this->path." HTTP/".$this->httpVersion."\r\n";
-            $requestHeader .= "Host: ".$urlParsed['host']."\r\n";
+            $requestHeader = $this->method.' '.$this->path.' HTTP/'.$this->httpVersion."\r\n";
+            $requestHeader .= 'Host: '.$urlParsed['host']."\r\n";
             if ($headers) {
                 $requestHeader .= implode("\r\n", $headers)."\r\n";
             }
@@ -1179,8 +1204,10 @@ class ChipVN_Http_Client
             $this->parseResponseHeaders($responseHeader);
 
             // get body
-            while (!feof($filePointer)) {
-                $responseBody .= fgets($filePointer);
+            if (!$this->nobody) {
+                while (!feof($filePointer)) {
+                    $responseBody .= fgets($filePointer);
+                }
             }
             fclose($filePointer);
 
@@ -1216,7 +1243,7 @@ class ChipVN_Http_Client
     /**
      * Execute follow redirect.
      *
-     * @return null|boolean {@link execute()}
+     * @return null|bool {@link execute()}
      */
     protected function followRedirect()
     {
@@ -1226,18 +1253,41 @@ class ChipVN_Http_Client
             && ($this->maxRedirect === true || $this->redirectedCount < $this->maxRedirect)
         ) {
             $location = $this->getAbsoluteUrl($location, $this->target);
+            $referer = isset($this->headers['Referer']) ? $this->headers['Referer'] : null;
 
             $this->redirectedCount++;
-            $this->redirectCookies += $this->getCookies();
+            $this->redirectUrls[] = $this->getTarget();
+            $this->redirectedRequests[] = clone $this;
 
+            // remove old request.
             $this->resetRequest();
-            $this->setCookies($this->getResponseArrayCookies() + $this->getRedirectCookies());
+            if ($referer) {
+                $this->setReferer($referer);
+            }
+            $host = parse_url($location, PHP_URL_HOST);
+            foreach ($this->redirectedRequests as $obj) {
+                foreach ($obj->getResponseArrayCookies() as $cookie) {
+                    if (empty($cookie['domain'])
+                        || ($domain = trim($cookie['domain'], '.'))
+                            && substr($host, -strlen($domain)) == $domain
+                    ) {
+                        $this->setCookies($cookie);
+                    }
+                }
+            }
+            // remove old responses.
             $this->resetResponse();
 
             return $this->execute($location);
         }
 
         return;
+    }
+
+    public function __clone()
+    {
+        $this->redirectedRequests = array();
+        $this->redirectedUrls = array();
     }
 
     /**
@@ -1290,7 +1340,7 @@ class ChipVN_Http_Client
     /**
      * Get redirected count.
      *
-     * @return integer
+     * @return int
      */
     public function getRedirectedCount()
     {
@@ -1300,7 +1350,7 @@ class ChipVN_Http_Client
     /**
      * Get response status code.
      *
-     * @return integer
+     * @return int
      */
     public function getResponseStatus()
     {
@@ -1344,7 +1394,7 @@ class ChipVN_Http_Client
      *
      * @param string|null $name Null to get all headers
      *
-     * @return mixed|boolean False If get header by name and it is not exist
+     * @return mixed|bool False If get header by name and it is not exist
      */
     public function getResponseHeaders($name = null)
     {
@@ -1382,7 +1432,7 @@ class ChipVN_Http_Client
     /**
      * Determine if method is put/post.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPut()
     {
