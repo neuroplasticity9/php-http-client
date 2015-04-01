@@ -10,7 +10,7 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
- * @version    2.6.0
+ * @version    2.6.1
  * @relase     Jan 07, 2015
  */
 class ChipVN_Http_Client
@@ -1266,8 +1266,9 @@ class ChipVN_Http_Client
             }
             $host = parse_url($location, PHP_URL_HOST);
             foreach ($this->redirectedRequests as $obj) {
+                $objHost = parse_url($obj->getTarget(), PHP_URL_HOST);
                 foreach ($obj->getResponseArrayCookies() as $cookie) {
-                    if (empty($cookie['domain'])
+                    if (empty($cookie['domain']) && !strcasecmp($host, $objHost)
                         || ($domain = trim($cookie['domain'], '.'))
                             && substr($host, -strlen($domain)) == $domain
                     ) {
@@ -1284,6 +1285,11 @@ class ChipVN_Http_Client
         return;
     }
 
+    /**
+     * @since 2.6.0
+     *
+     * @return void
+     */
     public function __clone()
     {
         $this->redirectedRequests = array();
