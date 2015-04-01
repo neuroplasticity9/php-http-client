@@ -856,14 +856,10 @@ class ChipVN_Http_Client
      */
     public function isValidCookie($value)
     {
-        $value = (array) $value;
-
-        $valid = !array_diff_key(
+        return !array_diff_key(
             array_flip(array('name', 'value', 'expires', 'path', 'domain', 'secure', 'httponly')),
-            $value
+            (array) $value
         );
-
-        return $valid;
     }
 
     /**
@@ -914,16 +910,7 @@ class ChipVN_Http_Client
      */
     public function createCookie(array $cookie)
     {
-        $result = $cookie['name'].'='.$cookie['value'].';';
-
-        // don't need extra args
-        // unset($cookie['name'], $cookie['value']);
-        // foreach ($cookie as $key => $value) {
-        //     if ($value !== null) {
-        //         $result .= ' ' . $key . '=' . $value . ';';
-        //     }
-        // }
-        return $result;
+        return $cookie['name'].'='.$cookie['value'].';';
     }
 
     /**
