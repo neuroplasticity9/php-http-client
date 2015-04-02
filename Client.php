@@ -10,11 +10,25 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
- * @version    2.6.1
- * @relase     Jan 07, 2015
+ * @version    2.6.2
+ * @relase     Apr 02, 2015
  */
 class ChipVN_Http_Client
 {
+    /**
+     * Debug mode.
+     *
+     * @var bool
+     */
+    protected $debug = false;
+
+    /**
+     * Debug request informations.
+     *
+     * @var array
+     */
+    protected $debugRequestInfo;
+
     /**
      * HTTP Version.
      *
@@ -888,6 +902,7 @@ class ChipVN_Http_Client
             if (isset($cookie['domain'])) {
                 $cookie['domain'] = strtolower($cookie['domain']);
             }
+
             return  $cookie + array(
                 'name'     => $name,
                 'value'    => $value,
@@ -1083,6 +1098,14 @@ class ChipVN_Http_Client
         $body    = $this->prepareRequestBody();
         $headers = $this->prepareRequestHeaders();
 
+        $this->debugRequest = array();
+        if ($this->debug) {
+            $this->debugRequestInfo = array(
+                'headers' => $headers,
+                'body'    => $body,
+            );
+        }
+
         // use cURL to send request
         if ($this->useCurl) {
             $ch = curl_init();
@@ -1204,7 +1227,8 @@ class ChipVN_Http_Client
             }
 
             // remove chunked
-            if (isset($this->responseHeaders['transfer-encoding'])
+            if (!$this->nobody
+                && isset($this->responseHeaders['transfer-encoding'])
                 && $this->responseHeaders['transfer-encoding'] == 'chunked'
             ) {
                 $data    = $responseBody;
@@ -1258,7 +1282,7 @@ class ChipVN_Http_Client
             $host = parse_url($location, PHP_URL_HOST);
             foreach ($this->redirectedRequests as $obj) {
                 $objHost = $obj->getHost();
-                foreach($obj->getResponseArrayCookies() as $cookie) {
+                foreach ($obj->getResponseArrayCookies() as $cookie) {
                     if (empty($cookie['domain'])) {
                         $cookie['domain'] = $objHost;
                     }
