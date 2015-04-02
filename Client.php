@@ -372,7 +372,7 @@ class ChipVN_Http_Client
         $this->followRedirect     = false;
         $this->maxRedirect        = true;
         $this->redirectedCount    = 0;
-        $this->redirectUrls       = array();
+        $this->redirectedUrls     = array();
         $this->redirectedRequests = array();
 
         return $this;
@@ -885,7 +885,9 @@ class ChipVN_Http_Client
                     }
                 }
             }
-
+            if (isset($cookie['domain'])) {
+                $cookie['domain'] = strtolower($cookie['domain']);
+            }
             return  $cookie + array(
                 'name'     => $name,
                 'value'    => $value,
@@ -936,11 +938,26 @@ class ChipVN_Http_Client
                 $headers[] = $name.': '.$value;
             }
         }
-        // cookies
+        // prepare cookies
         $cookies = '';
-        $domain = preg_replace('#^(.*?\.)?([\w-_]+\.\w+)$#', '$2', $this->host);
+        // {@link http://tools.ietf.org/html/rfc2109#section-4.3.2}
         foreach ($this->cookies as $name => $cookie) {
-            if ($cookie['domain'] && stripos($cookie['domain'], $domain) === false) {
+            if (
+                // * The value for the Path attribute is not a prefix of the request-
+                //  URI.
+                (isset($cookie['path']) && strpos($this->path, $cookie['path']) !== 0)
+
+                // * The value for the Domain attribute contains no embedded dots or
+                //  does not start with a dot.
+                // * The value for the request-host does not domain-match the Domain
+                //  attribute.
+                // * The request-host is a FQDN (not IP address) and has the form HD,
+                //  where D is the value of the Domain attribute, and H is a string
+                //  that contains one or more dots.
+                ||  (isset($cookie['domain'])
+                    && substr($this->host, -strlen($cookie['domain'])) != ltrim($cookie['domain'], '.')
+                )
+            ) {
                 unset($this->cookies[$name]);
                 continue;
             }
@@ -1051,14 +1068,13 @@ class ChipVN_Http_Client
                 .http_build_query($this->parameters) : '');
         }
 
-        $urlParsed    = parse_url($this->target);
-        $this->scheme = $urlParsed['scheme'];
+        $urlParsed = parse_url($this->target);
+        $this->scheme = strtolower($urlParsed['scheme']);
+        $this->host = $urlParsed['host'] = strtolower($urlParsed['host']); // force domain to lower case.
 
-        if ($urlParsed['scheme'] == 'https') {
-            $this->host = 'ssl://'.$urlParsed['host'];
+        if ($ssl = ($urlParsed['scheme'] == 'https')) {
             $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 443;
         } else {
-            $this->host = $urlParsed['host'];
             $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 80;
         }
         $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
@@ -1135,7 +1151,7 @@ class ChipVN_Http_Client
             // Ignore warning
             $handler = set_error_handler($errorHandler);
 
-            $filePointer = fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
+            $filePointer = fsockopen(($ssl ? 'ssl://' : '').$this->host, $this->port, $errno, $errstr, $this->timeout);
 
             // restore error handler
             $handler ? set_error_handler($handler) : restore_error_handler();
@@ -1150,7 +1166,7 @@ class ChipVN_Http_Client
                 return false;
             }
             $requestHeader = $this->method.' '.$this->path.' HTTP/'.$this->httpVersion."\r\n";
-            $requestHeader .= 'Host: '.$urlParsed['host']."\r\n";
+            $requestHeader .= 'Host: '.$this->host."\r\n";
             if ($headers) {
                 $requestHeader .= implode("\r\n", $headers)."\r\n";
             }
@@ -1228,24 +1244,25 @@ class ChipVN_Http_Client
             $referer = isset($this->headers['Referer']) ? $this->headers['Referer'] : null;
 
             $this->redirectedCount++;
-            $this->redirectUrls[] = $this->getTarget();
-            $this->redirectedRequests[] = clone $this;
+            $this->redirectedUrls[] = $this->getTarget();
+            $this->redirectedRequests[] = $this->getClone();
 
             // remove old request.
             $this->resetRequest();
             if ($referer) {
                 $this->setReferer($referer);
             }
+            $firstRequest = $this->redirectedRequests[0];
+            $this->setCookies($firstRequest->getCookies());
+
             $host = parse_url($location, PHP_URL_HOST);
             foreach ($this->redirectedRequests as $obj) {
-                $objHost = parse_url($obj->getTarget(), PHP_URL_HOST);
-                foreach ($obj->getResponseArrayCookies() as $cookie) {
-                    if (empty($cookie['domain']) && !strcasecmp($host, $objHost)
-                        || ($domain = trim($cookie['domain'], '.'))
-                            && substr($host, -strlen($domain)) == $domain
-                    ) {
-                        $this->setCookies($cookie);
+                $objHost = $obj->getHost();
+                foreach($obj->getResponseArrayCookies() as $cookie) {
+                    if (empty($cookie['domain'])) {
+                        $cookie['domain'] = $objHost;
                     }
+                    $this->setCookies($cookie);
                 }
             }
             // remove old responses.
@@ -1258,14 +1275,18 @@ class ChipVN_Http_Client
     }
 
     /**
-     * @since 2.6.0
+     * Don't use __clone(), because sometimes
+     * we need to clone everything of current object.
      *
-     * @return void
+     * @return self
      */
-    public function __clone()
+    public function getClone()
     {
-        $this->redirectedRequests = array();
-        $this->redirectedUrls = array();
+        $obj = clone $this;
+        $obj->redirectedRequests = array();
+        $obj->redirectedUrls = array();
+
+        return $obj;
     }
 
     /**
