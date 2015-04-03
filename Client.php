@@ -23,11 +23,13 @@ class ChipVN_Http_Client
     protected $debug = false;
 
     /**
-     * Debug request informations.
+     * Debug informations.
+     * This provides "time_start", "time_process" of a request.
+     * If debug mode is enabled, this will give "headers", "body"
      *
      * @var array
      */
-    protected $debugRequestInfo;
+    protected $info;
 
     /**
      * HTTP Version.
@@ -1098,9 +1100,9 @@ class ChipVN_Http_Client
         $body    = $this->prepareRequestBody();
         $headers = $this->prepareRequestHeaders();
 
-        $this->debugRequest = array();
+        $this->info = array('time_start' => microtime(true));
         if ($this->debug) {
-            $this->debugRequestInfo = array(
+            $this->info += array(
                 'headers' => $headers,
                 'body'    => $body,
             );
@@ -1248,6 +1250,7 @@ class ChipVN_Http_Client
             }
             $this->responseText = $responseBody;
         }
+        $this->info['time_process'] = microtime(true) - $this->info['start'];
 
         return true;
     }
