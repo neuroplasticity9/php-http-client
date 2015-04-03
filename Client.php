@@ -1250,7 +1250,7 @@ class ChipVN_Http_Client
             }
             $this->responseText = $responseBody;
         }
-        $this->info['time_process'] = microtime(true) - $this->info['start'];
+        $this->info['time_process'] = microtime(true) - $this->info['time_start'];
 
         return true;
     }
