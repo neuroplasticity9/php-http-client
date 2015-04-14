@@ -1487,7 +1487,8 @@ class ChipVN_Http_Client
     {
         $array = array();
         foreach (explode('&', $query) as $param) {
-            list($key, $value) = explode('=', $param, 2);
+            // handle if set parameters without value.
+            list($key, $value) = explode('=', $param, 2) + array(0, '');
             if (preg_match_all('#\[([^\]]+)?\]#i', $key, $matches)) {
                 $key = str_replace($matches[0], '', $key);
                 if (!isset($array[$key])) {
