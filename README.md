@@ -19,7 +19,7 @@
 * Add `$nobody` option to get only headers (helpful to get headers of a video url). Use `$client->setNobody(true/false)`;
 
 ##### Version 2.5.8: Oct 07, 2014
-* Optimize code
+* Optimized code
 * Added new method `setCookiesPairs()` to set cookies by string key=value; pairs
 * Added new method `setRawPostFile()` to post raw content of file
 
@@ -41,7 +41,7 @@
 * Added dynamic getters, setters (so you may get/set any properties for sending request easier)
 * Added new method: `getRedirectedCount()`
 * Added new methods: `setCookies()`, `setParameters()`, `setHeaders()`, `removeCookies()`, `removeParameters()`, `removeHeaders()`
-* Added new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`
+* ~~Added new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`~~
 * Deprecated methods: `setCookie()`, `setParam()`, `setHeader()` (still avaliable)
 * Changed method names: `readBinary()` -> `getFileData()`, `getMimeType()` -> `getFileType()`
 
@@ -60,7 +60,7 @@
 * Added new method `setHttpVersion()` to change HTTP protocol version
 
 ##### Version 2.4: Jul 25, 2013
-* Require PHP 5.3 or newer
+* ~~Require PHP 5.3 or newer~~
 * Change two static class methods (readBinary, mimeTye) to protected instance method
 
 ##### Version 2.3.4: Feb 20, 2013
@@ -106,35 +106,35 @@ Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `
 
 Create an `ChipVN_Http_Client` instnace
 
-	$request = new ChipVN_Http_Client;
+	$client = new ChipVN_Http_Client;
 
 #### Send a request
 
 **Use cURL or fsockopen**
 
-	$request->useCurl(false);
+	$client->useCurl(false);
 
 **Set target url** (like to browse a url on browser)
 
-	$request->setTarget('http://google.com');
+	$client->setTarget('http://google.com');
 
 **Use cookies**
 
-	$request->setCookiesPairs('name=value; name2=value2; name3=value3');
+	$client->setCookiesPairs('name=value; name2=value2; name3=value3');
 
-	$request->setCookies('name=value'); // single cookie key=value
-
-	// or
-	$request->setCookies('path=/; name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT');
+	$client->setCookies('name=value'); // single cookie key=value
 
 	// or
-	$request->setCookies(array(
+	$client->setCookies('path=/; name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT');
+
+	// or
+	$client->setCookies(array(
 		'name1=value1',
 		'name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT'
 	));
 
 	// or
-	$request->setCookies(array(
+	$client->setCookies(array(
 		'name' => 'name1',
 		'value' => 'value1',
 		'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
@@ -146,7 +146,7 @@ Create an `ChipVN_Http_Client` instnace
 	));
 
 	// or
-	$request->setCookies(array(
+	$client->setCookies(array(
 		array(
 			'name' => 'name1',
 			'value' => 'value1',
@@ -161,102 +161,102 @@ Create an `ChipVN_Http_Client` instnace
 
 **Change HTTP Protocol version**
 
-	$request->setHttpVersion('1.1');
+	$client->setHttpVersion('1.1');
 
 	// or
-	$request->setHttpVersion('1.0');
+	$client->setHttpVersion('1.0');
 
 **Follow redirect**
 
-	$request->setFollowRedirect(true);
+	$client->setFollowRedirect(true);
 
 	// or maximum redirect 5 times. Default is 3 times and return last response
-	$request->setFollowRedirect(true, 5);
+	$client->setFollowRedirect(true, 5);
 
 **Parameters / Uploading file**
 
-	$request->setParameters('name', 'value');
+	$client->setParameters('name', 'value');
 
 	// or
-	$request->setParameters('name=value&name2=value2&name3=value3');
+	$client->setParameters('name=value&name2=value2&name3=value3');
 
-	$request->setParam(array(
+	$client->setParam(array(
 		'name1=value1',
 		'name2=value2'
 	));
 
 	// or
-	$request->setParameters(array(
+	$client->setParameters(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
 	));
 
 	// for uploading
-	$request->setParameters('filedata', '@/path/path/file.jpg');
+	$client->setParameters('filedata', '@/path/path/file.jpg');
 
 	// also can use
-	$request->setParameters(array(
+	$client->setParameters(array(
 		'filedata'  => '@/path/path/file.jpg'
 	));
 
 **Post raw data**
 
-	$request->setRawPost('your data');
+	$client->setRawPost('your data');
 
 **Post raw file**
 
-	$request->setRawPost(file_get_contents('/your/file/path'));
+	$client->setRawPost(file_get_contents('/your/file/path'));
 
 	// but recommend to use the method
-	$request->setRawPostFile('/your/file/path');
+	$client->setRawPostFile('/your/file/path');
 
 **Referer**
 
-	$request->setReferer('http://domain.com');
+	$client->setReferer('http://domain.com');
 
 **User Agent**
 
-	$request->setUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1');
+	$client->setUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1');
 
 **Connect timeout**
 
-	$request->setTimeout($seconds);
+	$client->setTimeout($seconds);
 
 **Method**
 
-	$request->setMethod('POST');
-	$request->setMethod('GET');
-	$request->setMethod('PUT');
-	$request->setMethod('HEAD');
+	$client->setMethod('POST');
+	$client->setMethod('GET');
+	$client->setMethod('PUT');
+	$client->setMethod('HEAD');
 	// etc
 
 **Submit type**
 
 	// use to upload file
-	$request->setSubmitMultipart();
+	$client->setSubmitMultipart();
 
 	// submit normal form
-	$request->setSubmitNormal();
+	$client->setSubmitNormal();
 
 **Request enctype**
 
-	$request->setEnctype('application/x-www-form-urlencoded');
+	$client->setEnctype('application/x-www-form-urlencoded');
 
 **Use Headers**
 
-	$request->setHeaders('Origin', 'xxx');
+	$client->setHeaders('Origin', 'xxx');
 
 	// or
-	$request->setHeaders('User-Agent: Firefox/9.0.1');
+	$client->setHeaders('User-Agent: Firefox/9.0.1');
 
 	// or
-	$request->setHeaders(array(
+	$client->setHeaders(array(
 		'name1=value1',
 		'name2=value2',
 	));
 
 	// or
-	$request->setHeaders(array(
+	$client->setHeaders(array(
 		'name1'  => 'value1',
 		'name2'  => 'value2'
 	));
@@ -264,31 +264,31 @@ Create an `ChipVN_Http_Client` instnace
 **Use Proxy**
 The method only avaliable if you use cURL for sending request
 
-	$request->setProxy('127.0.0.1:80');
+	$client->setProxy('127.0.0.1:80');
 
 	// or
-	$request->setProxy('127.0.0.1:80', $username, $password);
+	$client->setProxy('127.0.0.1:80', $username, $password);
 
 **WWW-Authenticate**
 
-	$request->setAuth('user', 'pass');
+	$client->setAuth('user', 'pass');
 
 **Remove cookies/ parameters/ headers added**
 
-	$request->removeHeaders(true); // remove all headers
-	$request->removeHeaders('Referer'); // remove a header
+	$client->removeHeaders(true); // remove all headers
+	$client->removeHeaders('Referer'); // remove a header
 
-	$request->removeCookies(true); // remove all cookies
-	$request->removeCookies('name'); // remove a cookie
+	$client->removeCookies(true); // remove all cookies
+	$client->removeCookies('name'); // remove a cookie
 
-	$request->removeParameters(true); // remove all parameters
-	$request->removeParameters('name'); // remove a parameter
+	$client->removeParameters(true); // remove all parameters
+	$client->removeParameters('name'); // remove a parameter
 
 #### Helpers
 
 **parseCookie()**:
 
-	$cookie = $request->parseCookie('gostep=1; expires=Tue, 01-Apr-2014 05:20:23 GMT; Max-Age=300; path=/; domain=domain.com; secure;');
+	$cookie = $client->parseCookie('gostep=1; expires=Tue, 01-Apr-2014 05:20:23 GMT; Max-Age=300; path=/; domain=domain.com; secure;');
 
 	print_r($cookie);
 
@@ -309,46 +309,46 @@ This method used to create cookie from array with keys like above (parseCookie) 
 
 **Execute sending request**
 
-	$boolean = $request->execute();
+	$boolean = $client->execute();
 
-	var_dump($request->errors); // if have
+	var_dump($client->errors); // if have
 
 
 #### Get Response
 
 **Get response status code**
 
-	echo $request->getResponseStatus();
+	echo $client->getResponseStatus();
 
 **Get response headers**
 
-	print_r($request->getResponseHeaders());
+	print_r($client->getResponseHeaders());
 
 	// or
-	echo $request->getResponseHeaders('location');
+	echo $client->getResponseHeaders('location');
 
 	// or "set-cookie" return an array if have.
-	print_r($request->getResponseHeaders('set-cookie'));
+	print_r($client->getResponseHeaders('set-cookie'));
 
 **Get response cookies**
 
 	// by string
-	echo $request->getResponseCookies();
+	echo $client->getResponseCookies();
 
 	// by array [name => [info]]
-	print_r($request->getResponseArrayCookies()); // get all cookies
+	print_r($client->getResponseArrayCookies()); // get all cookies
 
-	print_r($request->getResponseArrayCookies('cookie-name'));
+	print_r($client->getResponseArrayCookies('cookie-name'));
 
 **Get response body text**
 
-	echo $request->getResponseText();
+	echo $client->getResponseText();
 
 **Reset request**
 Before sending another request, instead of create a new instance. Just call
 
-	$request->reset();
+	$client->reset();
 
 or only reset response data and keep old request data
 
-	$request->resetResponse();
+	$client->resetResponse();
