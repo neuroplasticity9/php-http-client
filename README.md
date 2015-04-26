@@ -1,13 +1,13 @@
 # PHP Http Client Class
 
-- ChipVN_Http_Client is a flexible class used to sending request, scraping web content and get response like a browser.
+- ChipVN_Http_Client is a simple and powerful class used to sending request, scraping web content and get response like a browser.
 - Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
 
 **Note**: _fsockopen_ is faster also it is default. Both methods are the same, but _fsockopen_ limited use proxy feature (only this feature).
 
-* Author:     Phan Thanh Cong <ptcong90@gmail.com>
-* Copyright:  2011-2014 Phan Thanh Cong.
-* License:    http://www.opensource.org/licenses/mit-license.php  MIT License
+* Author    : Phan Thanh Cong <ptcong90@gmail.com>
+* Copyright : 2011-2014 Phan Thanh Cong.
+* License   : MIT
 
 ## Change logs
 ##### Version 2.6.2: Apr 02, 2015
@@ -15,13 +15,13 @@
 
 ##### Version 2.6.0: Apr 02, 2015
 * Fixed parsing cookie with httpOnly, Secure flags
-* Fixed following redirect with cookies for domain. (for automatic signin to google)
+* Fixed following redirect with cookies for domain. (for automatic signing to google)
 * Add `$nobody` option to get only headers (helpful to get headers of a video url). Use `$client->setNobody(true/false)`;
 
 ##### Version 2.5.8: Oct 07, 2014
 * Optimize code
-* Added new method `setCookiesPairs()`
-* Added new method `setRawPostFile()`
+* Added new method `setCookiesPairs()` to set cookies by string key=value; pairs
+* Added new method `setRawPostFile()` to post raw content of file
 
 ##### Version 2.5.6: Oct 06, 2014
 * Changed prepareRequestHeaders() to allows send cookies from sub-domain.
@@ -120,7 +120,9 @@ Create an `ChipVN_Http_Client` instnace
 
 **Use cookies**
 
-	$request->setCookies('name=value');
+	$request->setCookiesPairs('name=value; name2=value2; name3=value3');
+
+	$request->setCookies('name=value'); // single cookie key=value
 
 	// or
 	$request->setCookies('path=/; name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT');
@@ -171,7 +173,7 @@ Create an `ChipVN_Http_Client` instnace
 	// or maximum redirect 5 times. Default is 3 times and return last response
 	$request->setFollowRedirect(true, 5);
 
-**Parameters / Upload file**
+**Parameters / Uploading file**
 
 	$request->setParameters('name', 'value');
 
@@ -192,9 +194,21 @@ Create an `ChipVN_Http_Client` instnace
 	// for uploading
 	$request->setParameters('filedata', '@/path/path/file.jpg');
 
+	// also can use
+	$request->setParameters(array(
+		'filedata'  => '@/path/path/file.jpg'
+	));
+
 **Post raw data**
 
 	$request->setRawPost('your data');
+
+**Post raw file**
+
+	$request->setRawPost(file_get_contents('/your/file/path'));
+
+	// but recommend to use the method
+	$request->setRawPostFile('/your/file/path');
 
 **Referer**
 
@@ -247,7 +261,8 @@ Create an `ChipVN_Http_Client` instnace
 		'name2'  => 'value2'
 	));
 
-**Use Proxy** The method only avaliable if you use cURL for sending request
+**Use Proxy**
+The method only avaliable if you use cURL for sending request
 
 	$request->setProxy('127.0.0.1:80');
 
@@ -285,13 +300,14 @@ Create an `ChipVN_Http_Client` instnace
         [name] => 'gostep'
         [value] => '1'
         [domain] => 'domain.com'
-        [secure] => ''
+        [secure] => true
         [httponly] => null
     )
 
-**createCookie()**: This method used to create cookie from array with keys like above (parseCookie) to string
+**createCookie()**
+This method used to create cookie from array with keys like above (parseCookie) to string
 
-**Send request**
+**Execute sending request**
 
 	$boolean = $request->execute();
 
@@ -299,6 +315,10 @@ Create an `ChipVN_Http_Client` instnace
 
 
 #### Get Response
+
+**Get response status code**
+
+	echo $request->getResponseStatus();
 
 **Get response headers**
 
@@ -324,17 +344,11 @@ Create an `ChipVN_Http_Client` instnace
 
 	echo $request->getResponseText();
 
-**Reset request** Just call
+**Reset request**
+Before sending another request, instead of create a new instance. Just call
 
 	$request->reset();
-
-before send an other request instead of create a new $request instance.
 
 or only reset response data and keep old request data
 
 	$request->resetResponse();
-
-
-
-
-
