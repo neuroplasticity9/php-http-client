@@ -1,17 +1,15 @@
 <?php
-
 /**
  * ChipVN_Http_Client class used to sending request and get response like a browser.
  * Use 2 functions: cURL, fsockopen
- * so you can use this class like "curl" WITHOUT CURL extension installed
- * Supports POST (fields, raw data), file uploading, GET, PUT, etc..
+ * so you can use this class like "curl" WITHOUT CURL extension installed.
  *
  * @author     Phan Thanh Cong <ptcong90@gmail.com>
- * @copyright  2010-2014 Phan Thanh Cong.
- * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
+ * @copyright  2010-2015 Phan Thanh Cong.
+ * @license    MIT
  *
- * @version    2.6.2
- * @relase     Apr 02, 2015
+ * @version    2.6.3
+ * @relase     May 03, 2015
  */
 class ChipVN_Http_Client
 {
@@ -25,7 +23,7 @@ class ChipVN_Http_Client
     /**
      * Debug informations.
      * This provides "time_start", "time_process" of a request.
-     * If debug mode is enabled, this will give "headers", "body"
+     * If debug mode is enabled, this will give "headers", "body".
      *
      * @var array
      */
@@ -1021,14 +1019,14 @@ class ChipVN_Http_Client
                             $uploadFilePath  = substr($value, 1);
                             if (file_exists($uploadFilePath)) {
                                 $body .= '--'.$this->boundary."\r\n";
-                                $body .= "Content-disposition: form-data; name=\"".$name."\"; filename=\"".basename($uploadFilePath)."\"\r\n";
+                                $body .= 'Content-disposition: form-data; name="'.$name.'"; filename="'.basename($uploadFilePath)."\"\r\n";
                                 $body .= 'Content-Type: '.$this->getFileType($uploadFilePath)."\r\n";
                                 $body .= "Content-Transfer-Encoding: binary\r\n\r\n";
                                 $body .= $this->getFileData($uploadFilePath)."\r\n";
                             }
                         } else {
                             $body .= '--'.$this->boundary."\r\n";
-                            $body .= "Content-Disposition: form-data; name=\"".$name."\"\r\n";
+                            $body .= 'Content-Disposition: form-data; name="'.$name."\"\r\n";
                             $body .= "\r\n";
                             $body .= $value."\r\n";
                         }
@@ -1107,150 +1105,175 @@ class ChipVN_Http_Client
                 'body'    => $body,
             );
         }
-
-        // use cURL to send request
         if ($this->useCurl) {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $this->target);
-
-            $httpVersion = CURL_HTTP_VERSION_1_0;
-            if ($this->httpVersion = '1.1') {
-                $httpVersion = CURL_HTTP_VERSION_1_1;
-            }
-            curl_setopt($ch, CURLOPT_HTTP_VERSION, $httpVersion);
-            curl_setopt($ch, CURLOPT_HEADER, true);
-            curl_setopt($ch, CURLOPT_NOBODY, false);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-            if ($this->nobody) {
-                curl_setopt($ch, CURLOPT_NOBODY, true);
-            }
-
-            if ($this->timeout) {
-                curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
-            }
-            if ($headers) {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            }
-            if ($this->isPut()) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-            }
-            if ($this->proxyIp) {
-                curl_setopt($ch, CURLOPT_PROXY, $this->proxyIp);
-                curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-
-                if ($this->proxyUser) {
-                    curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUser.':'.$this->proxyPassword);
-                }
-            }
-            // send request
-            $response = curl_exec($ch);
-
-            if ($response === false) {
-                $this->errors[] = sprintf('ERROR: %d - %s.', curl_errno($ch), curl_error($ch));
-
-                return false;
-            }
-            $headerSize     = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $responseHeader = (string) substr($response, 0, $headerSize);
-            $responseBody   = (string) substr($response, $headerSize);
-
-            $this->parseResponseHeaders($responseHeader);
-            $this->responseText = $responseBody;
-            curl_close($ch);
-
-            // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
-            // because if redirect count greater than $maxRedirect
-            // CURL will trigger an error, so we can't get any responses
-            if (null !== $responseStatus = $this->followRedirect()) {
-                return $responseStatus;
-            }
-        }
-        // use fsockopen to send request
-        else {
-            static $errorHandler = null;
-            if ($errorHandler === null) {
-                $errorHandler = create_function('', '');
-            }
-            // Ignore warning
-            $handler = set_error_handler($errorHandler);
-
-            $filePointer = fsockopen(($ssl ? 'ssl://' : '').$this->host, $this->port, $errno, $errstr, $this->timeout);
-
-            // restore error handler
-            $handler ? set_error_handler($handler) : restore_error_handler();
-
-            if (!$filePointer) {
-                if ($errstr) {
-                    $this->errors[] = sprintf('ERROR: %d - %s.', $errno, $errstr);
-                } else {
-                    $this->errors[] = sprintf('ERROR: Cannot connect to "%s" with port "%s"', $this->target, $this->port);
-                }
-
-                return false;
-            }
-            $requestHeader = $this->method.' '.$this->path.' HTTP/'.$this->httpVersion."\r\n";
-            $requestHeader .= 'Host: '.$this->host."\r\n";
-            if ($headers) {
-                $requestHeader .= implode("\r\n", $headers)."\r\n";
-            }
-            if (stripos($requestHeader, 'Connection:') === false) {
-                $requestHeader .= "Connection: close\r\n";
-            }
-            $requestHeader .= "\r\n";
-
-            if ($body && $this->isPut()) {
-                $requestHeader .= $body;
-            }
-            $requestHeader .= "\r\n\r\n";
-
-            // send request
-            fwrite($filePointer, $requestHeader);
-
-            $responseHeader = '';
-            $responseBody   = '';
-            do {
-                $responseHeader .= fgets($filePointer, 128);
-            } while (strpos($responseHeader, "\r\n\r\n") === false);
-
-            $this->parseResponseHeaders($responseHeader);
-
-            // get body
-            if (!$this->nobody) {
-                while (!feof($filePointer)) {
-                    $responseBody .= fgets($filePointer);
-                }
-            }
-            fclose($filePointer);
-
-            if (null !== $responseStatus = $this->followRedirect()) {
-                return $responseStatus;
-            }
-
-            // remove chunked
-            if (!$this->nobody
-                && isset($this->responseHeaders['transfer-encoding'])
-                && $this->responseHeaders['transfer-encoding'] == 'chunked'
-            ) {
-                $data    = $responseBody;
-                $pos     = 0;
-                $len     = strlen($data);
-                $outData = '';
-
-                while ($pos < $len) {
-                    $rawnum  =  substr($data, $pos, strpos(substr($data, $pos), "\r\n") + 2);
-                    $num     =  hexdec(trim($rawnum));
-                    $pos     += strlen($rawnum);
-                    $chunk   =  substr($data, $pos, $num);
-                    $outData .= $chunk;
-                    $pos     += strlen($chunk);
-                }
-                $responseBody = $outData;
-            }
-            $this->responseText = $responseBody;
+            $result = $this->executeWithCurl($headers, $body);
+        } else {
+            $result = $this->executeWithSocket($headers, $body);
         }
         $this->info['time_process'] = microtime(true) - $this->info['time_start'];
+
+        return $result;
+    }
+
+    /**
+     * Execute sending request with socket.
+     *
+     * @param array  $headers
+     * @param string $body
+     *
+     * @return bool
+     */
+    protected function executeWithSocket($headers, $body)
+    {
+        static $errorHandler = null;
+        if ($errorHandler === null) {
+            $errorHandler = create_function('', '');
+        }
+        // ignore warning
+        $handler = set_error_handler($errorHandler);
+
+        $filePointer = fsockopen(($ssl ? 'ssl://' : '').$this->host, $this->port, $errno, $errstr, $this->timeout);
+
+        // restore error handler
+        $handler ? set_error_handler($handler) : restore_error_handler();
+
+        if (!$filePointer) {
+            if ($errstr) {
+                $this->errors[] = sprintf('ERROR: %d - %s.', $errno, $errstr);
+            } else {
+                $this->errors[] = sprintf('ERROR: Cannot connect to "%s" with port "%s"', $this->target, $this->port);
+            }
+
+            return false;
+        }
+        $requestHeader = $this->method.' '.$this->path.' HTTP/'.$this->httpVersion."\r\n";
+        $requestHeader .= 'Host: '.$this->host."\r\n";
+        if ($headers) {
+            $requestHeader .= implode("\r\n", $headers)."\r\n";
+        }
+        if (stripos($requestHeader, 'Connection:') === false) {
+            $requestHeader .= "Connection: close\r\n";
+        }
+        $requestHeader .= "\r\n";
+
+        if ($body && $this->isPut()) {
+            $requestHeader .= $body;
+        }
+        $requestHeader .= "\r\n\r\n";
+
+        // send request
+        fwrite($filePointer, $requestHeader);
+
+        $responseHeader = '';
+        $responseBody   = '';
+        do {
+            $responseHeader .= fgets($filePointer, 128);
+        } while (strpos($responseHeader, "\r\n\r\n") === false);
+
+        $this->parseResponseHeaders($responseHeader);
+
+        // get body
+        if (!$this->nobody) {
+            while (!feof($filePointer)) {
+                $responseBody .= fgets($filePointer);
+            }
+        }
+        fclose($filePointer);
+
+        if (null !== $responseStatus = $this->followRedirect()) {
+            return $responseStatus;
+        }
+
+        // remove chunked
+        if (!$this->nobody
+            && isset($this->responseHeaders['transfer-encoding'])
+            && $this->responseHeaders['transfer-encoding'] == 'chunked'
+        ) {
+            $data    = $responseBody;
+            $pos     = 0;
+            $len     = strlen($data);
+            $outData = '';
+
+            while ($pos < $len) {
+                $rawnum  =  substr($data, $pos, strpos(substr($data, $pos), "\r\n") + 2);
+                $num     =  hexdec(trim($rawnum));
+                $pos     += strlen($rawnum);
+                $chunk   =  substr($data, $pos, $num);
+                $outData .= $chunk;
+                $pos     += strlen($chunk);
+            }
+            $responseBody = $outData;
+        }
+        $this->responseText = $responseBody;
+
+        return true;
+    }
+
+    /**
+     * Execute sending request with cURL.
+     *
+     * @param array  $headers
+     * @param string $body
+     *
+     * @return bool
+     */
+    protected function executeWithCurl($headers, $body)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->target);
+
+        $httpVersion = CURL_HTTP_VERSION_1_0;
+        if ($this->httpVersion = '1.1') {
+            $httpVersion = CURL_HTTP_VERSION_1_1;
+        }
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, $httpVersion);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+        if ($this->nobody) {
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+        }
+        if ($this->timeout) {
+            curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        }
+        if ($headers) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
+        if ($this->isPut()) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+        }
+        if ($this->proxyIp) {
+            curl_setopt($ch, CURLOPT_PROXY, $this->proxyIp);
+            curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+
+            if ($this->proxyUser) {
+                curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyUser.':'.$this->proxyPassword);
+            }
+        }
+        // send request
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            $this->errors[] = sprintf('ERROR: %d - %s.', curl_errno($ch), curl_error($ch));
+
+            return false;
+        }
+        $headerSize     = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $responseHeader = (string) substr($response, 0, $headerSize);
+        $responseBody   = (string) substr($response, $headerSize);
+
+        $this->parseResponseHeaders($responseHeader);
+        $this->responseText = $responseBody;
+        curl_close($ch);
+
+        // don't use "CURLOPT_FOLLOWLOCATION" and "CURLOPT_MAXREDIRS"
+        // because if redirect count greater than $maxRedirect
+        // CURL will trigger an error, so we can't get any responses
+        if (null !== $responseStatus = $this->followRedirect()) {
+            return $responseStatus;
+        }
 
         return true;
     }
