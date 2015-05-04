@@ -10,6 +10,9 @@
 * License   : MIT
 
 ## Change logs
+##### Version 2.6.3: May 03, 2015
+* Split `execute()` to two methods `executeWithSocket()`, `executeWithCurl()`.
+
 ##### Version 2.6.2: Apr 02, 2015
 * Add debug mode. use `$client->setDebug(true/false);`
 
