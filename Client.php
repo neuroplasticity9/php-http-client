@@ -306,8 +306,6 @@ class ChipVN_Http_Client
      */
     public function reset()
     {
-        $this->nobody = false;
-
         return $this
             ->resetRequest()
             ->resetFollowRedirect()
@@ -347,33 +345,34 @@ class ChipVN_Http_Client
      */
     public function resetRequest()
     {
-        $this->httpVersion   = '1.1';
-        $this->target        = '';
-        $this->scheme        = 'http';
-        $this->host          = '';
-        $this->port          = 0;
-        $this->path          = '';
-        $this->method        = 'GET';
-        $this->parameters    = array();
-        $this->rawPostData   = null;
-        $this->cookies       = array();
-        $this->headers       = array();
-        $this->timeout       = 10;
-        $this->userAgent     = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
-        $this->useCurl       = !self::$socketEnabled;
-        $this->isMultipart   = false;
+        $this->httpVersion = '1.1';
+        $this->target = '';
+        $this->scheme = 'http';
+        $this->host = '';
+        $this->port = 0;
+        $this->path = '';
+        $this->method = 'GET';
+        $this->parameters = array();
+        $this->rawPostData = null;
+        $this->cookies = array();
+        $this->headers = array();
+        $this->timeout = 10;
+        $this->userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1';
+        $this->useCurl = !self::$socketEnabled;
+        $this->isMultipart = false;
 
-        $this->proxyIp       = '';
-        $this->proxyUser     = '';
+        $this->proxyIp = '';
+        $this->proxyUser = '';
         $this->proxyPassword = '';
 
-        $this->authUser      = '';
-        $this->authPassword  = '';
+        $this->authUser = '';
+        $this->authPassword = '';
 
-        $this->enctype       = 'application/x-www-form-urlencoded';
-        $this->boundary      = '--'.md5('Phan Thanh Cong <ptcong90@gmail.com>');
+        $this->enctype = 'application/x-www-form-urlencoded';
+        $this->boundary = '--'.md5('Phan Thanh Cong <ptcong90@gmail.com>');
 
-        $this->errors        = array();
+        $this->nobody = false;
+        $this->errors = array();
 
         return $this;
     }
@@ -385,10 +384,10 @@ class ChipVN_Http_Client
      */
     public function resetFollowRedirect()
     {
-        $this->followRedirect     = false;
-        $this->maxRedirect        = true;
-        $this->redirectedCount    = 0;
-        $this->redirectedUrls     = array();
+        $this->followRedirect = false;
+        $this->maxRedirect = true;
+        $this->redirectedCount = 0;
+        $this->redirectedUrls = array();
         $this->redirectedRequests = array();
 
         return $this;
@@ -401,11 +400,11 @@ class ChipVN_Http_Client
      */
     public function resetResponse()
     {
-        $this->responseStatus       = 0;
-        $this->responseHeaders      = array();
-        $this->responseCookies      = '';
+        $this->responseStatus = 0;
+        $this->responseHeaders = array();
+        $this->responseCookies = '';
         $this->responseArrayCookies = array();
-        $this->responseText         = '';
+        $this->responseText = '';
 
         return $this;
     }
@@ -826,8 +825,8 @@ class ChipVN_Http_Client
      */
     public function setProxy($proxyIp, $username = '', $password = '')
     {
-        $this->proxyIp       = trim($proxyIp);
-        $this->proxyUser     = $username;
+        $this->proxyIp = trim($proxyIp);
+        $this->proxyUser = $username;
         $this->proxyPassword = $password;
 
         return $this;
@@ -843,7 +842,7 @@ class ChipVN_Http_Client
      */
     public function setAuth($username, $password = '')
     {
-        $this->authUser     = $username;
+        $this->authUser = $username;
         $this->authPassword = $password;
 
         return $this;
@@ -888,7 +887,7 @@ class ChipVN_Http_Client
     public function parseCookie($value)
     {
         if (is_string($value) && preg_match_all('#([^=;\s]+)(?:=([^;]+))?;?\s*?#', $value, $matches)) {
-            $name  = array_shift($matches[1]);
+            $name = array_shift($matches[1]);
             $value = array_shift($matches[2]);
 
             $cookie = array();
@@ -910,10 +909,9 @@ class ChipVN_Http_Client
                 'value'    => $value,
                 'expires'  => null,
                 'path'     => null,
-                'expires'  => null,
                 'domain'   => null,
-                'secure'   => null,
-                'httponly' => null,
+                'secure'   => false,
+                'httponly' => false,
             );
         }
 
@@ -1015,10 +1013,10 @@ class ChipVN_Http_Client
             if ($this->isMultipart) {
                 if (preg_match_all('#([^=&]+)=([^&]*)#i', $data, $matches)) {
                     foreach (array_combine($matches[1], $matches[2]) as $name => $value) {
-                        $name  = urldecode($name);
+                        $name = urldecode($name);
                         $value = urldecode($value);
                         if (substr($value, 0, 1) == '@') {
-                            $uploadFilePath  = substr($value, 1);
+                            $uploadFilePath = substr($value, 1);
                             if (file_exists($uploadFilePath)) {
                                 $body .= '--'.$this->boundary."\r\n";
                                 $body .= 'Content-disposition: form-data; name="'.$name.'"; filename="'.basename($uploadFilePath)."\"\r\n";
@@ -1087,17 +1085,20 @@ class ChipVN_Http_Client
 
         $urlParsed = parse_url($this->target);
         $this->scheme = strtolower($urlParsed['scheme']);
-        $this->host = $urlParsed['host'] = strtolower($urlParsed['host']); // force domain to lower case.
+        $this->host = strtolower($urlParsed['host']);
 
-        if ($this->scheme == 'https') {
-            $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 443;
-        } else {
-            $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 80;
+        if (!$this->port) {
+            if ($this->scheme == 'https') {
+                $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 443;
+            } else {
+                $this->port = isset($urlParsed['port']) ? $urlParsed['port'] : 80;
+            }
         }
+
         $this->path = (isset($urlParsed['path']) ? $urlParsed['path'] : '/')
                     .(isset($urlParsed['query']) ? '?'.$urlParsed['query'] : '');
 
-        $body    = $this->prepareRequestBody();
+        $body = $this->prepareRequestBody();
         $headers = $this->prepareRequestHeaders();
 
         $this->info = array('time_start' => microtime(true));
@@ -1169,9 +1170,9 @@ class ChipVN_Http_Client
 
             return false;
         }
-        $headerSize     = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $responseHeader = (string) substr($response, 0, $headerSize);
-        $responseBody   = (string) substr($response, $headerSize);
+        $responseBody = (string) substr($response, $headerSize);
 
         $this->parseResponseHeaders($responseHeader);
         $this->responseText = $responseBody;
@@ -1243,7 +1244,7 @@ class ChipVN_Http_Client
         fwrite($filePointer, $requestHeader);
 
         $responseHeader = '';
-        $responseBody   = '';
+        $responseBody = '';
         do {
             $responseHeader .= fgets($filePointer, 128);
         } while (strpos($responseHeader, "\r\n\r\n") === false);
@@ -1267,18 +1268,17 @@ class ChipVN_Http_Client
             && isset($this->responseHeaders['transfer-encoding'])
             && $this->responseHeaders['transfer-encoding'] == 'chunked'
         ) {
-            $data    = $responseBody;
-            $pos     = 0;
-            $len     = strlen($data);
+            $data = $responseBody;
+            $len = strlen($data);
             $outData = '';
 
             while ($pos < $len) {
-                $rawnum  =  substr($data, $pos, strpos(substr($data, $pos), "\r\n") + 2);
-                $num     =  hexdec(trim($rawnum));
-                $pos     += strlen($rawnum);
-                $chunk   =  substr($data, $pos, $num);
+                $rawnum = substr($data, $pos, strpos(substr($data, $pos), "\r\n") + 2);
+                $num = hexdec(trim($rawnum));
+                $pos += strlen($rawnum);
+                $chunk = substr($data, $pos, $num);
                 $outData .= $chunk;
-                $pos     += strlen($chunk);
+                $pos += strlen($chunk);
             }
             $responseBody = $outData;
         }
@@ -1368,7 +1368,7 @@ class ChipVN_Http_Client
                 } elseif (strpos($line, ':')) {
                     list($key, $value) = explode(':', $line, 2);
                     $value = ltrim($value);
-                    $key   = strtolower($key);
+                    $key = strtolower($key);
                     // parse cookie
                     if ($key == 'set-cookie') {
                         $this->responseCookies .= $value.';';
