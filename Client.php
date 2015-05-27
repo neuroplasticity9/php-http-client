@@ -1271,6 +1271,7 @@ class ChipVN_Http_Client
             $data = $responseBody;
             $len = strlen($data);
             $outData = '';
+            $pos = 0;
 
             while ($pos < $len) {
                 $rawnum = substr($data, $pos, strpos(substr($data, $pos), "\r\n") + 2);
