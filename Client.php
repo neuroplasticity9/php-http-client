@@ -10,8 +10,8 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
- * @version    2.6.3
- * @relase     May 04, 2015
+ * @version    2.6.4
+ * @relase     May 27, 2015
  */
 class ChipVN_Http_Client
 {
@@ -878,6 +878,32 @@ class ChipVN_Http_Client
     }
 
     /**
+     * Determine if cookie is valid for url.
+     *
+     * @param array  $cookie
+     * @param string $host
+     * @param string $path
+     *
+     * @return boolean
+     */
+    public function isValidCookieForHost(array $cookie, $host, $path = '')
+    {
+        if ($path && !empty($cookie['path']) && strpos($path, $cookie['path']) !== 0) {
+            return false;
+        }
+        if (!empty($cookie['domain'])
+            && (substr($cookie['domain'], 0, 1) == '.'
+                    && substr($host, -(strlen($cookie['domain'])-1)) != substr($cookie['domain'], 1)
+                || substr($cookie['domain'], 0, 1) != '.'
+                    && $cookie['domain'] != $host
+            )
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Parses a URL and returns an associative array.
      *
      * @param string $value
@@ -953,22 +979,17 @@ class ChipVN_Http_Client
                 $headers[] = $name.': '.$value;
             }
         }
-        // prepare cookies
+
         $cookies = '';
-        // {@link http://tools.ietf.org/html/rfc2109#section-4.3.2}
         foreach ($this->cookies as $name => $cookie) {
-            if (
-                (isset($cookie['path']) && strpos($this->path, $cookie['path']) !== 0)
-                ||  (isset($cookie['domain'])
-                    && substr($this->host, -strlen($cookie['domain'])) != $cookie['domain']
-                )
-            ) {
+            if (!$this->isValidCookieForHost($cookie, $this->host, $this->path)) {
                 unset($this->cookies[$name]);
                 continue;
             }
             $cookie = $this->createCookie($cookie);
             $cookies .= ($cookies && $cookie ? ' ' : '').$cookie;
         }
+
         if ($cookies) {
             $headers[] = 'Cookie: '.$cookies;
         }
@@ -1305,14 +1326,15 @@ class ChipVN_Http_Client
             $firstRequest = $this->redirectedRequests[0];
             $this->setCookies($firstRequest->getCookies());
 
-            $host = parse_url($location, PHP_URL_HOST);
+            $urlInfo = parse_url($location) + array('path' => '');
             foreach ($this->redirectedRequests as $obj) {
                 $objHost = $obj->getHost();
                 foreach ($obj->getResponseArrayCookies() as $cookie) {
-                    if (empty($cookie['domain'])) {
-                        $cookie['domain'] = $objHost;
+                    if ($objHost == $urlInfo['host']
+                        || $this->isValidCookieForHost($cookie, $urlInfo['host'], $urlInfo['path'])
+                    ) {
+                        $this->setCookies($cookie);
                     }
-                    $this->setCookies($cookie);
                 }
             }
             // remove old responses.

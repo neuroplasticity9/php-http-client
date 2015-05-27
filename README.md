@@ -10,6 +10,9 @@
 * License   : MIT
 
 ## Change logs
+##### Version 2.6.4: May 27, 2015
+* Cookies fixes.
+
 ##### Version 2.6.3: May 03, 2015
 * Split `execute()` to two methods `executeWithSocket()`, `executeWithCurl()`.
 
