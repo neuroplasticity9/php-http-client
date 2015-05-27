@@ -958,17 +958,7 @@ class ChipVN_Http_Client
         // {@link http://tools.ietf.org/html/rfc2109#section-4.3.2}
         foreach ($this->cookies as $name => $cookie) {
             if (
-                // * The value for the Path attribute is not a prefix of the request-
-                //  URI.
                 (isset($cookie['path']) && strpos($this->path, $cookie['path']) !== 0)
-
-                // * The value for the Domain attribute contains no embedded dots or
-                //  does not start with a dot.
-                // * The value for the request-host does not domain-match the Domain
-                //  attribute.
-                // * The request-host is a FQDN (not IP address) and has the form HD,
-                //  where D is the value of the Domain attribute, and H is a string
-                //  that contains one or more dots.
                 ||  (isset($cookie['domain'])
                     && substr($this->host, -strlen($cookie['domain'])) != $cookie['domain']
                 )
