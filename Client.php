@@ -1390,6 +1390,9 @@ class ChipVN_Http_Client
                         $this->responseCookies .= $value.';';
 
                         if ($cookie = $this->parseCookie($value)) {
+                            if (empty($cookie['domain'])) {
+                                $cookie['domain'] = $this->host;
+                            }
                             $this->responseArrayCookies[$cookie['name']] = $cookie;
                         }
                         if (!isset($this->responseHeaders[$key])) {
