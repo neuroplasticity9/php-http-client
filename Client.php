@@ -970,7 +970,7 @@ class ChipVN_Http_Client
                 //  where D is the value of the Domain attribute, and H is a string
                 //  that contains one or more dots.
                 ||  (isset($cookie['domain'])
-                    && substr($this->host, -strlen($cookie['domain'])) != ltrim($cookie['domain'], '.')
+                    && substr($this->host, -strlen($cookie['domain'])) != $cookie['domain']
                 )
             ) {
                 unset($this->cookies[$name]);
