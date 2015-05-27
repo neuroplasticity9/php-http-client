@@ -1330,6 +1330,9 @@ class ChipVN_Http_Client
             foreach ($this->redirectedRequests as $obj) {
                 $objHost = $obj->getHost();
                 foreach ($obj->getResponseArrayCookies() as $cookie) {
+                    if (empty($cookie['domain'])) {
+                        $cookie['domain'] = $objHost;
+                    }
                     if ($objHost == $urlInfo['host']
                         || $this->isValidCookieForHost($cookie, $urlInfo['host'], $urlInfo['path'])
                     ) {
