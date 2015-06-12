@@ -636,12 +636,12 @@ class ChipVN_Http_Client
             }
         } else {
             if (is_array($name)) {
-                $multiple = is_array($name[key($name)]);
-                if (!$multiple && $this->isValidCookie($name)) {
+                if ($this->isValidCookie($name)) {
                     $this->cookies[$name['name']] = $name;
                 } else {
                     foreach ($name as $key => $value) {
-                        if ($multiple || !is_int($key)) {
+                        // key-value pairs
+                        if (!is_int($key)) {
                             $this->setCookies($key, $value);
                         } else {
                             $this->setCookies($value);
