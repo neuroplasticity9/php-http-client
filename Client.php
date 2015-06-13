@@ -10,8 +10,8 @@
  * @copyright  2010-2014 Phan Thanh Cong.
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
- * @version    2.6.4
- * @relase     May 27, 2015
+ * @version    2.6.5
+ * @relase     Jun 13, 2015
  */
 class ChipVN_Http_Client
 {
@@ -884,7 +884,7 @@ class ChipVN_Http_Client
      * @param string $host
      * @param string $path
      *
-     * @return boolean
+     * @return bool
      */
     public function isValidCookieForHost(array $cookie, $host, $path = '')
     {
@@ -893,13 +893,14 @@ class ChipVN_Http_Client
         }
         if (!empty($cookie['domain'])
             && (substr($cookie['domain'], 0, 1) == '.'
-                    && substr($host, -(strlen($cookie['domain'])-1)) != substr($cookie['domain'], 1)
+                    && substr($host, -(strlen($cookie['domain']) - 1)) != substr($cookie['domain'], 1)
                 || substr($cookie['domain'], 0, 1) != '.'
                     && $cookie['domain'] != $host
             )
         ) {
             return false;
         }
+
         return true;
     }
 
@@ -1313,6 +1314,7 @@ class ChipVN_Http_Client
         ) {
             $location = $this->getAbsoluteUrl($location, $this->target);
             $referer = isset($this->headers['Referer']) ? $this->headers['Referer'] : null;
+            $userAgent = $this->userAgent;
 
             $this->redirectedCount++;
             $this->redirectedUrls[] = $this->getTarget();
@@ -1320,6 +1322,7 @@ class ChipVN_Http_Client
 
             // remove old request.
             $this->resetRequest();
+            $this->setUserAgent($userAgent);
             if ($referer) {
                 $this->setReferer($referer);
             }
