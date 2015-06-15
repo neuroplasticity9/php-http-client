@@ -11,7 +11,7 @@
  * @license    http://www.opensource.org/licenses/mit-license.php  MIT License
  *
  * @version    2.6.5
- * @relase     Jun 13, 2015
+ * @relase     Jun 15, 2015
  */
 class ChipVN_Http_Client
 {
@@ -1315,20 +1315,20 @@ class ChipVN_Http_Client
             $location = $this->getAbsoluteUrl($location, $this->target);
             $referer = isset($this->headers['Referer']) ? $this->headers['Referer'] : null;
             $userAgent = $this->userAgent;
+            $nobody = $this->nobody;
 
             $this->redirectedCount++;
             $this->redirectedUrls[] = $this->getTarget();
             $this->redirectedRequests[] = $this->getClone();
 
             // remove old request.
-            $this->resetRequest();
-            $this->setUserAgent($userAgent);
+            $this->resetRequest()
+                ->setUserAgent($userAgent)
+                ->setNobody($nobody)
+                ->setCookies($this->redirectedRequests[0]->getCookies());
             if ($referer) {
                 $this->setReferer($referer);
             }
-            $firstRequest = $this->redirectedRequests[0];
-            $this->setCookies($firstRequest->getCookies());
-
             $urlInfo = parse_url($location) + array('path' => '');
             foreach ($this->redirectedRequests as $obj) {
                 $objHost = $obj->getHost();
