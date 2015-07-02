@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 6.0.0
+ * @version 3.0.0
  */
 class Ptc_Http_Client
 {
