@@ -1,4 +1,4 @@
-### Version 6.0.0; Jun 26, 2015
+### Version 3.0.0; Jun 26, 2015
 - Rewrite this library
 - Supports HTTP/ Sock5 Proxy (Sock proxy require curl extension)
 - Can use as `Ptc_Http_Client` or `Ptc\Http\Client` *(look more beautiful if you're using PHP >= 5.3)*
