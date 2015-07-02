@@ -1,360 +1,394 @@
-# PHP Http Client Class
+# PHP Http Client for PHP >= 5.0
+ As you know, PHP 5.2 is EOF, but a lot of hosting services still using this version and not given other options. Have you ever want to write some plugins for Xenforo, Wordpress (both of them support PHP 5.2) but if you use a library that doesn't support PHP 5.2, so some of your clients whose still use this version can't use your plugin. That's why this library still supports for PHP 5.2.
 
-- ChipVN_Http_Client is a simple and powerful class used to sending request, scraping web content and get response like a browser.
-- Use 2 functions: cURL, fsockopen, so you can use this class, "curl" **WITHOUT CURL** extension installed
+This is a simple PHP class as a wrapper of curl/socket for sending HTTP request easier.
 
-**Note**: _fsockopen_ is faster also it is default. Both methods are the same, but _fsockopen_ limited use proxy feature (only this feature).
+## Requirements
+PHP needs to be a minimum version of PHP 5.0 with socket or curl enabled.
 
-* Author    : Phan Thanh Cong <ptcong90@gmail.com>
-* Copyright : 2011-2014 Phan Thanh Cong.
-* License   : MIT
-
-## Change logs
-##### Version 2.6.4: May 27, 2015
-* Cookies fixes.
-
-##### Version 2.6.3: May 03, 2015
-* Split `execute()` to two methods `executeWithSocket()`, `executeWithCurl()`.
-
-##### Version 2.6.2: Apr 02, 2015
-* Add debug mode. use `$client->setDebug(true/false);`
-
-##### Version 2.6.0: Apr 02, 2015
-* Fixed parsing cookie with httpOnly, Secure flags
-* Fixed following redirect with cookies for domain. (for automatic signing to google)
-* Add `$nobody` option to get only headers (helpful to get headers of a video url). Use `$client->setNobody(true/false)`;
-
-##### Version 2.5.8: Oct 07, 2014
-* Optimized code
-* Added new method `setCookiesPairs()` to set cookies by string key=value; pairs
-* Added new method `setRawPostFile()` to post raw content of file
-
-##### Version 2.5.6: Oct 06, 2014
-* Changed prepareRequestHeaders() to allows send cookies from sub-domain.
-
-##### Version 2.5.5: Apr 7, 2014
-* Optimize and clear code
-* Change class name to `ChipVN_Http_Client` (old class name still avaliable and just extends new class name)
-* Improve `execute()`
-* Sync request data  between Socket and cURL
-* Allows unlimit follow redirect by `setFollowRedirect(true, true)`
-
-##### Version 2.5.4: Apr 2, 2014
-* Changed class name from ~~\ChipVN\Http\Request~~ to ~~ChipVN_Http_Request~~ to support PHP >= 5.0
-* Fixed some bugs while scraping login Flickr.
-* Improved followRedirect, parsing/ creating cookies.
-* Added new method `resetFollowRedirect()`
-* Added dynamic getters, setters (so you may get/set any properties for sending request easier)
-* Added new method: `getRedirectedCount()`
-* Added new methods: `setCookies()`, `setParameters()`, `setHeaders()`, `removeCookies()`, `removeParameters()`, `removeHeaders()`
-* ~~Added new alias methods: `addCookies()`, `addParameters()`, `addHeaders()`~~
-* Deprecated methods: `setCookie()`, `setParam()`, `setHeader()` (still avaliable)
-* Changed method names: `readBinary()` -> `getFileData()`, `getMimeType()` -> `getFileType()`
-
-##### Version 2.5.3: Apr 1, 2014
-* Improve `setCookie()`
-* Added new methods `resetResponse()`, `resetRequest()`, `parseCookie()`, `createCookie()`
-* Added new method `setFollowRedirect()` to follow redirect
-* Added new method `getResponseArrayCookies()` to get all cookies by array [name => [info]]
-* Fixed a bug
-* Change all properties to protected (need use set* methods to change the properties)
-
-##### Version 2.5: Mar 07, 2014
-* ~~Change class name to \ChipVN\Http\Request~~
-* Most clean and clear
-* Supports composer
-* Added new method `setHttpVersion()` to change HTTP protocol version
-
-##### Version 2.4: Jul 25, 2013
-* ~~Require PHP 5.3 or newer~~
-* Change two static class methods (readBinary, mimeTye) to protected instance method
-
-##### Version 2.3.4: Feb 20, 2013
-* Fixed parse headers (typo)
-
-##### Version 2.3.3: Nov 5, 2012
-* Re-struct, something edited
-
-##### Version 2.3.2: June 12, 2012
-* Add some methods
-
-##### Version 2.3.1: Mar 30, 2012
-* Fixed some bugs to work well with PHP 5.3 (E_NOTICE default is enabled)
-
-##### Version 2.3: Feb 2, 2012
-* Update for picasa API
-
-##### Version 2.2: Jan 1, 2012
-* Support raw data for posting (upload image to picasa)
-
-##### Version 2.1: Dec 23, 2011
-* Fixed some bugs
-
-##### Version 2.0: Jun 26, 2011
-* Rewrite class to easy use
-* Fixed some bugs
-
-##### Version 1.2: April 19, 2011
-* Mime-type bug on upload file fixed
-
-##### Version 1.1:
-* Supports upload multiple files
-* Fixed some bugs
-
-##### Version 1.0:
-* Supports send a basic request
-* Proxy (only useCurl)
-* Supports file uploading
+## Installation
+To install this library, install composer and issue the following command:
+```
+composer require "ptcong/php-http-class": "dev-master"
+composer update
+```
+If your hosting is running with PHP 5.2, you should refer to this library:
+https://bitbucket.org/xrstf/composer-php52
 
 ## Usage
-
-Add require `"ptcong/php-http-class": "dev-master"` to _composer.json_ and run `composer update` if you use composer
-
-Create an `ChipVN_Http_Client` instnace
-
-	$client = new ChipVN_Http_Client;
-
-#### Send a request
-
-**Use cURL or fsockopen**
-
-	$client->useCurl(false);
-
-**Set target url** (like to browse a url on browser)
-
-	$client->setTarget('http://google.com');
-
-**Use cookies**
-
-	$client->setCookiesPairs('name=value; name2=value2; name3=value3');
-
-	$client->setCookies('name=value'); // single cookie key=value
-
-	// or
-	$client->setCookies('path=/; name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT');
-
-	// or
-	$client->setCookies(array(
-		'name1=value1',
-		'name2=value2; expires=Tue, 01-Apr-2014 04:57:57 GMT'
-	));
-
-	// or
-	$client->setCookies(array(
-		'name' => 'name1',
-		'value' => 'value1',
-		'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
-		// not required
-		// 'path' => '/',
-		// 'domain' => null,
-		// 'secure' => null,
-		// 'httponly' => null
-	));
-
-	// or
-	$client->setCookies(array(
-		array(
-			'name' => 'name1',
-			'value' => 'value1',
-			'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
-		),
-		array(
-			'name' => 'name2',
-			'value' => 'value2',
-			'expires' => 'expires=Tue, 01-Apr-2014 04:57:57 GMT', // not required
-		)
-	));
-
-**Change HTTP Protocol version**
-
-	$client->setHttpVersion('1.1');
-
-	// or
-	$client->setHttpVersion('1.0');
-
-**Follow redirect**
-
-	$client->setFollowRedirect(true);
-
-	// or maximum redirect 5 times. Default is 3 times and return last response
-	$client->setFollowRedirect(true, 5);
-
-**Parameters / Uploading file**
-
-	$client->setParameters('name', 'value');
-
-	// or
-	$client->setParameters('name=value&name2=value2&name3=value3');
-
-	$client->setParam(array(
-		'name1=value1',
-		'name2=value2'
-	));
-
-	// or
-	$client->setParameters(array(
-		'name1'  => 'value1',
-		'name2'  => 'value2'
-	));
-
-	// for uploading
-	$client->setParameters('filedata', '@/path/path/file.jpg');
-
-	// also can use
-	$client->setParameters(array(
-		'filedata'  => '@/path/path/file.jpg'
-	));
-
-**Post raw data**
-
-	$client->setRawPost('your data');
-
-**Post raw file**
-
-	$client->setRawPost(file_get_contents('/your/file/path'));
-
-	// but recommend to use the method
-	$client->setRawPostFile('/your/file/path');
-
-**Referer**
-
-	$client->setReferer('http://domain.com');
-
-**User Agent**
-
-	$client->setUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv : 9.0.1) Gecko/20100101 Firefox/9.0.1');
-
-**Connect timeout**
-
-	$client->setTimeout($seconds);
-
-**Method**
-
-	$client->setMethod('POST');
-	$client->setMethod('GET');
-	$client->setMethod('PUT');
-	$client->setMethod('HEAD');
-	// etc
-
-**Submit type**
-
-	// use to upload file
-	$client->setSubmitMultipart();
-
-	// submit normal form
-	$client->setSubmitNormal();
-
-**Request enctype**
-
-	$client->setEnctype('application/x-www-form-urlencoded');
-
-**Use Headers**
-
-	$client->setHeaders('Origin', 'xxx');
-
-	// or
-	$client->setHeaders('User-Agent: Firefox/9.0.1');
-
-	// or
-	$client->setHeaders(array(
-		'name1=value1',
-		'name2=value2',
-	));
-
-	// or
-	$client->setHeaders(array(
-		'name1'  => 'value1',
-		'name2'  => 'value2'
-	));
-
-**Use Proxy**
-The method only avaliable if you use cURL for sending request
-
-	$client->setProxy('127.0.0.1:80');
-
-	// or
-	$client->setProxy('127.0.0.1:80', $username, $password);
-
-**WWW-Authenticate**
-
-	$client->setAuth('user', 'pass');
-
-**Remove cookies/ parameters/ headers added**
-
-	$client->removeHeaders(true); // remove all headers
-	$client->removeHeaders('Referer'); // remove a header
-
-	$client->removeCookies(true); // remove all cookies
-	$client->removeCookies('name'); // remove a cookie
-
-	$client->removeParameters(true); // remove all parameters
-	$client->removeParameters('name'); // remove a parameter
-
-#### Helpers
-
-**parseCookie()**:
-
-	$cookie = $client->parseCookie('gostep=1; expires=Tue, 01-Apr-2014 05:20:23 GMT; Max-Age=300; path=/; domain=domain.com; secure;');
-
-	print_r($cookie);
-
-	[gostep] => Array
-    (
-        [expires] => 'Tue, 01-Apr-2014 05:20:23 GMT'
-        [Max-Age] => '300'
-        [path] => '/''
-        [name] => 'gostep'
-        [value] => '1'
-        [domain] => 'domain.com'
-        [secure] => true
-        [httponly] => null
+First, you neeed to include composer autoloader.
+```php
+require dirname(__FILE__).'/vendor/autoload.php';
+```
+
+* [Create a client](#create-a-client)
+* [Options and Helper methods](#options-and-helper-methods)
+* [Some simple options (timeout, protocol version, user-agent, etc...)](#some-simple-options)
+* [Send with headers](#with-headers)
+* [Send with cookies](#with-cookies)
+* [Send with query string](#with-query-string)
+* [Send with form params](#with-form-params)
+* [Send with multipart data](#with-multipart-data)
+* [Upload a file](#upload-a-file)
+* [Post RAW data](#post-raw-data)
+* [Post JSON data](#post-json-data)
+* [Use HTTP/Sock proxy](#with-http-sock5-proxy)
+* [Use Auth basic](#with-auth-basic)
+* [Sending and get response](#send-request-and-get-responses)
+    - [Get send result](#send-request-and-get-responses)
+    - [Get response status code](#get-response-status-code)
+    - [Get response text](#get-response-body-text)
+    - [Get resonse cookies as string](#get-response-cookies-as-string)
+    - [Get resonse cookies as array](#get-response-cookies-as-array)
+    - [Get header lines as array of string](#get-response-header-lines-by-specified-name)
+    - [Get response header lines as comma-separated string](#get-response-header-lines-as-comma-separated-string)
+    - [Get response headers as lines](#get-response-headers-as-lines)
+    - [Get followed redirect urls, count, requests, cookies collection](#get-followed-redirect-urls-count-requests-cookies-collection)
+    - [Get debug info](#get-debug-info)
+
+
+#### Create a client
+Create a client in PHP 5.2
+```php
+$client = Ptc_Http_Client::create('GET', 'http://google.com');
+```
+You also can use the line as the way PHP >= 5.3 does if your hosting is running on PHP >= 5.3
+```php
+use Ptc\Http;
+$client = Client::create('GET', 'http://google.com');
+```
+Create a client with default options
+```php
+$method = 'POST'; // may GET/POST/PUT or any HTTP method
+$target = 'http://domain.com';
+$request = Ptc\Http\Client::create($method, $target, array(
+    'handler'          => null,  // null|string - "socket" or "curl". null to use default.
+    'method'           => 'GET',  // string
+    'url'              => null,  // string
+    'nobody'           => false, // boolean
+    'follow_redirects' => 0,     // integer|true - True to follows all of redirections.
+    'protocol_version' => '1.1', // string
+    'timeout'          => 10,    // integer Timeout in seconds
+    'user_agent'       => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:38.0) Gecko/20100101 Firefox/38.0',
+    'auth'             => null,    // null|string An Auth Basic "user:password"
+    'proxy'            => null,    // null|string A proxy with format "ip:port"
+    'proxy_userpwd'    => null,    // null|string User password with format "user:password"
+    'proxy_type'       => 'http',  // string Must be one of "http" or "sock5"
+    'headers'          => array(), // array
+    'cookies'          => array(), // array
+    'json'             => false,   // false|string String json
+    'body'             => '',      // string|resource
+    'query'            => array(), // array
+    'form_params'      => array(), // array
+    'multipart'        => array(), // array
+))->send();
+
+var_dump($request->getResponse()); // null if have errors occured while sending.
+```
+#### Options and Helper methods
+This library provides two handlers for sending request are Socket and Curl. By default, the library will try to detect your PHP settings and request options what you set to give a handler. But if you perfer to use Socket or Curl, you can specify that by `handler` option.
+Socket is built in PHP, so you can use this library for sending request without curl extension.
+
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'handler' => 'socket' // or 'curl'
+));
+```
+#### Shortcut methods to creating and sending request quickly
+You can use all of HTTP methods as shortcut
+```php
+$client = Ptc_Http_Client::post('http://domain.com', $options);
+$client = Ptc_Http_Client::get('http://domain.com', $options);
+$client = Ptc_Http_Client::put('http://domain.com', $options);
+$client = Ptc_Http_Client::delete('http://domain.com', $options);
+...
+```
+#### Some simple options
+```php
+$client
+    ->withTimeout(10) // timeout of sending request
+    ->withNobody(true) // specify that you only want to get headers
+    ->withProtocolVersion('1.1') // HTTP protocol version
+    ->withFollowRedirects(true) // true or an integer
+    ->withUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:38.0) Gecko/20100101 Firefox/38.0');
+```
+#### With headers
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'headers' => array(
+        'Referer' => 'http://google.com',
+        'Header1' => 'value',
+        'Header2' => array(
+            'value2', 'value3'
+        )
     )
+))
+// to append value2 to Header1
+->withHeader('Header1', 'value2')
 
-**createCookie()**
-This method used to create cookie from array with keys like above (parseCookie) to string
+// to replace value3 to Header1
+->withHeader('Header1', 'value3', flase)
 
-**Execute sending request**
+// to append value4, value5 to Header1
+->withHeader('Header1', array('value4', 'value5'))
 
-	$boolean = $client->execute();
+// to remove a header by case-insensitive
+->withoutHeader('header1');
+```
+#### With cookies
+Use helper method to set dynamic values.
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'cookies' => array(
+        array(
+            'Name' => 'cookie0',
+            'Value' => 'value0',
+            'Path' => '/',
+            'Max-Age'  => 300,
+            'Expires'  => time() + 86400,
+            'Secure'   => false,
+            'Discard'  => false,
+            'HttpOnly' => false
+        )
+    )
+))
+// with default args
+->withCookie('cookie1', 'value1', $path = '/', $secure = false, $httpOnly = false)
+->withCookie('cookie2', 'value2')
+->withCookie('cookie6=value6; expires=Fri, 26-Jun-2015 03:24:07 GMT')
 
-	var_dump($client->errors); // if have
+// Sets multiple cookies by string
+->withStringCookies('cookie3=value3; cookie4=value4;cookie5=value5')
 
+// to remove a cookie by name
+->withoutCookie('cookie1');
+```
+#### With query string
+Query option similar to Form param option.
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'query' => array(
+        'query1' => 'value1',
+        'query2' => 'value2',
+        'query3' => 'value3',
+    )
+))
+->withQuery('query1', 'value2')
+->withQuery('query2', 'value3', false) // to override query2
+->withQuery('query3=value3&query4=value4')
+->withQuery(array(
+    'query5' => 'value5',
+    'query6' => 'value6'
+))
+// to remove a query by name
+->withoutQuery('query1');
+```
+#### With form params
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'form_params' => array(
+        'field1' => 'value1',
+        'field2' => array('value2', 'value3')
+        'field3' => array(
+            'nested1' => 1,
+            'nested2' => 2
+        ),
+        'field4' => array(1, 2)
+    )
+))
+->withFormParam('field1', 'value2') // field1 will be field1[]=value1&field1[]=value2
+->withFormParam('field1', 'value3', false) // field1 will be field1=value3
+->withFormParam('field5=value5&field6=value6&field7=value7')
+->withFormParam(array(
+    'field8' => 'value8',
+    'field9' => 'value9'
+));
 
-#### Get Response
+// to remove a form field by name
+->withoutFormParam('field')
 
-**Get response status code**
+// to see your data
+var_dump((string) $client->prepareRequest()->getBody());
+```
+#### With multipart data
+Multipart field require `name` and `contents` keys. `filename` and `headers` are optional.
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'multipart' => array(
+        array(
+            'name' => 'field1',
+            'contents' => 'value1'
+        ),
+        array(
+            'name' => 'field2',
+            'contents' => 'this is a text file',
+            'filename' => 'file.txt',
+            'headers' => array(
+                'Custom-Header' => 'abc'
+            )
+        ),
+        // may use to upload a file
+        array(
+            'name' => 'field2',
+            'contents' => fopen('/path/to/file'),
+            // optional keys
+            'filename' => 'file.jpg',
+            'headers' => array(
+                'Content-Type' => 'image/jpg'
+            )
+        )
+    )
+))
+->withMultipart('field2', 'value2')
+->withMultipart('field3', 'value3', 'fieldname3')
+->withMultipart('field4', 'value4', 'fieldname4', array('Custom-Header' => 'value'))
+->withMultipart('file1', fopen('/path/to/file'), 'filename1') // to upload a file
 
-	echo $client->getResponseStatus();
+// to remove a part
+->withoutMultipart('field2');
+```
+#### Upload a file.
+```php
+$client
+    ->withFormFile('file1', '/path/to/file1', $optionalFileName = null, $optionalHeaders = array())
+    ->withFormFile('file2', '/path/to/file2');
 
-**Get response headers**
+// to remove this file
+$client->withoutMultipart('file1');
+```
+#### Post RAW data
+```php
+$client->withBody('raw data');
+```
+#### Post JSON data
+Used to easily upload JSON encoded data as the body of a request. A `Content-Type: application/json` header will be added if no Content-Type header is already present on the message.
+```php
+$client->withJson(array(1,2,3));
+// or
+$client->withJson(json_encode(array(1,2,3)));
+```
+#### With HTTP/ Sock5 Proxy
+You may use a HTTP or Sock Proxy. But Sock Proxy require curl extension.
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'proxy'         => '192.168.1.105:8888',
+    'proxy_userpwd' => 'user:pass',
+    'proxy_type'    => 'http' // "http" or "sock5"
+))
+$client->withProxy('192.168.1.105:8888'); // proxy without user pass, default is HTTP proxy
+$client->withProxy('192.168.1.105:8888', 'user:pass', 'sock5'); // proxy without user pass, default is HTTP proxy
+```
+#### With Auth Basic
+```php
+$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+    'auth' => 'user:pass',
+))
+$client->withAuth('user:pass');
+```
+#### Send request and get responses
+```php
+$client->send();
+var_dump($client->getResponse() !== null);
+boolean true
+```
+##### Get response status code
+```php
+var_dump($client->getResponseStatus());
+int 200
+```
+##### Get response reason
+```php
+var_dump($client->getResponseReason());
+string 'OK' (length=2)
+```
+##### Get response body text
+```php
+var_dump($client->getResponseBody());
+string 'Hello' (length=5)
 
-	print_r($client->getResponseHeaders());
+var_dump((string) $client);
+string 'Hello' (length=5)
+```
 
-	// or
-	echo $client->getResponseHeaders('location');
+##### Get response cookies as string
+```php
+var_dump($client->getResponseCookies());
+string 'c1=v1; c2=v2;' (length=13)
+```
 
-	// or "set-cookie" return an array if have.
-	print_r($client->getResponseHeaders('set-cookie'));
-
-**Get response cookies**
-
-	// by string
-	echo $client->getResponseCookies();
-
-	// by array [name => [info]]
-	print_r($client->getResponseArrayCookies()); // get all cookies
-
-	print_r($client->getResponseArrayCookies('cookie-name'));
-
-**Get response body text**
-
-	echo $client->getResponseText();
-
-**Reset request**
-Before sending another request, instead of create a new instance. Just call
-
-	$client->reset();
-
-or only reset response data and keep old request data
-
-	$client->resetResponse();
+##### Get response cookies as array
+```php
+var_dump($client->getResponseArrayCookies());
+array (size=2)
+  0 =>
+    array (size=9)
+      'Name' => string 'c1' (length=2)
+      'Value' => string 'v1' (length=2)
+      'Domain' => null
+      'Path' => string '/' (length=1)
+      'Max-Age' => null
+      'Expires' => string 'Sun, 28-Jun-2015 11:13:07 GMT' (length=29)
+      'Secure' => boolean false
+      'Discard' => boolean false
+      'HttpOnly' => boolean false
+  1 =>
+    array (size=9)
+      'Name' => string 'c2' (length=2)
+      'Value' => string 'v2' (length=2)
+      'Domain' => string 'abc.com' (length=7)
+      'Path' => string '/Path/' (length=6)
+      'Max-Age' => null
+      'Expires' => string 'Sun, 28-Jun-2015 11:13:07 GMT' (length=29)
+      'Secure' => boolean true
+      'Discard' => boolean false
+      'HttpOnly' => boolean true
+```
+##### Get response header lines by specified name
+```php
+var_dump($client->getResponseHeader('set-cookie')); // Case-insensitive
+array (size=2)
+  0 => string 'c1=v1; expires=Sun, 28-Jun-2015 11:13:48 GMT' (length=44)
+  1 => string 'c2=v2; expires=Sun, 28-Jun-2015 11:13:48 GMT; path=/Path/; domain=abc.com; secure; httponly' (length=91)
+```
+##### Get response header lines as comma-separated string
+```php
+var_dump($client->getResponseHeaderLine('server'));
+string 'Apache' (length=6)
+```
+##### Get response headers as lines
+```php
+var_dump($client->getResponseHeaders());
+array (size=9)
+  0 => string 'Date: Sun, 28 Jun 2015 11:20:14 GMT' (length=35)
+  1 => string 'Server: Apache' (length=14)
+  2 => string 'X-Powered-By: PHP/5.2.17' (length=24)
+  3 => string 'Set-Cookie: c1=v1; expires=Sun, 28-Jun-2015 11:21:54 GMT' (length=56)
+  4 => string 'Set-Cookie: c2=v2; expires=Sun, 28-Jun-2015 11:21:54 GMT; path=/Path/; domain=abc.com; secure; httponly' (length=103)
+  5 => string 'Location: c.php' (length=15)
+  6 => string 'Content-Length: 0' (length=17)
+  7 => string 'Connection: close' (length=17)
+  8 => string 'Content-Type: text/html' (length=23)
+```
+##### Get followed redirect urls, count, requests, cookies collection
+```php
+var_dump($client->getRedirects());
+array (size=4)
+  'count' => int 2
+  'urls' =>
+    array (size=2)
+      0 => string 'http://link1'
+      1 => string 'http://link2'
+  'cookies' => ....
+  'requests' => ....
+```
+##### Get debug info
+```php
+var_dump($client->getDebugInfo());
+array (size=4)
+  'time_start' => float 1435488809.58
+  'time_process' => float 0.00152993202209
+  'handler' => string 'socket' (length=6)
+  'errors' =>
+    array (size=0)
+      empty
+```

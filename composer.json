@@ -1,7 +1,7 @@
 {
     "minimum-stability": "dev",
     "name": "ptcong/php-http-class",
-    "description": "A simple and powerful Http Client class used to sending request and get response like a browser.",
+    "description": "A simple and powerful Http Client library used for sending request and get response like a browser.",
     "keywords": ["php", "http", "request", "curl", "fsockopen"],
     "license": "MIT",
     "authors": [{
@@ -14,8 +14,7 @@
     },
     "autoload": {
         "psr-0": {
-            "ChipVN_": "/"
+            "Ptc": "src"
         }
-    },
-    "target-dir": "ChipVN/Http"
+    }
 }
