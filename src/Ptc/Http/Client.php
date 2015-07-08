@@ -1,6 +1,7 @@
 <?php
 /**
- * @version 3.0.0
+ * @author Phan Thanh Cong <ptcong90@gmail.com>
+ * @version 3.0
  */
 class Ptc_Http_Client
 {
@@ -32,27 +33,6 @@ class Ptc_Http_Client
     );
 
     /**
-     * @var array
-     */
-    protected $debugInfo = array(
-        'time_start'   => null,    // null|float time start sending
-        'time_process' => null,    // null|float time for execute sending request
-        'handler'      => null,
-        'errors'       => array(), // array error message while sending reqeuest.
-    );
-
-    /**
-     * Used for saving tempopary data.
-     *
-     * @var array
-     */
-    private $builder = array(
-        'headers'     => array(),
-        'query'       => array(),
-        'form_params' => array(),
-    );
-
-    /**
      * Array of request info.
      *
      * @var array
@@ -76,6 +56,27 @@ class Ptc_Http_Client
         'urls'     => array(),
         'cookies'  => array(),
         'requests' => array(), // [self]
+    );
+
+    /**
+     * @var array
+     */
+    protected $debugInfo = array(
+        'time_start'   => null,    // null|float time start sending
+        'time_process' => null,    // null|float time for execute sending request
+        'handler'      => null,
+        'errors'       => array(), // array error message while sending reqeuest.
+    );
+
+    /**
+     * Used for saving tempopary data.
+     *
+     * @var array
+     */
+    private $builder = array(
+        'headers'     => array(),
+        'query'       => array(),
+        'form_params' => array(),
     );
 
     /**
@@ -163,7 +164,7 @@ class Ptc_Http_Client
             }
         }
 
-        return $object->setOptions(array('method' => $method, 'url' => $url) + $options);
+        return $object->setOptions(array('method' => strtoupper($method), 'url' => $url) + $options);
     }
 
     /**
@@ -201,11 +202,10 @@ class Ptc_Http_Client
      */
     public function send()
     {
-        $request = $this->prepareRequest();
+        list($options, $request) = $this->prepareRequest();
 
         // update sanitized options
-        $this->options = $request['options'];
-        unset($request['options']);
+        $this->options = $options;
 
         $this->request = $request;
         $this->response = null;
@@ -238,17 +238,14 @@ class Ptc_Http_Client
                 || $this->options['follow_redirects'] > $this->redirects['count'])
             && $nextUrl = $client->getResponseHeaderLine('Location')
         ) {
+
             $nextUrl = $this->getAbsoluteUrl($nextUrl, $client->options['url']);
 
             if ($this->redirects['count'] === 0) {
                 $this->redirects['urls'][] = $client->options['url'];
                 $this->redirects['requests'][] = $client;
-                // may have cookies with same name but different domain,
-                // so we should use only cookie values to push to redirect cookies.
                 $this->redirects['cookies'] = array_values($client->options['cookies']);
-                if ($cookies = $client->getResponseArrayCookies()) {
-                    $this->redirects['cookies'] = array_merge($this->redirects['cookies'], $cookies);
-                }
+                $this->collectResponseCookies($this->redirects['cookies'], $client->getResponseArrayCookies());
             }
 
             $reuseOptions = array(
@@ -263,25 +260,76 @@ class Ptc_Http_Client
             $client = self::create('GET', $nextUrl, $options)->send();
 
             // assign new response
+            $this->request = $client->request;
             $this->response = $client->response;
 
             $this->redirects['count']++;
             $this->redirects['urls'][] = $client->options['url'];
             $this->redirects['requests'][] = $client;
-            if ($cookies = $client->getResponseArrayCookies()) {
-                $this->redirects['cookies'] = array_merge($this->redirects['cookies'], $cookies);
-            }
+
+            $this->collectResponseCookies($this->redirects['cookies'], $client->getResponseArrayCookies());
         }
     }
 
+    private function collectResponseCookies(&$collection, $cookies)
+    {
+        if (!$cookies) return;
+
+        foreach ($collection as $oldKey => $oldValue) {
+            foreach ($cookies as $newKey => $newValue) {
+                if ($oldValue['Name'] === $oldValue['Name']
+                    && $oldValue['Path'] === $oldValue['Path']
+                    && $oldValue['Domain'] === $oldValue['Domain']
+                    && $oldValue['Secure'] === $oldValue['Secure']
+                    && $oldValue['HttpOnly'] === $oldValue['HttpOnly']
+                ) {
+                    // use newer value
+                    $collection[$oldKey] = $newValue;
+                    unset($cookies[$newKey]);
+                }
+            }
+        }
+        $collection = array_merge($collection, $cookies);
+    }
+
     /**
-     * Returns array of redirects.
+     * Gets redirected count.
+     *
+     * @return integer
+     */
+    public function getRedirectedCount()
+    {
+        return $this->redirects['count'];
+    }
+
+    /**
+     * Array of redirected urls
+     *
+     * @return string[]
+     */
+    public function getRedirectedUrls()
+    {
+        return $this->redirects['urls'];
+    }
+
+    /**
+     * Array of all cookies
      *
      * @return array
      */
-    public function getRedirects()
+    public function getRedirectedCookies()
     {
-        return $this->redirects;
+        $this->redirects['cookies'];
+    }
+
+    /**
+     * Array of all requests
+     *
+     * @return array
+     */
+    public function getRedirectedRequests()
+    {
+        $this->redirects['requests'];
     }
 
     /**
@@ -611,8 +659,8 @@ class Ptc_Http_Client
             $uri['query'] = trim($uri['query'].'&'.$clone->getParamsAsString($clone->options['query']), '&');
         }
         $request = array(
-            'method'           => strtoupper($clone->options['method']),
             'protocol_version' => $clone->options['protocol_version'],
+            'method'           => strtoupper($clone->options['method']),
             'uri'              => $clone->getUriAsString($uri),
             'uriInfo'          => $uri,
         );
@@ -688,11 +736,10 @@ class Ptc_Http_Client
 
         $request += array(
             'headers' => $clone->getHeadersAsLines($clone->builder['headers']),
-            'body'    => $body,
-            'options' => $clone->options
+            'body'    => $body
         );
 
-        return $request;
+        return array($clone->options, $request);
     }
 
     /**
