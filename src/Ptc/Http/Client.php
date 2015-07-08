@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Phan Thanh Cong <ptcong90@gmail.com>
+ *
  * @version 3.0
  */
 class Ptc_Http_Client
@@ -34,17 +35,37 @@ class Ptc_Http_Client
 
     /**
      * Array of request info.
+     * After request sent, $request will contains the keys:
+     * [
+     *     uri => ...,
+     *     uriInfo => ...,
+     *     protocol_version => ...,
+     *     method => ...,
+     *     headers => ...,
+     *     body => ...
+     * ]
      *
-     * @var array
+     * @var null|array
      */
-    protected $request;
+    public $request;
 
     /**
      * Array of response info.
+     * After request sent, $response may be null or an array that
+     * contains the keys
+     * [
+     *     headers => [
+     *         protocol_version => ...,
+     *         status => ...,
+     *         reason => ...,
+     *         headers => ...,
+     *     ],
+     *     body => ...
+     * ]
      *
-     * @var array
+     * @var null|array
      */
-    protected $response;
+    public $response;
 
     /**
      * Array of all requests.
@@ -238,7 +259,6 @@ class Ptc_Http_Client
                 || $this->options['follow_redirects'] > $this->redirects['count'])
             && $nextUrl = $client->getResponseHeaderLine('Location')
         ) {
-
             $nextUrl = $this->getAbsoluteUrl($nextUrl, $client->options['url']);
 
             if ($this->redirects['count'] === 0) {
@@ -273,15 +293,17 @@ class Ptc_Http_Client
 
     private function collectResponseCookies(&$collection, $cookies)
     {
-        if (!$cookies) return;
+        if (!$cookies) {
+            return;
+        }
 
         foreach ($collection as $oldKey => $oldValue) {
             foreach ($cookies as $newKey => $newValue) {
-                if ($oldValue['Name'] === $oldValue['Name']
-                    && $oldValue['Path'] === $oldValue['Path']
-                    && $oldValue['Domain'] === $oldValue['Domain']
-                    && $oldValue['Secure'] === $oldValue['Secure']
-                    && $oldValue['HttpOnly'] === $oldValue['HttpOnly']
+                if ($oldValue['Name'] === $newValue['Name']
+                    && $oldValue['Path'] === $newValue['Path']
+                    && $oldValue['Domain'] === $newValue['Domain']
+                    && $oldValue['Secure'] === $newValue['Secure']
+                    && $oldValue['HttpOnly'] === $newValue['HttpOnly']
                 ) {
                     // use newer value
                     $collection[$oldKey] = $newValue;
@@ -303,7 +325,7 @@ class Ptc_Http_Client
     }
 
     /**
-     * Array of redirected urls
+     * Array of redirected urls.
      *
      * @return string[]
      */
@@ -313,23 +335,23 @@ class Ptc_Http_Client
     }
 
     /**
-     * Array of all cookies
+     * Array of all cookies.
      *
      * @return array
      */
     public function getRedirectedCookies()
     {
-        $this->redirects['cookies'];
+        return $this->redirects['cookies'];
     }
 
     /**
-     * Array of all requests
+     * Array of all requests.
      *
      * @return array
      */
     public function getRedirectedRequests()
     {
-        $this->redirects['requests'];
+        return $this->redirects['requests'];
     }
 
     /**
@@ -351,20 +373,32 @@ class Ptc_Http_Client
     /**
      * Return current request.
      *
+     * @param null|string
+     *
      * @return null|array
      */
-    public function getRequest()
+    public function getRequest($key = null)
     {
+        if ($key !== null) {
+            return $this->request[$key];
+        }
+
         return $this->request;
     }
 
     /**
      * Return current response.
      *
+     * @param null|string
+     *
      * @return null|array
      */
-    public function getResponse()
+    public function getResponse($key = null)
     {
+        if ($key !== null) {
+            return $this->response[$key];
+        }
+
         return $this->response;
     }
 
