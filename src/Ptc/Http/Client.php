@@ -225,6 +225,10 @@ class Ptc_Http_Client
     {
         list($options, $request) = $this->prepareRequest();
 
+        if (empty($request['uri'])) {
+            throw new Exception('Request URI cannot be empty.');
+        }
+
         // update sanitized options
         $this->options = $options;
 
