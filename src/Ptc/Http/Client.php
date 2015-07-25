@@ -43,7 +43,7 @@ class Ptc_Http_Client
      *     method => ...,
      *     headers => ...,
      *     body => ...
-     * ]
+     * ].
      *
      * @var null|array
      */
@@ -61,7 +61,7 @@ class Ptc_Http_Client
      *         headers => ...,
      *     ],
      *     body => ...
-     * ]
+     * ].
      *
      * @var null|array
      */
@@ -1231,15 +1231,20 @@ class Ptc_Http_Client
      * Used for adding headers to an array.
      *
      * @param array           &$builder
-     * @param string          $name
+     * @param string|array    $name
      * @param string|string[] $values
      * @param boolean         $append
      */
     protected function addHeaderToArray(&$builder, $name, $values, $append = true)
     {
-        if (!is_string($name)) {
-            throw new InvalidArgumentException('Header name must be a string.');
+        if (is_array($name)) {
+            foreach ($name as $key => $value) {
+                $this->addHeaderToArray($builder, $key, $value, $append);
+            }
+
+            return;
         }
+
         $normalizedKey = $this->normalizeHeaderKey($name);
 
         if (!$append || !isset($builder[$normalizedKey])) {

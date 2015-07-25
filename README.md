@@ -132,6 +132,12 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 // to append value4, value5 to Header1
 ->withHeader('Header1', array('value4', 'value5'))
 
+// to append value 7 to Header2, value6 to Header1
+->withHeader(array(
+  'Header1' => 'value6',
+  'Header2' => 'value7'
+), null, true)
+
 // to remove a header by case-insensitive
 ->withoutHeader('header1');
 ```
