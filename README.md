@@ -9,7 +9,7 @@ PHP needs to be a minimum version of PHP 5.0 with socket or curl enabled.
 ## Installation
 To install this library, install composer and issue the following command:
 ```
-composer require "ptcong/php-http-class": "dev-master"
+composer require "ptcong/php-http-class": "3.x-dev"
 composer update
 ```
 If your hosting is running with PHP 5.2, you should refer to this library:
