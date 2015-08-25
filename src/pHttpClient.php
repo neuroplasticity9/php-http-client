@@ -2,9 +2,9 @@
 /**
  * @author Phan Thanh Cong <ptcong90@gmail.com>
  *
- * @version 3.0
+ * @version 3.1
  */
-class Ptc_Http_Client
+class pHttpClient
 {
     /**
      * Array of options.
@@ -157,14 +157,19 @@ class Ptc_Http_Client
     /**
      * Create an instance.
      *
-     * @param string $method
-     * @param string $url
+     * @param string $url|$method
+     * @param string $method|$url
      * @param array  $options
      *
      * @return self
      */
-    public static function create($method, $url, $options = array())
+    public static function create($url, $method = 'GET', $options = array())
     {
+        // new style
+        if (strpos($method, '://')) {
+            $url = $method; $method = $url;
+        }
+
         $object = new self;
 
         // Ensure that there options will not be overrided if we set them via both
@@ -215,7 +220,7 @@ class Ptc_Http_Client
             'CONNECT' => 1
         );
         if (!empty($methods[strtoupper($method)])) {
-            return self::create($method, $arguments[0], isset($arguments[1]) ? $arguments[1] : array())->send();
+            return self::create($arguments[0], $method, isset($arguments[1]) ? $arguments[1] : array())->send();
         }
         throw new Exception(sprintf('Method "%s" is not defined.', $method));
     }
@@ -1821,8 +1826,4 @@ class Ptc_Http_Client
         }
         throw new Exception('Have no available handler based on your request options/ PHP config.');
     }
-}
-
-if (PHP_VERSION_ID >= 50300) {
-    class_alias('Ptc_Http_Client', 'Ptc\Http\Client');
 }

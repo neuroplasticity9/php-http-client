@@ -50,18 +50,16 @@ require dirname(__FILE__).'/vendor/autoload.php';
 #### Create a client
 Create a client in PHP 5.2
 ```php
-$client = Ptc_Http_Client::create('GET', 'http://google.com');
+$client = pHttpClient::create('http://google.com', 'GET'); // default is GET
+// or
+$client = pHttpClient::create('GET', 'http://google.com');
 ```
-You also can use the line as the way PHP >= 5.3 does if your hosting is running on PHP >= 5.3
-```php
-use Ptc\Http;
-$client = Client::create('GET', 'http://google.com');
-```
+
 Create a client with default options
 ```php
 $method = 'POST'; // may GET/POST/PUT or any HTTP method
 $target = 'http://domain.com';
-$request = Ptc\Http\Client::create($method, $target, array(
+$request = pHttpClient::create($target, $method, array(
     'handler'          => null,  // null|string - "socket" or "curl". null to use default.
     'method'           => 'GET',  // string
     'url'              => null,  // string
@@ -90,17 +88,17 @@ This library provides two handlers for sending request are Socket and Curl. By d
 Socket is built in PHP, so you can use this library for sending request without curl extension.
 
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'handler' => 'socket' // or 'curl'
 ));
 ```
 #### Shortcut methods to creating and sending request quickly
 You can use all of HTTP methods as shortcut
 ```php
-$client = Ptc_Http_Client::post('http://domain.com', $options);
-$client = Ptc_Http_Client::get('http://domain.com', $options);
-$client = Ptc_Http_Client::put('http://domain.com', $options);
-$client = Ptc_Http_Client::delete('http://domain.com', $options);
+$client = pHttpClient::post('http://domain.com', $options);
+$client = pHttpClient::get('http://domain.com', $options);
+$client = pHttpClient::put('http://domain.com', $options);
+$client = pHttpClient::delete('http://domain.com', $options);
 ...
 ```
 #### Some simple options
@@ -114,7 +112,7 @@ $client
 ```
 #### With headers
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'headers' => array(
         'Referer' => 'http://google.com',
         'Header1' => 'value',
@@ -144,7 +142,7 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 #### With cookies
 Use helper method to set dynamic values.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'cookies' => array(
         array(
             'Name' => 'cookie0',
@@ -172,7 +170,7 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 #### With query string
 Query option similar to Form param option.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'query' => array(
         'query1' => 'value1',
         'query2' => 'value2',
@@ -191,7 +189,7 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 ```
 #### With form params
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'form_params' => array(
         'field1' => 'value1',
         'field2' => array('value2', 'value3')
@@ -219,7 +217,7 @@ var_dump((string) $client->prepareRequest()->getBody());
 #### With multipart data
 Multipart field require `name` and `contents` keys. `filename` and `headers` are optional.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'multipart' => array(
         array(
             'name' => 'field1',
@@ -276,7 +274,7 @@ $client->withJson(json_encode(array(1,2,3)));
 #### With HTTP/ Sock5 Proxy
 You may use a HTTP or Sock Proxy. But Sock Proxy require curl extension.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'proxy'         => '192.168.1.105:8888',
     'proxy_userpwd' => 'user:pass',
     'proxy_type'    => 'http' // "http" or "sock5"
@@ -286,7 +284,7 @@ $client->withProxy('192.168.1.105:8888', 'user:pass', 'sock5'); // proxy without
 ```
 #### With Auth Basic
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = pHttpClient::create('POST', 'http://domain.com', array(
     'auth' => 'user:pass',
 ))
 $client->withAuth('user:pass');
