@@ -190,6 +190,11 @@ class Ptc_Http_Client
             }
         }
 
+        if (!empty($options['cookies']) && is_string($options['cookies'])) {
+            $object->withStringCookies($options['cookies']);
+            unset($options['cookies']);
+        }
+
         return $object->setOptions(array('method' => strtoupper($method), 'url' => $url) + $options);
     }
 
