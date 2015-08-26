@@ -4,6 +4,3 @@
 - Can use as `Ptc_Http_Client` or `Ptc\Http\Client` *(look more beautiful if you're using PHP >= 5.3)*
 - With a set of helper methods to easily set dynamic cookies, headers, form params, multipart data, form file, json data, etc..
 - More improvement, bug fixes in previous version
-
-### Version 3.1; Aug 25, 2015
-- Rename class to pHttpClient
