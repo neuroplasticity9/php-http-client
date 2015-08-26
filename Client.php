@@ -794,6 +794,18 @@ class Ptc_Http_Client
     }
 
     /**
+     * Sets method
+     *
+     * @param string $method
+     *
+     * @return self
+     */
+    public function withMethod($method)
+    {
+        return $this->setOptions('method', $method);
+    }
+
+    /**
      * Sets User-Agent option.
      *
      * @param string $userAgent
