@@ -2,7 +2,7 @@
 /**
  * @author Phan Thanh Cong <ptcong90@gmail.com>
  *
- * @version 3.0
+ * @version 3.0.1
  */
 class Ptc_Http_Client
 {
@@ -157,14 +157,19 @@ class Ptc_Http_Client
     /**
      * Create an instance.
      *
-     * @param string $method
-     * @param string $url
+     * @param string $url|$method
+     * @param string $method|$url
      * @param array  $options
      *
      * @return self
      */
-    public static function create($method, $url, $options = array())
+    public static function create($url, $method = 'GET', $options = array())
     {
+        // new style
+        if (strpos($method, '://')) {
+            $url = $method; $method = $url;
+        }
+
         $object = new self;
 
         // Ensure that there options will not be overrided if we set them via both

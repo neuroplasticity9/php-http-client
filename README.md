@@ -51,6 +51,9 @@ require dirname(__FILE__).'/vendor/autoload.php';
 Create a client in PHP 5.2
 ```php
 $client = Ptc_Http_Client::create('GET', 'http://google.com');
+// or
+$client = Ptc_Http_Client::create('http://google.com', 'GET');
+$client = Ptc_Http_Client::create('http://google.com'); // default is GET
 ```
 You also can use the line as the way PHP >= 5.3 does if your hosting is running on PHP >= 5.3
 ```php
