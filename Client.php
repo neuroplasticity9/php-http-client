@@ -794,7 +794,7 @@ class Ptc_Http_Client
     }
 
     /**
-     * Sets method
+     * Sets request method.
      *
      * @param string $method
      *
