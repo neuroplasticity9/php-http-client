@@ -167,7 +167,9 @@ class Ptc_Http_Client
     {
         // new style
         if (strpos($method, '://')) {
-            $url = $method; $method = $url;
+            $temp = $url;
+            $url = $method;
+            $method = $temp;
         }
 
         $object = new self;
@@ -286,6 +288,7 @@ class Ptc_Http_Client
                 'nobody', 'protocol_version', 'timeout', 'user_agent', 'auth',
                 'proxy', 'proxy_userpwd', 'proxy_type', 'query'
             );
+
             $options = array('cookies' => $this->redirects['cookies']);
             foreach ($reuseOptions as $key) {
                 $options[$key] = $this->options[$key];
