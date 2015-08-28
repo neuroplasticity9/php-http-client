@@ -691,10 +691,7 @@ class Ptc_Http_Client
             'reason'           => $match[3],
             'headers'          => array(),
         );
-        foreach ($lines as $line) {
-            list($name, $value) = explode(':', $line, 2);
-            $this->addHeaderToArray($out['headers'], $name, $value);
-        }
+        $this->addHeaderToArray($out['headers'], $lines, null);
 
         return $out;
     }
@@ -1268,6 +1265,9 @@ class Ptc_Http_Client
     {
         if (is_array($name)) {
             foreach ($name as $key => $value) {
+                if (is_int($key)) {
+                    list($key, $value) = array_map('trim', explode(':', $value, 2));
+                }
                 $this->addHeaderToArray($builder, $key, $value, $append);
             }
 
