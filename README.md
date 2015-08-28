@@ -285,7 +285,8 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
     'proxy_type'    => 'http' // "http" or "sock5"
 ))
 $client->withProxy('192.168.1.105:8888'); // proxy without user pass, default is HTTP proxy
-$client->withProxy('192.168.1.105:8888', 'user:pass', 'sock5'); // proxy without user pass, default is HTTP proxy
+$client->withProxy('192.168.1.105:8888', 'user:pass'); // use HTTP proxy with user, pass
+$client->withProxy('192.168.1.105:8888', null, 'sock5'); // use sock5 proxy
 ```
 #### With Auth Basic
 ```php
