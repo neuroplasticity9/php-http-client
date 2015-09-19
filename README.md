@@ -381,15 +381,12 @@ array (size=9)
 ```
 ##### Get followed redirect urls, count, requests, cookies collection
 ```php
-var_dump($client->getRedirects());
-array (size=4)
-  'count' => int 2
-  'urls' =>
-    array (size=2)
-      0 => string 'http://link1'
-      1 => string 'http://link2'
-  'cookies' => ....
-  'requests' => ....
+var_dump($client->getRedirectedCount());
+var_dump($client->getRedirectedUrls());
+// all cookies, may has some different sites
+var_dump($client->getRedirectedCookies());
+// get all request details
+var_dump($client->getRedirectedRequests());
 ```
 ##### Get debug info
 ```php
