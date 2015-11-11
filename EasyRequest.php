@@ -1,10 +1,12 @@
 <?php
 /**
+ * Simple Http Client inspired by PSR-7
+ *
  * @author Phan Thanh Cong <ptcong90@gmail.com>
  *
  * @version 3.0.1
  */
-class Ptc_Http_Client
+class EasyRequest
 {
     /**
      * Array of options.
@@ -1842,8 +1844,4 @@ class Ptc_Http_Client
         }
         throw new Exception('Have no available handler based on your request options/ PHP config.');
     }
-}
-
-if (PHP_VERSION_ID >= 50300) {
-    class_alias('Ptc_Http_Client', 'Ptc\Http\Client');
 }
