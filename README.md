@@ -1,17 +1,19 @@
-# PHP Http Client for PHP >= 5.0
- As you know, PHP 5.2 is EOF, but a lot of hosting services still using this version and not given other options. Have you ever want to write some plugins for Xenforo, Wordpress (both of them support PHP 5.2) but if you use a library that doesn't support PHP 5.2, so some of your clients whose still use this version can't use your plugin. That's why this library still supports for PHP 5.2.
+# Simple PHP Http Client
 
-This is a simple PHP class as a wrapper of curl/socket for sending HTTP request easier.
+A simple Http library that inspired by PSR-7 and working with curl/socket for sending request.
 
 ## Requirements
 PHP needs to be a minimum version of PHP 5.0 with socket or curl enabled.
 
 ## Installation
+
 To install this library, install composer and issue the following command:
+
 ```
 composer require "ptcong/php-http-class": "3.x-dev"
 composer update
 ```
+
 If your hosting is running with PHP 5.2, you should refer to this library:
 https://bitbucket.org/xrstf/composer-php52
 
@@ -48,23 +50,20 @@ require dirname(__FILE__).'/vendor/autoload.php';
 
 
 #### Create a client
-Create a client in PHP 5.2
+
 ```php
-$client = Ptc_Http_Client::create('GET', 'http://google.com');
+$client = EasyRequest::create('GET', 'http://google.com');
 // or
-$client = Ptc_Http_Client::create('http://google.com', 'GET');
-$client = Ptc_Http_Client::create('http://google.com'); // default is GET
+$client = EasyRequest::create('http://google.com', 'GET');
+$client = EasyRequest::create('http://google.com'); // default is GET
 ```
-You also can use the line as the way PHP >= 5.3 does if your hosting is running on PHP >= 5.3
-```php
-use Ptc\Http;
-$client = Client::create('GET', 'http://google.com');
-```
+
 Create a client with default options
+
 ```php
 $method = 'POST'; // may GET/POST/PUT or any HTTP method
 $target = 'http://domain.com';
-$request = Ptc\Http\Client::create($method, $target, array(
+$request = EasyRequest::create($method, $target, array(
     'handler'          => null,  // null|string - "socket" or "curl". null to use default.
     'method'           => 'GET',  // string
     'url'              => null,  // string
@@ -88,22 +87,24 @@ $request = Ptc\Http\Client::create($method, $target, array(
 
 var_dump($request->getResponse()); // null if have errors occured while sending.
 ```
+
 #### Options and Helper methods
+
 This library provides two handlers for sending request are Socket and Curl. By default, the library will try to detect your PHP settings and request options what you set to give a handler. But if you perfer to use Socket or Curl, you can specify that by `handler` option.
 Socket is built in PHP, so you can use this library for sending request without curl extension.
 
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'handler' => 'socket' // or 'curl'
 ));
 ```
 #### Shortcut methods to creating and sending request quickly
 You can use all of HTTP methods as shortcut
 ```php
-$client = Ptc_Http_Client::post('http://domain.com', $options);
-$client = Ptc_Http_Client::get('http://domain.com', $options);
-$client = Ptc_Http_Client::put('http://domain.com', $options);
-$client = Ptc_Http_Client::delete('http://domain.com', $options);
+$client = EasyRequest::post('http://domain.com', $options);
+$client = EasyRequest::get('http://domain.com', $options);
+$client = EasyRequest::put('http://domain.com', $options);
+$client = EasyRequest::delete('http://domain.com', $options);
 ...
 ```
 #### Some simple options
@@ -117,7 +118,7 @@ $client
 ```
 #### With headers
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'headers' => array(
         'Referer' => 'http://google.com',
         'Header1' => 'value',
@@ -147,7 +148,7 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 #### With cookies
 Use helper method to set dynamic values.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'cookies' => array(
         array(
             'Name' => 'cookie0',
@@ -175,7 +176,7 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 #### With query string
 Query option similar to Form param option.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'query' => array(
         'query1' => 'value1',
         'query2' => 'value2',
@@ -194,7 +195,7 @@ $client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
 ```
 #### With form params
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'form_params' => array(
         'field1' => 'value1',
         'field2' => array('value2', 'value3')
@@ -222,7 +223,7 @@ var_dump((string) $client->prepareRequest()->getBody());
 #### With multipart data
 Multipart field require `name` and `contents` keys. `filename` and `headers` are optional.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'multipart' => array(
         array(
             'name' => 'field1',
@@ -279,7 +280,7 @@ $client->withJson(json_encode(array(1,2,3)));
 #### With HTTP/ Sock5 Proxy
 You may use a HTTP or Sock Proxy. But Sock Proxy require curl extension.
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'proxy'         => '192.168.1.105:8888',
     'proxy_userpwd' => 'user:pass',
     'proxy_type'    => 'http' // "http" or "sock5"
@@ -290,7 +291,7 @@ $client->withProxy('192.168.1.105:8888', null, 'sock5'); // use sock5 proxy
 ```
 #### With Auth Basic
 ```php
-$client = Ptc_Http_Client::create('POST', 'http://domain.com', array(
+$client = EasyRequest::create('POST', 'http://domain.com', array(
     'auth' => 'user:pass',
 ))
 $client->withAuth('user:pass');
