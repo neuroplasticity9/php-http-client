@@ -1713,7 +1713,7 @@ class EasyRequest
             $headers = $field['headers'];
             $headers['Content-Disposition'] = 'form-data; name="'.$field['name'].'"'
                     .($field['filename'] ? '; filename="'.$field['filename'].'"' : '');
-            $out .= $this->getMultipartHeaders($boundary, $headers).($field['headers'] ? "\r\n" : '');
+            $out .= $this->getMultipartHeaders($boundary, $headers);
             $out .= $this->getBodyAsString($field['contents']);
             $out .= "\r\n";
         }
