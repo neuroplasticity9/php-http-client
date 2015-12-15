@@ -10,3 +10,7 @@
 - `withHttpProxy()` method to quickly set HTTP proxy.
 - `withSock5Proxy()` method to quickly set SOCK5 proxy.
 - `getAllResponseCookies()` as alias of `getRedirectedCookies()`
+
+## [3.0.4] - 2015-12-15
+### Fixed
+- Fixed a bug of generating multipart file headers.
