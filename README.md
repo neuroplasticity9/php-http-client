@@ -10,7 +10,7 @@ PHP needs to be a minimum version of PHP 5.0 with socket or curl enabled.
 To install this library, install composer and issue the following command:
 
 ```
-composer require "ptcong/php-http-class": "3.x-dev"
+composer require "ptcong/php-http-class": "^3.0"
 composer update
 ```
 
@@ -288,6 +288,9 @@ $client = EasyRequest::create('POST', 'http://domain.com', array(
 $client->withProxy('192.168.1.105:8888'); // proxy without user pass, default is HTTP proxy
 $client->withProxy('192.168.1.105:8888', 'user:pass'); // use HTTP proxy with user, pass
 $client->withProxy('192.168.1.105:8888', null, 'sock5'); // use sock5 proxy
+
+$client->withSock5Proxy('192.168.1.105:8888', 'user:pass'); // use sock5 proxy
+$client->withHttpProxy('192.168.1.105:8888', 'user:pass'); // use http proxy
 ```
 #### With Auth Basic
 ```php
