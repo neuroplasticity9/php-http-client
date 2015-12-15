@@ -3,8 +3,6 @@
  * Simple Http Client inspired by PSR-7
  *
  * @author Phan Thanh Cong <ptcong90@gmail.com>
- *
- * @version 3.0.1
  */
 class EasyRequest
 {
@@ -331,6 +329,16 @@ class EasyRequest
             }
         }
         $collection = array_merge($collection, $cookies);
+    }
+
+    /**
+     * Returns collection cookies of all requests.
+     *
+     * @return array
+     */
+    public function getAllResponseCookies()
+    {
+        return $this->getRedirectedCookies();
     }
 
     /**
@@ -854,6 +862,36 @@ class EasyRequest
                 ->setOptions('proxy_type', $type);
         }
         throw new InvalidArgumentException('Proxy must be one of: string with format "ip:port" or "null".');
+    }
+
+    /**
+     * Sets HTTP proxy
+     *
+     * @param string $proxy
+     * @param null|string $userPwd
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException if proxy is invalid.
+     */
+    public function withHttpProxy($proxy, $userPwd = null)
+    {
+        return $this->withProxy($proxy, $userPwd, 'http');
+    }
+
+    /**
+     * Sets Sock5 proxy
+     *
+     * @param string $proxy
+     * @param null|string $userPwd
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException if proxy is invalid.
+     */
+    public function withSock5Proxy($proxy, $userPwd = null)
+    {
+        return $this->withProxy($proxy, $userPwd, 'sock5');
     }
 
     /**
