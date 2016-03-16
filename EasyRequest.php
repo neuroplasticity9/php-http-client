@@ -1873,13 +1873,15 @@ class EasyRequest
 
             return $this->options['handler'];
         }
-
-        if ($available['socket'] && $this->options['proxy_type'] != 'sock5') {
-            return 'socket';
-        }
+    
         if ($available['curl']) {
             return 'curl';
         }
+        
+        if ($available['socket'] && $this->options['proxy_type'] != 'sock5') {
+            return 'socket';
+        }
+        
         throw new Exception('Have no available handler based on your request options/ PHP config.');
     }
 }
