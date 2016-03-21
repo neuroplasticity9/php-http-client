@@ -340,7 +340,9 @@ class EasyRequest
      */
     public function getAllResponseCookies()
     {
-        return $this->getRedirectedCookies();
+        return $this->getRedirectedCount()
+            ? $this->getRedirectedCookies()
+            : $this->getResponseArrayCookies();
     }
 
     /**
