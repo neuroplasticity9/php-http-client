@@ -6,6 +6,8 @@
  */
 class EasyRequest
 {
+    const BOUNDARY_PLACEHOLDER = '##BOUNDARY##';
+
     /**
      * Array of options.
      *
@@ -655,6 +657,7 @@ class EasyRequest
         curl_setopt($ch, CURLOPT_NOBODY, $this->options['nobody']);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->options['timeout']);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $request['headers']);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request['method']);
 
         if ($body = $request['body']) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
@@ -733,8 +736,8 @@ class EasyRequest
         }
 
         // prepare body
-        $body = '';
-        $params = '';
+        $body = $params = $boundary = '';
+
         if ($clone->options['form_params']) {
             $params = $clone->getParamsAsString($clone->options['form_params']);
         }
@@ -792,8 +795,17 @@ class EasyRequest
         // user agent
         $clone->withHeader('User-Agent', $clone->options['user_agent'], false);
 
+        $headers = $clone->getHeadersAsLines($clone->builder['headers']);
+
+        if ($boundary) {
+            foreach ($headers as &$line) {
+                $line = strtr($line, array(self::BOUNDARY_PLACEHOLDER => $boundary));
+            }
+            $body = strtr($body, array(self::BOUNDARY_PLACEHOLDER => $boundary));
+        }
+
         $request += array(
-            'headers' => $clone->getHeadersAsLines($clone->builder['headers']),
+            'headers' => $headers,
             'body'    => $body
         );
 
@@ -1874,12 +1886,14 @@ class EasyRequest
             return $this->options['handler'];
         }
 
-        if ($available['socket'] && $this->options['proxy_type'] != 'sock5') {
-            return 'socket';
-        }
         if ($available['curl']) {
             return 'curl';
         }
+
+        if ($available['socket'] && $this->options['proxy_type'] != 'sock5') {
+            return 'socket';
+        }
+
         throw new Exception('Have no available handler based on your request options/ PHP config.');
     }
 }
