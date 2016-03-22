@@ -334,6 +334,18 @@ class EasyRequest
     }
 
     /**
+     * Return current url.
+     *
+     * @return string
+     */
+    public function getCurrentUrl()
+    {
+        return $this->getRedirectedCount()
+            ? end($this->redirects['urls'])
+            : $this->options['url'];
+    }
+
+    /**
      * Returns collection cookies of all requests.
      *
      * @return array
