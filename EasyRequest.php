@@ -661,9 +661,15 @@ class EasyRequest
      */
     protected function sendWithCurl(array $request)
     {
+        if ($request['protocol_version'] == '1.0') {
+            $protocolVersion = CURL_HTTP_VERSION_1_0;
+        } else {
+            $protocolVersion = CURL_HTTP_VERSION_1_1;
+        }
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $request['uri']);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, $request['protocol_version']);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, $protocolVersion);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
