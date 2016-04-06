@@ -190,7 +190,12 @@ class EasyRequest
         }
         if (!empty($options['headers'])) {
             foreach ($options['headers'] as $name => $values) {
-                $object->withHeader($name, $values);
+                if (is_int($name)) {
+                    list($name, $value) = explode(':', $values, 2);
+                    $object->withHeader($name, $value);
+                } else {
+                    $object->withHeader($name, $values);
+                }
             }
         }
 
@@ -287,7 +292,7 @@ class EasyRequest
             }
 
             $reuseOptions = array(
-                'nobody', 'protocol_version', 'timeout', 'user_agent', 'auth',
+                'nobody', 'protocol_version', 'timeout', 'user_agent', 'auth', 'headers',
                 'proxy', 'proxy_userpwd', 'proxy_type', 'query'
             );
 
