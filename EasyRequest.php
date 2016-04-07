@@ -33,6 +33,7 @@ class EasyRequest
         'query'            => array(), // array
         'form_params'      => array(), // array
         'multipart'        => array(), // array
+        'curl'             => array(),
     );
 
     /**
@@ -666,40 +667,46 @@ class EasyRequest
      */
     protected function sendWithCurl(array $request)
     {
-        if ($request['protocol_version'] == '1.0') {
-            $protocolVersion = CURL_HTTP_VERSION_1_0;
-        } else {
-            $protocolVersion = CURL_HTTP_VERSION_1_1;
-        }
+        $curlOptions = array(
+            CURLOPT_CUSTOMREQUEST  => $request['method'],
+            CURLOPT_URL            => $request['uri'],
+            CURLOPT_HEADER         => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_ENCODING       => 'gzip, deflate',
+            CURLOPT_NOBODY         => $this->options['nobody'],
+            CURLOPT_TIMEOUT        => $this->options['timeout'],
+            CURLOPT_HTTPHEADER     => $request['headers'],
+        );
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $request['uri']);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, $protocolVersion);
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-        curl_setopt($ch, CURLOPT_NOBODY, $this->options['nobody']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $this->options['timeout']);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $request['headers']);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request['method']);
+        if ($request['protocol_version'] == '1.0') {
+            $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_0;
+        } else {
+            $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
+        }
 
         if ($body = $request['body']) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+            $curlOptions[CURLOPT_POSTFIELDS] = $body;
         }
+
         if ($this->options['proxy']) {
-            curl_setopt($ch, CURLOPT_PROXY, $this->options['proxy']);
+            $curlOptions[CURLOPT_PROXY] = $this->options['proxy'];
 
             static $proxyTypeOptions = array(
                 'http'  => CURLPROXY_HTTP,
                 'sock5' => CURLPROXY_SOCKS5
             );
-            curl_setopt($ch, CURLOPT_PROXYTYPE, $proxyTypeOptions[$this->options['proxy_type']]);
+            $curlOptions[CURLOPT_PROXYTYPE] = $proxyTypeOptions[$this->options['proxy_type']];
 
             if ($this->options['proxy_userpwd']) {
-                curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->options['proxy_userpwd']);
+                $curlOptions[CURLOPT_PROXYUSERPWD] = $this->options['proxy_userpwd'];
             }
         }
+        // add curl extra options
+        $curlOptions += $this->options['curl'];
+
+        $ch = curl_init();
+        curl_setopt_array($ch, $curlOptions);
         $response = curl_exec($ch);
 
         if ($response === false) {
