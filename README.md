@@ -1,3 +1,6 @@
+# Deprecated
+This package is deprecated, please use [EasyRequest](https://github.com/ptcong/easyrequest) instead of. It's newer and better.
+
 # Simple PHP Http Client
 
 A simple Http library that inspired by PSR-7 and working with curl/socket for sending request.
