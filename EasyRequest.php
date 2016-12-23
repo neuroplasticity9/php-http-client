@@ -827,7 +827,7 @@ class EasyRequest
         // user agent
         $clone->withHeader('User-Agent', $clone->options['user_agent'], false);
 
-        !$clone->hasHeader('Expect') && $clone->withHeader('Expect', '');
+        !$clone->hasHeader('Expect') && $body && $clone->withHeader('Expect', '');
 
         $headers = $clone->getHeadersAsLines($clone->builder['headers']);
 
